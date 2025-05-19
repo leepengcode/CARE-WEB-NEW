@@ -1,55 +1,70 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
-import DefaultLayout from './layouts/DefaultLayout.jsx'
-import GuestLayout from './layouts/GuestLayout.jsx'
-import Home from './views/Home.jsx'
-import Login from './views/Login.jsx'
-import Signup from './views/Signup.jsx'
-import Survey from './views/Survey.jsx'
-import SurveyView from './views/SurveyView.jsx'
-import MortgageCalculator from './components/MortgageCalculator.jsx'
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import AboutUs from "./components/AboutUs.jsx";
+import Article from "./components/Article.jsx";
+import ArticleDetail from "./components/ArticleDetail.jsx";
+import MortgageCalculator from "./components/MortgageCalculator.jsx";
+import Properties from "./components/Properies/Properties.jsx";
+import PropertyDetail from "./components/PropertyDetail.jsx";
+import DefaultLayout from "./layouts/DefaultLayout.jsx";
+import GuestLayout from "./layouts/GuestLayout.jsx";
+import Home from "./views/Home.jsx";
+import Login from "./views/Login.jsx";
+import Signup from "./views/Signup.jsx";
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <DefaultLayout />,
     children: [
       {
-        path: '/dashboard',
+        path: "/dashboard",
         element: <Navigate to="/" />,
       },
       {
-        path: '/',
+        path: "/",
         element: <Home />,
       },
       {
-        path: '/surveys',
-        element: <Survey />,
-      },
-      {
-        path: '/surveys/create',
-        element: <SurveyView />,
-      },
-      {
-        path: '/mortgage-calculator',
+        path: "/mortgage-calculator",
         element: <MortgageCalculator />,
+      },
+      {
+        path: "/properties",
+        element: <Properties />,
+      },
+      {
+        path: "/property/:id",
+        element: <PropertyDetail />,
+      },
+      {
+        path: "/article",
+        element: <Article />,
+      },
+      {
+        path: "/article/:id",
+        element: <ArticleDetail />,
+      },
+      {
+        path: "/about",
+        element: <AboutUs />,
       },
     ],
   },
 
   {
-    path: '/',
+    path: "/",
     element: <GuestLayout />,
     children: [
       {
-        path: '/login',
+        path: "/login",
         element: <Login />,
       },
       {
-        path: '/signup',
+        path: "/signup",
         element: <Signup />,
       },
     ],
   },
-])
+]);
 
-export default router
+export default router;

@@ -77,7 +77,7 @@ export default function MostLikeProperty() {
       <PageComponents>
         <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-md md:text-2xl">Most like property</h2>
+            <h2 className="text-md md:text-xl">Most like property</h2>
             <div className="flex gap-2">
               <button
                 onClick={() => setView("grid")}

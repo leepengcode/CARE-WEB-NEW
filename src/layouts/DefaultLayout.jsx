@@ -38,7 +38,15 @@ export default function DefaultLayout() {
 
   const navigation = [
     { name: "Home", to: "/", current: true },
-    { name: "Property", to: "/property", current: true },
+    {
+      name: "Property",
+      to: "/property",
+      current: true,
+      children: [
+        { name: "Properties", to: "/properties" },
+        { name: "My Property", to: "/my-property" },
+      ],
+    },
     {
       name: "Category",
       to: "/category",
@@ -59,8 +67,8 @@ export default function DefaultLayout() {
       to: "/page",
       current: true,
       children: [
-        { name: "About", to: "/page/about" },
-        { name: "Blog", to: "/page/house" },
+        { name: "About", to: "/about" },
+        { name: "Article", to: "/article" },
         { name: "Favorite", to: "/page/condo" },
         { name: "Mortgage", to: "/mortgage-calculator" },
       ],
@@ -117,7 +125,7 @@ export default function DefaultLayout() {
                       {/* Dropdown */}
                       <div
                         className={classNames(
-                          "absolute left-0 mt-4 w-56 rounded-md shadow-lg bg-white overflow-hidden transition-all duration-200 z-20",
+                          "absolute left-0 mt-4 w-44 rounded-md shadow-lg bg-white overflow-hidden transition-all duration-200 z-20",
                           openMenu === idx
                             ? "max-h-96 opacity-100 visible"
                             : "max-h-0 opacity-0 invisible"

@@ -149,7 +149,7 @@ const Slider = () => {
     <PageComponents>
       <div className="w-full max-w-6xl mx-auto py-0 md:py-5 md:px-10">
         <div className="w-full flex items-center justify-center">
-          <div className="w-full relative overflow-hidden h-36 md:h-[20rem]  lg:h-[30rem] rounded-lg bg-gray-400">
+          <div className="w-full relative overflow-hidden h-40 md:h-[20rem]  lg:h-[30rem] rounded-lg bg-gray-400">
             {loading ? (
               <div className="flex items-center justify-center w-full h-full relative">
                 {/* Skeleton Loader */}
@@ -165,7 +165,7 @@ const Slider = () => {
               </div>
             ) : (
               <div
-                className="relative w-full h-36 md:w-full md:h-full"
+                className="relative w-full h-40 md:w-full md:h-full"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >

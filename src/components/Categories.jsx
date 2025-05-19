@@ -65,7 +65,7 @@ const categories = [
     icon: <FaRegHeart size={22} />,
     to: "/category/favorite",
   },
-  { name: "Blog", icon: <MdArticle size={22} />, to: "/category/blog" },
+  { name: "Article", icon: <MdArticle size={22} />, to: "/article" },
   { name: "Agency", icon: <MdGroups size={22} />, to: "/category/agency" },
   {
     name: "Achievement",

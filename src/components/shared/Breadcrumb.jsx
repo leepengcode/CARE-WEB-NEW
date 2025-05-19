@@ -8,6 +8,7 @@ const PATH_NAMES = {
   category: "Category",
   page: "Page",
   about: "About",
+  article: "Article",
   // Add more mappings as needed
 };
 

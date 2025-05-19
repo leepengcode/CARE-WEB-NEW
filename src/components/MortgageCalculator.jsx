@@ -56,7 +56,7 @@ export default function MortgageCalculator() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-7 lg:py-10 px-0 sm:px-6 md:px-10">
+      <div className="w-full max-w-6xl mx-auto py-0 md:py-5 md:px-10">
         {/* Introduction Section */}
         <div className="text-center mb-8 md:mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-gray-900">
