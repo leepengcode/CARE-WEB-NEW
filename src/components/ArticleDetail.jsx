@@ -1,17 +1,18 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import {
-  FaChevronLeft,
-  FaFacebook,
-  FaInstagram,
-  FaRegCalendarAlt,
-  FaRegCopy,
-  FaRegTimesCircle,
-  FaShareAlt,
-  FaTelegram,
-  FaTwitter,
-} from "react-icons/fa";
+import React, { useEffect, useRef, useState } from "react";
+import { FaCheck, FaChevronLeft, FaCopy, FaShareAlt } from "react-icons/fa";
+import { IoClose } from "react-icons/io5";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  FacebookIcon,
+  FacebookShareButton,
+  TelegramIcon,
+  TelegramShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  WhatsappIcon,
+  WhatsappShareButton,
+} from "react-share";
 import PageComponents from "./PageComponents";
 
 const getShareUrl = (id) => `${window.location.origin}/article/${id}`;
@@ -19,20 +20,35 @@ const getShareUrl = (id) => `${window.location.origin}/article/${id}`;
 export default function ArticleDetail() {
   const [article, setArticle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showShare, setShowShare] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
+  const shareMenuRef = useRef(null);
 
   useEffect(() => {
     fetchArticleDetail();
   }, [id]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        shareMenuRef.current &&
+        !shareMenuRef.current.contains(event.target)
+      ) {
+        setShowShareMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const fetchArticleDetail = async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `http://localhost:8001/api/get_articles_public`,
+        `http://127.0.0.1:8000/api/get_articles_public`,
         { params: { limit: 1000 } }
       );
       if (response.data && response.data.data) {
@@ -51,49 +67,11 @@ export default function ArticleDetail() {
     }
   };
 
-  const handleCopy = () => {
+  const handleCopyLink = () => {
     navigator.clipboard.writeText(getShareUrl(article.id));
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setTimeout(() => setCopied(false), 2000);
   };
-
-  const shareOptions = [
-    {
-      label: "Facebook",
-      icon: <FaFacebook className="text-blue-600 w-6 h-6" />,
-      url: (id) =>
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-          getShareUrl(id)
-        )}`,
-    },
-    {
-      label: "Telegram",
-      icon: <FaTelegram className="text-blue-400 w-6 h-6" />,
-      url: (id) =>
-        `https://t.me/share/url?url=${encodeURIComponent(
-          getShareUrl(id)
-        )}&text=${encodeURIComponent(article.title)}`,
-    },
-    {
-      label: "Instagram",
-      icon: <FaInstagram className="text-pink-500 w-6 h-6" />,
-      url: () => `https://www.instagram.com/`,
-      disabled: true,
-    },
-    {
-      label: "X",
-      icon: <FaTwitter className="text-black w-6 h-6" />,
-      url: (id) =>
-        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-          getShareUrl(id)
-        )}&text=${encodeURIComponent(article.title)}`,
-    },
-    {
-      label: copied ? "Copied!" : "Copy Link",
-      icon: <FaRegCopy className="text-gray-700 w-6 h-6" />,
-      action: handleCopy,
-    },
-  ];
 
   if (isLoading) {
     return (
@@ -133,24 +111,100 @@ export default function ArticleDetail() {
   return (
     <PageComponents>
       <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
-        {/* iPhone-style Back Button */}
-        <button
-          onClick={() => navigate("/article")}
-          className="flex items-center gap-2 px-4 py-2 mb-4 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-100 active:bg-gray-200 transition text-blue-600 font-medium w-fit"
-        >
-          <FaChevronLeft className="w-4 h-4" />
-          <span className="text-base">Back</span>
-        </button>
+        <div className="flex justify-between items-center mb-4">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate("/article")}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-100 active:bg-gray-200 transition text-blue-600 font-medium"
+          >
+            <FaChevronLeft className="w-4 h-4" />
+            <span className="text-base">Back</span>
+          </button>
+
+          {/* Share Button */}
+          <div className="relative" ref={shareMenuRef}>
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all duration-200"
+            >
+              <FaShareAlt className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Share Menu */}
+            {showShareMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg p-4 z-50 animate-fade-in-up">
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-gray-800">
+                      Share Article
+                    </h3>
+                    <button
+                      onClick={() => setShowShareMenu(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <IoClose size={20} />
+                    </button>
+                  </div>
+
+                  {/* Social Media Buttons */}
+                  <div className="flex justify-between gap-2">
+                    <FacebookShareButton
+                      url={getShareUrl(article.id)}
+                      quote={article.title}
+                    >
+                      <FacebookIcon size={40} round />
+                    </FacebookShareButton>
+
+                    <TwitterShareButton
+                      url={getShareUrl(article.id)}
+                      title={article.title}
+                    >
+                      <TwitterIcon size={40} round />
+                    </TwitterShareButton>
+
+                    <TelegramShareButton
+                      url={getShareUrl(article.id)}
+                      title={article.title}
+                    >
+                      <TelegramIcon size={40} round />
+                    </TelegramShareButton>
+
+                    <WhatsappShareButton
+                      url={getShareUrl(article.id)}
+                      title={article.title}
+                    >
+                      <WhatsappIcon size={40} round />
+                    </WhatsappShareButton>
+                  </div>
+
+                  {/* Copy Link Button */}
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    {copied ? (
+                      <>
+                        <FaCheck className="text-green-500" />
+                        <span className="text-green-500">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaCopy />
+                        <span>Copy Link</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <article className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-2 md:p-4 flex items-center justify-between">
+          <div className="p-2 md:p-4">
             <h1 className="text-lg md:text-2xl font-bold text-gray-900 font-khmer">
               {article.title}
             </h1>
-            <button
-              className="ml-4 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onClick={() => setShowShare(true)}
-              title="Share"
-            ></button>
           </div>
           <div className="relative w-full h-full">
             <img
@@ -160,82 +214,26 @@ export default function ArticleDetail() {
             />
           </div>
           <div className="p-3 md:p-6">
-            <div className="flex items-center justify-between text-gray-600 mb-6">
-              <span className="mr-4 flex items-center">
-                <FaRegCalendarAlt className="w-5 h-5 mr-1" />
-                {new Date(article.created_at).toLocaleDateString()}
-              </span>
-              <button
-                className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onClick={() => setShowShare(true)}
-                title="Share"
-              >
-                <FaShareAlt className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
-              </button>
-            </div>
             <div
               className="prose prose-lg max-w-none font-khmer"
               dangerouslySetInnerHTML={{ __html: article.description }}
             />
           </div>
         </article>
-
-        {showShare && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black bg-opacity-40 transition-all">
-            <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-lg w-full max-w-md mx-auto p-6 animate-fade-in-up">
-              <div className="flex justify-between items-center mb-4">
-                <span className="font-semibold text-lg text-gray-800">
-                  Share Article
-                </span>
-                <button
-                  onClick={() => setShowShare(false)}
-                  className="text-gray-400 hover:text-gray-700"
-                >
-                  <FaRegTimesCircle className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-4 justify-center">
-                {shareOptions.map((opt) =>
-                  opt.action ? (
-                    <button
-                      key={opt.label}
-                      onClick={() => {
-                        opt.action();
-                      }}
-                      className="flex flex-col items-center p-2 hover:bg-gray-100 rounded min-w-[70px]"
-                      disabled={opt.disabled}
-                    >
-                      {opt.icon}
-                      <span className="text-xs mt-1">{opt.label}</span>
-                    </button>
-                  ) : (
-                    <a
-                      key={opt.label}
-                      href={opt.url(article.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex flex-col items-center p-2 hover:bg-gray-100 rounded min-w-[70px] ${
-                        opt.disabled ? "opacity-50 pointer-events-none" : ""
-                      }`}
-                      onClick={() => setShowShare(false)}
-                    >
-                      {opt.icon}
-                      <span className="text-xs mt-1">{opt.label}</span>
-                    </a>
-                  )
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       <style>{`
         .animate-fade-in-up {
-          animation: fadeInUpModal 0.3s cubic-bezier(.4,0,.2,1);
+          animation: fadeInUp 0.2s ease-out forwards;
         }
-        @keyframes fadeInUpModal {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         .font-khmer {
           font-family: 'Noto Sans Khmer', Hanuman, Battambang, Siemreap, sans-serif;

@@ -59,15 +59,9 @@ export default function MortgageCalculator() {
       <div className="w-full max-w-6xl mx-auto py-0 md:py-5 md:px-10">
         {/* Introduction Section */}
         <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-gray-900">
+          {/* <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 text-gray-900">
             Property Mortgage Repayment Calculator
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base md:text-lg max-w-3xl mx-auto">
-            Plan your property investment with ease! Use our mortgage calculator
-            to estimate your monthly repayments, understand your principal and
-            interest breakdown, and make informed financial decisions for your
-            dream home.
-          </p>
+          </h1> */}
         </div>
 
         {/* Main Calculator Section */}

@@ -1,5 +1,5 @@
 const cache = {};
-const SLIDER_API_URL = "http://localhost:8001/api/get_slider";
+const SLIDER_API_URL = "http://127.0.0.1:8000/api/get_slider_public";
 
 export async function fetchSlider() {
   const key = "slider";

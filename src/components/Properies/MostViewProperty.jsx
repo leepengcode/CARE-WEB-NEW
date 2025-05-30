@@ -1,6 +1,8 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { fetchMostViewed } from "../../api/propertyApi";
 import PageComponents from "../PageComponents";
 import PropertyCard from "../shared/PropertyCard";
 import PropertyCardSkeleton from "../shared/PropertyCardSkeleton";
@@ -29,17 +31,10 @@ export default function MostViewProperty() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:8001/api/get_property_public?limit=12&top_rated=1"
-        );
-        const result = await response.json();
-
-        if (result.error || !result.data) {
-          throw new Error(result.message || "No data received");
-        }
+        const result = await fetchMostViewed(12);
 
         // Map API data to PropertyCard expected fields and filter by status: 1
-        const mappedProperties = result.data
+        const mappedProperties = result
           .filter((property) => property?.status === 1)
           .map((property) => ({
             id: property?.id || 0,
@@ -53,15 +48,12 @@ export default function MostViewProperty() {
               : "$0",
             title: property?.title || "Untitled",
             location: property?.address || "Unknown Location",
-            views: property?.total_view || 0, // Map total_click (API field for views)
+            views: property?.total_view || 0,
             time: property?.post_created || "N/A",
           }));
 
         // Sort by views (most viewed first) as a fallback
         mappedProperties.sort((a, b) => b.views - a.views);
-
-        // Debug log to verify sorting
-        console.log("Sorted properties by views:", mappedProperties);
 
         setProperties(mappedProperties);
         setLoading(false);
@@ -77,7 +69,7 @@ export default function MostViewProperty() {
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-md md:text-xl">Most view property</h2>
             <div className="flex gap-2">
@@ -118,7 +110,7 @@ export default function MostViewProperty() {
   if (error) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
           <p>Error: {error}</p>
         </div>
       </PageComponents>
@@ -127,7 +119,7 @@ export default function MostViewProperty() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-md md:text-2xl">Most View Property</h2>
           <div className="flex gap-2">

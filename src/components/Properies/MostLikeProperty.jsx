@@ -1,6 +1,8 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { fetchMostLiked } from "../../api/propertyApi";
 import PageComponents from "../PageComponents";
 import PropertyCard from "../shared/PropertyCard";
 import PropertyCardSkeleton from "../shared/PropertyCardSkeleton";
@@ -29,17 +31,10 @@ export default function MostLikeProperty() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:8001/api/get_property_public?limit=12&most_liked=1"
-        );
-        const result = await response.json();
-
-        if (result.error) {
-          throw new Error(result.message);
-        }
+        const result = await fetchMostLiked(12);
 
         // Map API data to PropertyCard expected fields and filter by status: 1
-        const mappedProperties = result.data
+        const mappedProperties = result
           .filter((property) => property?.status === 1)
           .map((property) => ({
             id: property?.id || 0,
@@ -55,7 +50,8 @@ export default function MostLikeProperty() {
             location: property?.address || "Unknown Location",
             views: property?.total_view || 0,
             time: property?.post_created || "N/A",
-            likes: property?.favourite_count || 0, // Map favourite_count for sorting
+            likes: property?.favourite_count || 0,
+            is_favourite: property.is_favourite,
           }));
 
         // Sort by likes (most liked first)
@@ -75,7 +71,7 @@ export default function MostLikeProperty() {
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-md md:text-xl">Most like property</h2>
             <div className="flex gap-2">
@@ -116,7 +112,7 @@ export default function MostLikeProperty() {
   if (error) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
           <p>Error: {error}</p>
         </div>
       </PageComponents>
@@ -125,7 +121,7 @@ export default function MostLikeProperty() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-md md:text-2xl">Most like property</h2>
           <div className="flex gap-2">

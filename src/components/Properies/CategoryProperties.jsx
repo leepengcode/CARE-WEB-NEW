@@ -23,7 +23,7 @@ const cardVariants = {
   }),
 };
 
-export default function Properties() {
+export default function CategoryProperties({ category, title, image }) {
   const navigate = useNavigate();
   const [view, setView] = useState("grid");
   const [properties, setProperties] = useState([]);
@@ -36,81 +36,25 @@ export default function Properties() {
   const propertiesPerPage = 24;
   const [currentFilters, setCurrentFilters] = useState({});
 
-  // Load data from cache or fetch fresh data on mount
   useEffect(() => {
-    const cache = sessionStorage.getItem("propertiesCache");
-    if (cache) {
-      const { view, currentPage, totalProperties, filters } = JSON.parse(cache);
-      setView(view);
-      setCurrentPage(currentPage);
-      setTotalProperties(totalProperties);
-      setCurrentFilters(filters || {});
-      cacheRestoreRef.current = { page: currentPage, filters: filters || {} };
-      sessionStorage.removeItem("propertiesCache");
-    } else {
-      fetchData(); // Initial load without filters
-    }
-    didMountRef.current = true;
-  }, []);
+    fetchData();
+    // eslint-disable-next-line
+  }, [category, currentPage]);
 
-  // Restore scroll position after loading
-  useEffect(() => {
-    if (!loading) {
-      const scroll = sessionStorage.getItem("propertiesScroll");
-      if (scroll) {
-        window.scrollTo(0, parseInt(scroll, 10));
-        sessionStorage.removeItem("propertiesScroll");
-      }
-    }
-  }, [loading]);
-
-  // Fetch data for restored cache after state is set
-  useEffect(() => {
-    if (cacheRestoreRef.current) {
-      fetchData(cacheRestoreRef.current.filters, cacheRestoreRef.current.page);
-      cacheRestoreRef.current = null;
-    }
-  }, [currentPage, currentFilters]);
-
-  // Fetch data when user changes page (not on mount)
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      // Only fetch if not on initial mount (prevents double fetch)
-      if (didMountRef.current) {
-        fetchData(currentFilters, page);
-      }
-    }
-  };
-
-  // Fetch data when user applies filters
-  const handleFilterApply = (filters) => {
-    setCurrentPage(1);
-    setCurrentFilters(filters);
-    fetchData(filters, 1);
-  };
-
-  // Fetch data when user clears filters
-  const handleFilterClear = () => {
-    setCurrentPage(1);
-    setCurrentFilters({});
-    fetchData({}, 1);
-  };
-
-  // Fetch data when page changes or on filter button click
   const fetchData = async (filters = currentFilters, page = currentPage) => {
     setLoading(true);
     try {
-      // Remove null/undefined values from filters
+      // Remove null/undefined values from filters and remove category from filters
       const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([, value]) => value != null)
+        Object.entries(filters).filter(
+          ([key, value]) => value != null && key !== "category"
+        )
       );
 
       const { data = [], total } = await fetchAllProperties(
         page,
         propertiesPerPage,
-        cleanFilters
+        { ...cleanFilters, category }
       );
 
       if (!Array.isArray(data)) {
@@ -118,7 +62,10 @@ export default function Properties() {
       }
 
       const mappedProperties = data
-        .filter((property) => property.status === 1)
+        .filter(
+          (property) =>
+            property.status === 1 && property.category?.category === category
+        )
         .map((property) => ({
           id: property.id,
           image: property.title_image,
@@ -130,7 +77,6 @@ export default function Properties() {
           location: property.address,
           views: property.total_view,
           time: property.post_created,
-          is_favourite: property.is_favourite,
         }));
 
       setProperties(mappedProperties);
@@ -146,7 +92,6 @@ export default function Properties() {
   };
 
   const handlePropertyClick = (propertyId) => {
-    // Save current state to cache before navigating
     sessionStorage.setItem("propertiesScroll", window.scrollY);
     sessionStorage.setItem(
       "propertiesCache",
@@ -164,22 +109,19 @@ export default function Properties() {
 
   const renderPagination = () => {
     const pageNumbers = [];
-    const maxPagesToShow = window.innerWidth < 768 ? 3 : 5; // Show fewer pages on mobile
+    const maxPagesToShow = window.innerWidth < 768 ? 3 : 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
     return (
       <div className="flex justify-center items-center gap-1 sm:gap-2 mt-6">
         <button
-          onClick={() => handlePageChange(currentPage - 1)}
+          onClick={() => setCurrentPage(currentPage - 1)}
           disabled={currentPage === 1}
           className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md ${
             currentPage === 1
@@ -192,7 +134,7 @@ export default function Properties() {
         {startPage > 1 && (
           <>
             <button
-              onClick={() => handlePageChange(1)}
+              onClick={() => setCurrentPage(1)}
               className="px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md bg-gray-200 hover:bg-gray-300"
             >
               1
@@ -203,7 +145,7 @@ export default function Properties() {
         {pageNumbers.map((page) => (
           <button
             key={page}
-            onClick={() => handlePageChange(page)}
+            onClick={() => setCurrentPage(page)}
             className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md ${
               currentPage === page
                 ? "bg-blue-800 text-white"
@@ -217,7 +159,7 @@ export default function Properties() {
           <>
             {endPage < totalPages - 1 && <span className="px-1">...</span>}
             <button
-              onClick={() => handlePageChange(totalPages)}
+              onClick={() => setCurrentPage(totalPages)}
               className="px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md bg-gray-200 hover:bg-gray-300"
             >
               {totalPages}
@@ -225,7 +167,7 @@ export default function Properties() {
           </>
         )}
         <button
-          onClick={() => handlePageChange(currentPage + 1)}
+          onClick={() => setCurrentPage(currentPage + 1)}
           disabled={currentPage === totalPages}
           className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md ${
             currentPage === totalPages
@@ -243,12 +185,24 @@ export default function Properties() {
     return (
       <PageComponents>
         <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+          <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
+            <img
+              src={image}
+              alt={title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+              <h1 className="text-white text-3xl md:text-5xl font-bold drop-shadow-lg">
+                {title}
+              </h1>
+            </div>
+          </div>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-md md:text-xl">All Properties</h2>
             <div className="flex items-center gap-2">
               <PropertyFilters
-                onFilter={handleFilterApply}
-                onClear={handleFilterClear}
+                onFilter={setCurrentFilters}
+                onClear={() => setCurrentFilters({})}
               />
               <button
                 onClick={() => setView("grid")}
@@ -288,8 +242,8 @@ export default function Properties() {
     return (
       <PageComponents>
         <PropertyFilters
-          onFilter={handleFilterApply}
-          onClear={handleFilterClear}
+          onFilter={setCurrentFilters}
+          onClear={() => setCurrentFilters({})}
         />
         <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
           <p className="text-red-600">Error: {error}</p>
@@ -301,12 +255,24 @@ export default function Properties() {
   return (
     <PageComponents>
       <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
+          <img
+            src={image}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+            <h1 className="text-white text-3xl md:text-5xl font-bold drop-shadow-lg">
+              {title}
+            </h1>
+          </div>
+        </div>
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-md md:text-2xl">All Properties</h2>
           <div className="flex items-center gap-2">
             <PropertyFilters
-              onFilter={handleFilterApply}
-              onClear={handleFilterClear}
+              onFilter={setCurrentFilters}
+              onClear={() => setCurrentFilters({})}
             />
             <button
               onClick={() => setView("grid")}

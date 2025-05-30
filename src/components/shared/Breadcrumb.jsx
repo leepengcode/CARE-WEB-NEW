@@ -4,11 +4,22 @@ import PageComponents from "../PageComponents";
 const PATH_NAMES = {
   "": "Home",
   "mortgage-calculator": "Property Mortgage ",
-  property: "Property",
+  "my-property": "My Property",
+  agency: "Agency",
+  properties: "Properties",
   category: "Category",
   page: "Page",
   about: "About",
   article: "Article",
+  residential: "Residential",
+  commercial: "Commercial",
+  industrial: "Industrial",
+  land: "Land",
+  business: "Business",
+  agriculture: "Agriculture",
+  highBuilding: "High Building",
+  condo: "Condo",
+
   // Add more mappings as needed
 };
 
@@ -21,7 +32,7 @@ export default function Breadcrumb() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto  md:px-10">
+      <div className="w-full max-w-6xl mx-auto   lg:px-10">
         <nav aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>

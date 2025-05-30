@@ -1,4 +1,4 @@
-import { Disclosure, Menu } from "@headlessui/react";
+import { Disclosure } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
@@ -12,7 +12,8 @@ function classNames(...classes) {
 
 export default function DefaultLayout() {
   const navigate = useNavigate();
-  const { userToken, setUserToken, setCurrentUser } = useStateContext();
+  const { userToken, setUserToken, setCurrentUser, currentUser } =
+    useStateContext();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,17 +23,34 @@ export default function DefaultLayout() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsVisible(currentScrollY < lastScrollY);
+      setIsVisible(currentScrollY < lastScrollY || currentScrollY < 10);
       setLastScrollY(currentScrollY);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsVisible(true);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   function logout(ev) {
     ev.preventDefault();
+    // Optionally call backend logout endpoint
+    // axios.post(`${import.meta.env.VITE_API_URL}/api/logout`, {}, {
+    //   headers: { Authorization: `Bearer ${userToken}` }
+    // });
     setUserToken(null);
     setCurrentUser({});
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("currentUser");
     navigate("/");
   }
 
@@ -45,6 +63,7 @@ export default function DefaultLayout() {
       children: [
         { name: "Properties", to: "/properties" },
         { name: "My Property", to: "/my-property" },
+        { name: "Add Property", to: "/add-property" },
       ],
     },
     {
@@ -54,11 +73,11 @@ export default function DefaultLayout() {
       children: [
         { name: "Residential", to: "/category/residential" },
         { name: "Condo", to: "/category/condo" },
-        { name: "Commercial", to: "/category/land" },
+        { name: "Commercial", to: "/category/commercial" },
         { name: "Industrial", to: "/category/industrial" },
         { name: "Land", to: "/category/land" },
         { name: "Business for sell", to: "/category/business-for-sell" },
-        { name: "Algricalture Land", to: "/category/algricalture-land" },
+        { name: "Algricalture Land", to: "/category/agriculture-land" },
         { name: "High Building", to: "/category/high-building" },
       ],
     },
@@ -69,8 +88,9 @@ export default function DefaultLayout() {
       children: [
         { name: "About", to: "/about" },
         { name: "Article", to: "/article" },
-        { name: "Favorite", to: "/page/condo" },
+        { name: "Favorite", to: "/favorites" },
         { name: "Mortgage", to: "/mortgage-calculator" },
+        { name: "Agency", to: "/agency" },
       ],
     },
     { name: "Contact", to: "/contact", current: true },
@@ -89,14 +109,13 @@ export default function DefaultLayout() {
             <div className="flex items-center">
               <div className="shrink-0">
                 <img
-                  className="h-auto w-32 md:w-52"
+                  className="h-auto w-44 md:w-52"
                   src="https://externalchecking.com/logo/care.png"
                   alt="Company Logo"
                 />
               </div>
             </div>
 
-            {/* Desktop Menu */}
             <div className="hidden md:flex items-center md:space-x-0 lg:space-x-4">
               {navigation.map((item, idx) => (
                 <div key={item.name} className="relative">
@@ -122,7 +141,6 @@ export default function DefaultLayout() {
                           )}
                         />
                       </button>
-                      {/* Dropdown */}
                       <div
                         className={classNames(
                           "absolute left-0 mt-4 w-44 rounded-md shadow-lg bg-white overflow-hidden transition-all duration-200 z-20",
@@ -173,22 +191,32 @@ export default function DefaultLayout() {
               ))}
             </div>
 
-            {/* Right Side Buttons */}
             <div className="hidden md:flex items-center gap-4">
               {userToken ? (
-                <Menu as="div" className="relative">
-                  <Menu.Button>
-                    <UserIcon className="w-8 h-8 bg-blue-600 p-2 text-white rounded-full" />
-                  </Menu.Button>
-                </Menu>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="p-0 m-0 border-none bg-transparent"
+                >
+                  {currentUser?.profile ? (
+                    <img
+                      src={currentUser.profile}
+                      alt={currentUser.name || "User"}
+                      className="w-8 h-8 rounded-full  object-cover cursor-pointer"
+                    />
+                  ) : (
+                    <UserIcon className="w-8 h-8 bg-blue-600 p-2 text-white rounded-full cursor-pointer" />
+                  )}
+                </button>
               ) : (
-                <div className="bg-blue-500 py-2 px-4 rounded-md text-white">
-                  <h1>Login</h1>
-                </div>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="bg-blue-500 py-2 px-4 rounded-md text-white hover:bg-blue-600 transition-colors"
+                >
+                  Login
+                </button>
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setMobileMenuOpen(true)}
@@ -201,7 +229,6 @@ export default function DefaultLayout() {
         </div>
       </Disclosure>
 
-      {/* Overlay */}
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
@@ -209,7 +236,6 @@ export default function DefaultLayout() {
         />
       )}
 
-      {/* Mobile Slide Menu */}
       <div
         className={`fixed top-0 right-0 z-50 h-full w-72 max-w-full bg-white shadow-2xl transform transition-transform duration-300 ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
@@ -236,7 +262,7 @@ export default function DefaultLayout() {
                       setOpenMobileMenu(openMobileMenu === idx ? null : idx)
                     }
                     className={classNames(
-                      "flex justify-between px-3 items-center w-full text-left text-md  text-gray-700 hover:text-blue-600",
+                      "flex justify-between px-3 items-center w-full text-left text-md text-gray-700 hover:text-blue-600",
                       openMobileMenu === idx ? "text-blue-600" : ""
                     )}
                   >
@@ -289,7 +315,7 @@ export default function DefaultLayout() {
                       isActive
                         ? "bg-blue-600 text-white"
                         : "text-gray-700 hover:text-blue-500",
-                      "block rounded-md px-3 py-2 text-md  transition-all"
+                      "block rounded-md px-3 py-2 text-md transition-all"
                     )
                   }
                 >
@@ -298,6 +324,16 @@ export default function DefaultLayout() {
               )}
             </div>
           ))}
+
+          {userToken && (
+            <NavLink
+              to="/profile"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block mt-4 px-4 py-2 text-center rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200"
+            >
+              My Profile
+            </NavLink>
+          )}
 
           {userToken ? (
             <button
@@ -311,22 +347,20 @@ export default function DefaultLayout() {
             </button>
           ) : (
             <NavLink
-              to="/login"
+              to="/"
               onClick={() => setMobileMenuOpen(false)}
               className="block mt-6 px-4 py-2 text-center rounded-md bg-blue-600 text-white hover:bg-blue-500"
             >
-              Sign in
+              Login
             </NavLink>
           )}
         </div>
       </div>
 
-      {/* Page Content */}
       <div className="pt-20">
         <Breadcrumb />
         <Outlet />
       </div>
-      {/* <Footer /> */}
     </div>
   );
 }

@@ -10,7 +10,7 @@ const firebaseConfig = {
   projectId: "care-4b762",
   storageBucket: "care-4b762.firebasestorage.app",
   messagingSenderId: "722616287757",
-  appId: "1:722616287757:web:dc90117345854269e68b44"
+  appId: "1:722616287757:web:0eab70045ffd241ee68b44"
 };
 
 // Initialize Firebase

@@ -79,7 +79,7 @@ export default function ArticleList() {
     try {
       const offset = (currentPage - 1) * itemsPerPage;
       const res = await axios.get(
-        `http://localhost:8001/api/get_articles_public`,
+        `http://127.0.0.1:8000/api/get_articles_public`,
         {
           params: {
             offset,
@@ -147,11 +147,11 @@ export default function ArticleList() {
               placeholder="Search articles..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full md:w-1/2 px-4 py-2 border rounded shadow-sm"
+              className="w-full md:w-1/2 px-4 py-2 border rounded-full shadow-sm"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
             >
               Search
             </button>
@@ -181,7 +181,7 @@ export default function ArticleList() {
                   />
                 </div>
                 <div className="flex-1 flex flex-col p-4">
-                  <h2 className="font-khmer font-bold text-lg md:text-xl text-gray-900 mb-2 line-clamp-2">
+                  <h2 className="font-khmer font-bold text-lg md:text-xl text-gray-900 mb-2 ">
                     {article.title}
                   </h2>
                   <div className="font-khmer flex items-center text-xs text-gray-400 mb-2">
@@ -233,7 +233,7 @@ export default function ArticleList() {
           }
         }
         .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
+          animation: fadeInUp 0.2s ease-out forwards;
         }
         .font-khmer {
           font-family: 'Noto Sans Khmer', Hanuman, Battambang, Siemreap, sans-serif;

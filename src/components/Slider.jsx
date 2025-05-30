@@ -1,23 +1,28 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useRef, useState } from "react";
-import { useInView } from "react-intersection-observer";
-import { useNavigate } from "react-router-dom";
-import { useStateContext } from "../contexts/ContextProvider.jsx";
+import { fetchSlider } from "../api/sliderApi";
 import PageComponents from "./PageComponents";
 
-// Skeleton Slider Component for Loading State
+// ✅ Skeleton Slider Component
 const SkeletonSlider = () => {
   return (
-    <div className="relative overflow-hidden h-72">
-      <div className="flex">
-        <div className="w-full flex-shrink-0 bg-blue-500 opacity-40 rounded-lg shadow-lg overflow-hidden">
-          <div className="w-full h-72 bg-blue-500 animate-shimmer"></div>
-        </div>
+    <div className="relative w-full overflow-hidden rounded-lg shadow-lg aspect-[22/9]">
+      {/* Still placeholder image */}
+      <div className="absolute inset-0 z-0"></div>
+
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 animate-pulse z-10" />
+
+      {/* Loading spinner */}
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 z-20">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
-      <div className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-blue-300 bg-opacity-40 text-gray-300 p-2 sm:p-3 rounded-full shadow-lg z-10">
+
+      {/* Fake navigation arrows */}
+      <div className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-gray-200 bg-opacity-40 text-gray-400 p-2 sm:p-3 rounded-full shadow-md z-30">
         <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
       </div>
-      <div className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-gray-300 bg-opacity-60 text-gray-300 p-2 sm:p-3 rounded-full shadow-lg z-10">
+      <div className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-gray-200 bg-opacity-40 text-gray-400 p-2 sm:p-3 rounded-full shadow-md z-30">
         <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6" />
       </div>
     </div>
@@ -25,96 +30,66 @@ const SkeletonSlider = () => {
 };
 
 const Slider = () => {
-  const { userToken } = useStateContext();
   const [sliderData, setSliderData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const sliderRef = useRef(null);
   const [intervalId, setIntervalId] = useState(null);
-  const navigate = useNavigate();
-
-  // Use useInView for slide-up animation
-  const { ref, inView } = useInView({
-    triggerOnce: false,
-    threshold: 0.2,
-  });
+  const [imageLoading, setImageLoading] = useState(true);
+  const sliderRef = useRef(null);
 
   useEffect(() => {
     const fetchSliderData = async () => {
       try {
-        // Add timeout to the fetch request
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        const data = await fetchSlider();
+        const socialLinks = [
+          "https://www.facebook.com/test",
+          "https://t.me/test",
+          "https://www.youtube.com/test",
+          "https://www.instagram.com/test",
+        ];
 
-        const res = await fetch("http://localhost:8001/api/get_slider_public", {
-          method: "GET",
-        });
+        const dataWithLinks = (data || []).map((slide, index) => ({
+          ...slide,
+          link: socialLinks[index % socialLinks.length],
+        }));
 
-        clearTimeout(timeoutId);
+        setSliderData(dataWithLinks);
 
-        const data = await res.json();
-        if (data.error) {
-          setError(data.message);
-        } else {
-          // Add test social media links to the slider data
-          const dataWithLinks = (data.data || []).map((slide, index) => {
-            const socialLinks = [
-              "https://www.facebook.com/test",
-              "https://t.me/test",
-              "https://www.youtube.com/test",
-              "https://www.instagram.com/test",
-            ];
-            return {
-              ...slide,
-              link: socialLinks[index % socialLinks.length],
-            };
-          });
-          setSliderData(dataWithLinks);
+        if (dataWithLinks.length > 0) {
+          const slideInterval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % dataWithLinks.length);
+          }, 5000);
+          setIntervalId(slideInterval);
         }
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching slider data:", err);
-        if (err.name === "AbortError") {
-          setError("Request timed out. Please try again.");
-        } else if (
-          err.name === "TypeError" &&
-          err.message === "Failed to fetch"
-        ) {
-          setError(
-            "Unable to connect to the server. Please check your internet connection."
-          );
-        } else {
-          setError(
-            err.message || "An error occurred while fetching slider data."
-          );
-        }
+        setError(
+          err.message || "An error occurred while fetching slider data."
+        );
         setLoading(false);
       }
     };
 
     fetchSliderData();
 
-    // Auto slide functionality
-    const slideInterval = setInterval(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === sliderData.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 3000);
-
-    setIntervalId(slideInterval);
-
-    return () => clearInterval(slideInterval);
-  }, [userToken]);
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, []);
 
   const goToNextSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === sliderData.length - 1 ? 0 : prevIndex + 1
-    );
+    if (sliderData.length === 0) return;
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % sliderData.length);
     resetAutoSlide();
   };
 
   const goToPreviousSlide = () => {
+    if (sliderData.length === 0) return;
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? sliderData.length - 1 : prevIndex - 1
     );
@@ -122,11 +97,10 @@ const Slider = () => {
   };
 
   const resetAutoSlide = () => {
+    if (sliderData.length === 0) return;
     clearInterval(intervalId);
     const slideInterval = setInterval(() => {
-      setCurrentIndex((prevIndex) =>
-        prevIndex === sliderData.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % sliderData.length);
     }, 3000);
     setIntervalId(slideInterval);
   };
@@ -145,32 +119,38 @@ const Slider = () => {
     window.open(link, "_blank", "noopener,noreferrer");
   };
 
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
+
+  const handleImageError = () => {
+    setImageLoading(false);
+    setError("Failed to load image");
+  };
+
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-0 md:py-5 md:px-10">
+      <div className="w-full max-w-6xl mx-auto py-0 md:py-5 lg:px-10">
         <div className="w-full flex items-center justify-center">
-          <div className="w-full relative overflow-hidden h-40 md:h-[20rem]  lg:h-[30rem] rounded-lg bg-gray-400">
+          <div className="w-full relative overflow-hidden rounded-lg">
             {loading ? (
-              <div className="flex items-center justify-center w-full h-full relative">
-                {/* Skeleton Loader */}
-                <div className="absolute inset-0 bg-gray-300 opacity-50 rounded-lg" />
-                {/* Circular Spinner */}
-                <div className="relative z-10 flex items-center justify-center w-full h-full">
-                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                </div>
+              <SkeletonSlider />
+            ) : error ? (
+              <div className="flex items-center justify-center w-full aspect-[22/9] text-red-500 text-center px-4">
+                {error}
               </div>
             ) : sliderData.length === 0 ? (
-              <div className="text-center text-xl rounded-lg">
+              <div className="text-center text-xl aspect-[16/9] flex items-center justify-center rounded-lg">
                 No slider data available.
               </div>
             ) : (
               <div
-                className="relative w-full h-40 md:w-full md:h-full"
+                className="relative w-full aspect-[21/9] md:aspect-[22/9]"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
                 <div
-                  className="flex transition-transform duration-1000 h-full"
+                  className="flex transition-transform duration-1000"
                   style={{
                     transform: `translateX(-${currentIndex * 100}%)`,
                   }}
@@ -179,12 +159,19 @@ const Slider = () => {
                   {sliderData.map((slide) => (
                     <div
                       key={slide.id}
-                      className="w-full flex-shrink-0 rounded-lg shadow-lg overflow-hidden h-full relative"
+                      className="w-full flex-shrink-0 rounded-lg overflow-hidden relative"
                     >
+                      {imageLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+                          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
                       <img
                         src={slide.image}
                         alt={slide.property_title}
-                        className="w-full h-full rounded-lg object-cover"
+                        className="w-full h-full object-cover"
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
                       />
                       {slide.link && (
                         <button
@@ -197,7 +184,8 @@ const Slider = () => {
                     </div>
                   ))}
                 </div>
-                {/* Navigation Arrows */}
+
+                {/* Arrows */}
                 <button
                   onClick={goToPreviousSlide}
                   className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-black bg-opacity-60 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-gray-700 z-10"
@@ -210,8 +198,9 @@ const Slider = () => {
                 >
                   <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
+
                 {/* Dot Indicators */}
-                <div className="absolute md:bottom-4 bottom-2 left-1/2 -translate-x-1/2 flex gap-1 md:gap-2 z-20">
+                <div className="absolute md:bottom-1 bottom-3 left-1/2 -translate-x-1/2 flex gap-1 md:gap-2 z-20">
                   {sliderData.map((_, idx) => (
                     <button
                       key={idx}

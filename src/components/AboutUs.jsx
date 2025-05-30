@@ -185,7 +185,7 @@ export default function AboutUs() {
 
   return (
     <PageComponents>
-      <div className="w-full  max-w-6xl mx-auto py-4   md:py-5 md:px-10">
+      <div className="w-full  max-w-6xl mx-auto py-4   md:py-5 lg:px-10">
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-stretch justify-center w-full max-w-6xl mx-auto ">
           {/* Image Card */}
           <div className="w-full md:w-1/2 flex justify-center items-stretch">

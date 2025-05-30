@@ -41,19 +41,24 @@ const categories = [
   {
     name: "Building",
     icon: <FaBuilding size={22} />,
-    to: "/category/building",
+    to: "/category/high-building",
   },
   { name: "Condo", icon: <MdApartment size={22} />, to: "/category/condo" },
-  { name: "Business", icon: <MdStore size={22} />, to: "/category/business" },
   {
-    name: "Measurement",
-    icon: <FaRuler size={22} />,
-    to: "/category/measurement",
+    name: "Business",
+    icon: <MdStore size={22} />,
+    to: "/category/business-for-sell",
   },
+
   {
     name: "Consultant",
     icon: <MdPerson size={22} />,
     to: "/category/consultant",
+  },
+  {
+    name: "Measurement",
+    icon: <FaRuler size={22} />,
+    to: "/category/measurement",
   },
   {
     name: "Mortgage",
@@ -66,7 +71,7 @@ const categories = [
     to: "/category/favorite",
   },
   { name: "Article", icon: <MdArticle size={22} />, to: "/article" },
-  { name: "Agency", icon: <MdGroups size={22} />, to: "/category/agency" },
+  { name: "Agency", icon: <MdGroups size={22} />, to: "/agency" },
   {
     name: "Achievement",
     icon: <MdGroups size={22} />,
@@ -106,7 +111,7 @@ export default function Categories() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+      <div className="w-full max-w-6xl mx-auto py-4 md:py-0 lg:px-6">
         {/* Small screens: horizontal scrollable carousel */}
         <div className="block md:hidden relative">
           <div
@@ -159,7 +164,7 @@ export default function Categories() {
           </div>
         </div>
         {/* md+ screens: full grid */}
-        <div className="hidden md:grid md:grid-cols-8 gap-x-4 justify-items-center min-h-[250px]">
+        <div className="hidden md:grid md:grid-cols-8 gap-x-4 justify-items-center min-h-[230px]">
           {categories.map((cat) => (
             <div
               key={cat.name}

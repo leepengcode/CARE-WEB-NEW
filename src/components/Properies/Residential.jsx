@@ -23,7 +23,7 @@ const cardVariants = {
   }),
 };
 
-export default function Properties() {
+export default function Residential() {
   const navigate = useNavigate();
   const [view, setView] = useState("grid");
   const [properties, setProperties] = useState([]);
@@ -110,7 +110,7 @@ export default function Properties() {
       const { data = [], total } = await fetchAllProperties(
         page,
         propertiesPerPage,
-        cleanFilters
+        { ...cleanFilters, category: "Residential" }
       );
 
       if (!Array.isArray(data)) {
@@ -118,7 +118,11 @@ export default function Properties() {
       }
 
       const mappedProperties = data
-        .filter((property) => property.status === 1)
+        .filter(
+          (property) =>
+            property.status === 1 &&
+            property.category?.category === "Residential"
+        )
         .map((property) => ({
           id: property.id,
           image: property.title_image,
@@ -130,7 +134,6 @@ export default function Properties() {
           location: property.address,
           views: property.total_view,
           time: property.post_created,
-          is_favourite: property.is_favourite,
         }));
 
       setProperties(mappedProperties);
@@ -301,6 +304,18 @@ export default function Properties() {
   return (
     <PageComponents>
       <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
+          <img
+            src="https://saltosystems.com/sites/default/files/styles/breakpoint_1920/public/images/contents/residential_background_1.jpg?itok=yErIXYOm"
+            alt="Residential"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+            <h1 className="text-white text-3xl md:text-5xl font-bold drop-shadow-lg">
+              Residential
+            </h1>
+          </div>
+        </div>
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-md md:text-2xl">All Properties</h2>
           <div className="flex items-center gap-2">
