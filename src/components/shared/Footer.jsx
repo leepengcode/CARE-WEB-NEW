@@ -1,9 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
   const scrollRef = useRef(null);
-  const scrollSpeed = 1; // Adjust scroll speed
-  const scrollInterval = 30; // Adjust smoothness
+  const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
   // Auto-scroll effect
   useEffect(() => {
@@ -11,9 +13,12 @@ const Footer = () => {
     if (!container) return;
 
     let scrollPosition = 0;
+    const scrollSpeed = 1;
     const maxScroll = container.scrollWidth - container.clientWidth;
 
     const scroll = () => {
+      if (isHovered) return; // Stop scrolling when hovered
+
       scrollPosition += scrollSpeed;
       if (scrollPosition >= maxScroll) {
         scrollPosition = 0; // Reset to start for infinite loop
@@ -21,129 +26,208 @@ const Footer = () => {
       container.scrollLeft = scrollPosition;
     };
 
-    const interval = setInterval(scroll, scrollInterval);
+    const interval = setInterval(scroll, 30);
+    return () => clearInterval(interval);
+  }, [isHovered]);
 
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+  const categories = [
+    { name: "Residential", to: "/residential" },
+    { name: "Commercial", to: "/commercial" },
+    { name: "Industrial", to: "/industrial" },
+    { name: "Agriculture", to: "/agriculture" },
+    { name: "Land", to: "/land" },
+    { name: "Building", to: "/high-building" },
+    { name: "Condo", to: "/condo" },
+    { name: "Business", to: "/business-for-sell" },
+  ];
 
-  // Tab-to-scroll functionality
-  const handleKeyDown = (e) => {
-    const container = scrollRef.current;
-    if (!container) return;
+  const pages = [
+    { name: "About", to: "/about" },
+    { name: "Article", to: "/article" },
+    { name: "Favorite", to: "/favorites" },
+    { name: "Mortgage", to: "/mortgage-calculator" },
+    { name: "Agency", to: "/agency" },
+    { name: "Consultant", to: "/consultant" },
+    { name: "Achievement", to: "/achievement" },
+  ];
 
-    if (e.key === "Tab") {
-      e.preventDefault(); // Prevent default tab behavior
-      const scrollAmount = 100; // Adjust scroll distance per tab
-      if (e.shiftKey) {
-        // Shift + Tab to scroll left
-        container.scrollLeft -= scrollAmount;
-      } else {
-        // Tab to scroll right
-        container.scrollLeft += scrollAmount;
-      }
-    }
-  };
+  const socialLinks = [
+    {
+      icon: <FaFacebookF />,
+      url: "https://www.facebook.com/profile.php?id=100086669414097",
+      label: "Facebook",
+    },
+    {
+      icon: <FaInstagram />,
+      url: "https://www.instagram.com/cambodiaangkorrealestate/",
+      label: "Instagram",
+    },
+    {
+      icon: <FaTiktok />,
+      url: "https://www.tiktok.com/@cambodiaangkorrealestate",
+      label: "TikTok",
+    },
+    { icon: <FaYoutube />, url: "https://youtube.com", label: "YouTube" },
+  ];
 
   return (
-    <div className="w-full mx-auto py-4 md:py-5 md:px-6 bg-gray-100">
+    <div className="w-full bg-gray-300">
       {/* Bank Logos Section */}
-      <div
-        ref={scrollRef}
-        className="w-full overflow-x-hidden whitespace-nowrap py-4"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        style={{ outline: "none" }}
-      >
-        <div className="inline-flex space-x-6 px-4">
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_005.jpeg"
-            alt="CIMB Bank"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_001.jpg"
-            alt="Kookmin Bank"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_002.jpeg"
-            alt="Rural Development Bank"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_003.jpeg"
-            alt="Maybank"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0011.jpeg"
-            alt="Prince"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0011.jpeg"
-            alt="Prince"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0011.jpeg"
-            alt="Prince"
-            className="h-15 object-contain"
-          />
-          <img
-            src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0011.jpeg"
-            alt="Prince"
-            className="h-15 object-contain"
-          />
+      <div className="w-full bg-white py-6">
+        <div className="max-w-6xl mx-auto px-4">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 text-center">
+            Our Partners
+          </h3>
+          <div
+            ref={scrollRef}
+            className="flex gap-8 overflow-x-auto pb-4 hide-scrollbar"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_005.jpeg"
+              alt="CIMB Bank"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_001.jpg"
+              alt="Kookmin Bank"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_002.jpeg"
+              alt="Rural Development Bank"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_003.jpeg"
+              alt="Maybank"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_009.jpeg"
+              alt="Prince"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0011.jpeg"
+              alt="Prince"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0013.jpeg"
+              alt="Prince"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0014.jpeg"
+              alt="Prince"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_001.jpg"
+              alt="Prince"
+              className="h-12 object-contain"
+            />
+            <img
+              src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_002.jpeg"
+              alt="Prince"
+              className="h-12 object-contain"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Content Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-700 py-6">
-        {/* About C-A-R-E */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">About C-A-R-E</h3>
-          <p className="text-sm">
-            Cambodia Angkor Real Estate Co., Ltd. (IC-A-R-E) was the first
-            company of its kind to be licensed by the Royal Government of
-            Cambodia. Our operator's license was granted on 8th January 2002 and
-            since then our company has gone from strength to strength.
+      {/* Main Footer Content */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* About Section */}
+          <div className="md:col-span-2">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              About C-A-R-E
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              Cambodia Angkor Real Estate Co., Ltd. (IC-A-R-E) was the first
+              company of its kind to be licensed by the Royal Government of
+              Cambodia. Our operator's license was granted on 8th January 2002
+              and since then our company has gone from strength to strength.
+            </p>
+            {/* Social Media Icons */}
+            <div className="flex gap-4">
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
+                  aria-label={social.label}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-row gap-40">
+            {/* Categories Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                Categories
+              </h3>
+              <div className="grid grid-cols-1 gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category.name}
+                    onClick={() => navigate(category.to)}
+                    className="text-gray-600 hover:text-blue-600 text-sm text-left transition-colors"
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pages Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">
+                Pages
+              </h3>
+              <div className="grid grid-cols-1 gap-2">
+                {pages.map((page) => (
+                  <button
+                    key={page.name}
+                    onClick={() => navigate(page.to)}
+                    className="text-gray-600 hover:text-blue-600 text-sm text-left transition-colors"
+                  >
+                    {page.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Copyright Bar */}
+      <div className="bg-gray-900 text-white py-4">
+        <div className="max-w-6xl mx-auto px-4 text-center text-sm">
+          <p>
+            Copyright © 2002 - {new Date().getFullYear()} | Angkor Real Estate.
+            All Rights Reserved.
           </p>
         </div>
-
-        {/* Recent Post */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Recent Post</h3>
-          <ul className="text-sm space-y-1">
-            <li>» The organized their 4th forum and election for the new</li>
-            <li>» 2005 Charities</li>
-            <li>» Cambodia's tallest tower forced to lose a few storeys</li>
-            <li>
-              » Speculation, unfulfilled infrastructure pledges lead to price
-            </li>
-            <li>
-              » Data for apartment market doesn't tally, but industry remains
-            </li>
-          </ul>
-        </div>
-
-        {/* Our Listings */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Our Listings</h3>
-          <ul className="text-sm space-y-1">
-            <li>» Apartment</li>
-            <li>» Boutique</li>
-            <li>» BUSINESS</li>
-            <li>» COMMERCIAL</li>
-            <li>» Guest House</li>
-          </ul>
-        </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="bg-gray-900 text-white py-3 px-4 text-sm flex justify-center items-center">
-        <span>Copyright 2002 | Angkor Real Estate. All Rights Reserved.</span>
-      </div>
+      <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 const cache = {};
-const SLIDER_API_URL = "http://127.0.0.1:8000/api/get_slider_public";
+const SLIDER_API_URL = "https://externalchecking.com/api/api_rone_new/public/api/get_slider_public";
 
 export async function fetchSlider() {
   const key = "slider";

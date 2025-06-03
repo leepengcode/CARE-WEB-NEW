@@ -43,7 +43,7 @@ const PropertyFilters = ({ onFilter, onClear }) => {
   const fetchAddress = async (code = "", types) => {
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/get_address?code=${code}`
+        `https://externalchecking.com/api/api_rone_new/public/api/get_address?code=${code}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);

@@ -79,7 +79,7 @@ export default function ArticleList() {
     try {
       const offset = (currentPage - 1) * itemsPerPage;
       const res = await axios.get(
-        `http://127.0.0.1:8000/api/get_articles_public`,
+        `https://externalchecking.com/api/api_rone_new/public/api/get_articles_public`,
         {
           params: {
             offset,

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const cache = {};
-const API_BASE = "http://127.0.0.1:8000/api/get_property_public";
+const API_BASE = "https://externalchecking.com/api/api_rone_new/public/api/get_property_public";
 
 function getCacheKey(params) {
   return JSON.stringify(params);
@@ -56,19 +56,75 @@ export async function fetchAllProperties(page = 1, limit = 12, filters = {}) {
   };
 }
 
-export async function fetchPropertyById(id) {
-  const properties = await fetchAllProperties(1, 1000);
-  const property = properties.data.find(p => String(p.id) === String(id));
-  if (!property) {
-    throw new Error("Property not found");
+export async function fetchPropertyById(id, userToken = null) {
+  // If userToken is provided, use the authenticated endpoint
+  if (userToken) {
+    const url = new URL("https://externalchecking.com/api/api_rone_new/public/api/get_property");
+    url.searchParams.append("property_id", id);
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.error || !Array.isArray(result.data) || result.data.length === 0) {
+       // Based on previous console logs, this endpoint returns an array.
+       // If the array is empty or there's an error, the property wasn't found for this user/token.
+       throw new Error(result.message || "Authenticated property not found");
+    }
+
+    // This endpoint returns an array, find the specific property by ID
+    const property = result.data.find(p => String(p.id) === String(id));
+
+    if (!property) {
+       throw new Error("Property with given ID not found in authenticated response");
+    }
+
+    return property;
   }
+
+  // For public properties, use the existing logic
+  const API_BASE_PUBLIC = "https://externalchecking.com/api/api_rone_new/public/api/get_property_public";
+  const params = {
+    limit: 1000,
+    offset: 0,
+    // We don't include status here for public fetch based on previous logic
+  };
+  
+  const url = new URL(API_BASE_PUBLIC);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value != null) {
+      url.searchParams.append(key, value);
+    }
+  });
+
+  const response = await fetch(url.toString());
+  const json = await response.json();
+  
+  if (json.error || !Array.isArray(json.data)) {
+     throw new Error(json.message || "Public property fetch failed");
+  }
+
+  const property = json.data.find(p => String(p.id) === String(id));
+
+  if (!property) {
+    throw new Error("Public property not found");
+  }
+
   return property;
 }
 
 export async function fetchAddress(code = "", types) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/api/get_address?code=${code}`
+      `https://externalchecking.com/api/api_rone_new/public/api/get_address?code=${code}`
     );
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -103,7 +159,7 @@ export async function fetchAddress(code = "", types) {
 
 export async function fetchAgencies() {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/agency-list-public');
+    const response = await fetch('https://externalchecking.com/api/api_rone_new/public/api/agency-list-public');
     const result = await response.json();
     if (result.error) throw new Error(result.message || "Failed to fetch agencies");
     return result.data;
@@ -125,5 +181,32 @@ export async function toggleFavorite(propertyId, type, userToken) {
     }
   );
   return res.data;
+}
+
+export async function fetchPropertyForEdit(id, userToken) {
+  if (!userToken) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await fetch(
+    `https://externalchecking.com/api/api_rone_new/public/api/get_property?property_id=${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (result.error) {
+    throw new Error(result.message || "Failed to fetch property");
+  }
+
+  return result.data;
 }
 

@@ -20,45 +20,45 @@ const categories = [
   {
     name: "Residential",
     icon: <MdHome size={22} />,
-    to: "/category/residential",
+    to: " /residential",
   },
   {
     name: "Commercial",
     icon: <MdBusiness size={22} />,
-    to: "/category/commercial",
+    to: " /commercial",
   },
   {
     name: "Industrial",
     icon: <MdFactory size={22} />,
-    to: "/category/industrial",
+    to: " /industrial",
   },
   {
     name: "Agriculture",
     icon: <MdAgriculture size={22} />,
-    to: "/category/agriculture",
+    to: " /agriculture",
   },
-  { name: "Land", icon: <MdLocationOn size={22} />, to: "/category/land" },
+  { name: "Land", icon: <MdLocationOn size={22} />, to: " /land" },
   {
     name: "Building",
     icon: <FaBuilding size={22} />,
-    to: "/category/high-building",
+    to: " /high-building",
   },
-  { name: "Condo", icon: <MdApartment size={22} />, to: "/category/condo" },
+  { name: "Condo", icon: <MdApartment size={22} />, to: " /condo" },
   {
     name: "Business",
     icon: <MdStore size={22} />,
-    to: "/category/business-for-sell",
+    to: " /business-for-sell",
   },
 
   {
     name: "Consultant",
     icon: <MdPerson size={22} />,
-    to: "/category/consultant",
+    to: "/consultant",
   },
   {
     name: "Measurement",
     icon: <FaRuler size={22} />,
-    to: "/category/measurement",
+    to: "/measurement",
   },
   {
     name: "Mortgage",
@@ -68,16 +68,16 @@ const categories = [
   {
     name: "Favorite",
     icon: <FaRegHeart size={22} />,
-    to: "/category/favorite",
+    to: " /favorite",
   },
   { name: "Article", icon: <MdArticle size={22} />, to: "/article" },
   { name: "Agency", icon: <MdGroups size={22} />, to: "/agency" },
   {
     name: "Achievement",
     icon: <MdGroups size={22} />,
-    to: "/category/achievement",
+    to: "/achievement",
   },
-  { name: "More", icon: <MdGroups size={22} />, to: "/category/more" },
+  { name: "Services", icon: <MdGroups size={22} />, to: "/services" },
 ];
 
 const PAGE_SIZE = 8;

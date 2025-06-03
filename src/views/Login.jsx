@@ -69,7 +69,7 @@ export default function Login() {
         password
       );
       const firebaseId = userCredential.user.uid;
-      localStorage.setItem("firebaseUid", firebaseId); // Persist UID
+      localStorage.setItem("firebaseUid", firebaseId); 
       console.log("Firebase auth success: UID =", firebaseId);
 
       // Send phone number to backend to trigger OTP

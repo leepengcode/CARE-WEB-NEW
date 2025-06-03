@@ -47,7 +47,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!userToken) {
-      navigate("/login");
+      navigate("/");
       return;
     }
     const fetchProfile = async () => {
@@ -199,7 +199,7 @@ export default function Profile() {
       setCurrentUser({});
       localStorage.removeItem("userToken");
       localStorage.removeItem("currentUser");
-      navigate("/login");
+      navigate("/");
       showToast("Signed out successfully!", "success");
     };
     document.getElementById("confirm-no").onclick = () => {

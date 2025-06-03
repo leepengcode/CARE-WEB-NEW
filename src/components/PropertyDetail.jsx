@@ -11,7 +11,7 @@ import {
   FaTelegram,
 } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FacebookIcon,
   FacebookShareButton,
@@ -29,6 +29,7 @@ import PageComponents from "./PageComponents";
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [property, setProperty] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,15 +42,66 @@ const PropertyDetail = () => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const shareMenuRef = useRef(null);
-  const { userToken } = useStateContext();
+  const { userToken, currentUser } = useStateContext();
   const [favLoading, setFavLoading] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [showLargeImageModal, setShowLargeImageModal] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  // Get the previous path from location state or default to properties
+  const previousPath = location.state?.from || "/properties";
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!userToken || !currentUser?.id) {
+        console.log("No userToken or currentUser.id available");
+        return;
+      }
+
+      try {
+        console.log("Fetching user role for user ID:", currentUser.id);
+        const userResponse = await fetch(
+          `https://externalchecking.com/api/api_rone_new/public/api/get_user_by_id?userid=${currentUser.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+        const userData = await userResponse.json();
+        console.log("User data response:", userData);
+        if (!userData.error) {
+          console.log("Setting user role to:", userData.data.role);
+          setUserRole(userData.data.role);
+        } else {
+          console.error("Error in user data response:", userData.error);
+        }
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+      }
+    };
+
+    fetchUserRole();
+  }, [userToken, currentUser]);
+
+  useEffect(() => {
+    if (property) {
+      console.log("Property data:", {
+        id: property.id,
+        agent_owner_id: property.agent_owner?.id,
+        current_user_id: currentUser?.id,
+        user_role: userRole,
+        latitude: property.latitude,
+        longitude: property.longitude,
+      });
+    }
+  }, [property, currentUser, userRole]);
 
   useEffect(() => {
     fetchPropertyDetail();
     setImgLoaded(false);
-  }, [id]);
+  }, [id, userToken, location.state?.property]);
 
   useEffect(() => {
     if (descriptionRef.current) {
@@ -87,12 +139,86 @@ const PropertyDetail = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const propertyData = await fetchPropertyById(id);
+
+      // Check if property object is passed in state (from My Property)
+      const propertyFromState = location.state?.property;
+
+      let propertyData = null;
+
+      if (propertyFromState) {
+        console.log("=== Property Data from State ===");
+        console.log("Raw PropertyFromState object:", propertyFromState); // Log the whole object
+        console.log("Potential description fields in state data:", {
+          description: propertyFromState.description,
+          descriptions: propertyFromState.descriptions,
+          body: propertyFromState.body,
+        });
+
+        // Map the data correctly, trying multiple potential description field names
+        propertyData = {
+          ...propertyFromState,
+          title_image: propertyFromState.image || propertyFromState.title_image,
+          description: propertyFromState.description || "", // Try multiple names
+          propery_type:
+            propertyFromState.propery_type || propertyFromState.status,
+          post_created:
+            propertyFromState.post_created ||
+            propertyFromState.time ||
+            new Date().toISOString(),
+          type:
+            propertyFromState.type ||
+            propertyFromState.category?.category ||
+            "",
+          status: propertyFromState.state || propertyFromState.status,
+          price: propertyFromState.price
+            ? parseFloat(
+                String(propertyFromState.price).replace(/[^0-9.-]+/g, "")
+              ) || 0
+            : 0,
+          gallery: propertyFromState.gallery || [], // Ensure gallery is an array
+          // Handle category properly, trying multiple potential field names/structures
+          category: propertyFromState.category?.category
+            ? propertyFromState.category.category
+            : {
+                category: propertyFromState.category || "",
+                image: propertyFromState.category_image || "",
+              },
+        };
+
+        console.log("Mapped Property Data (from State):", propertyData);
+      } else {
+        // Normal property fetch (authenticated or public based on token)
+        console.log("=== Fetching Property by ID ===");
+        console.log("Property ID:", id);
+        console.log("User Token Available:", !!userToken);
+
+        propertyData = await fetchPropertyById(id, userToken);
+      }
+
+      if (!propertyData) {
+        throw new Error("Property not found");
+      }
+
+      // Log the final property data being set
+      console.log("=== Final Property Data Being Set ===");
+      console.log("Property ID:", propertyData.id);
+      console.log("Property Status:", propertyData.status);
+      console.log("Property Type:", propertyData.type);
+      console.log("Property Title:", propertyData.title);
+      console.log("Property Title Image:", propertyData.title_image);
+      console.log("Property Category:", propertyData.category);
+      console.log("Property Description:", propertyData.description);
+      console.log("Property Price:", propertyData.price);
+      console.log("Property Gallery:", propertyData.gallery);
+      console.log("Property Post Created:", propertyData.post_created);
+      console.log("Property Type:", propertyData.propery_type);
+      console.log("Raw Property Data:", propertyData);
+
       setProperty(propertyData);
       setSelectedImage(propertyData.title_image);
     } catch (error) {
       console.error("Error fetching property:", error);
-      setError(error.message);
+      setError(error.message || "Failed to fetch property");
     } finally {
       setIsLoading(false);
     }
@@ -138,8 +264,11 @@ const PropertyDetail = () => {
   };
 
   const handleBackClick = () => {
-    const originPath = sessionStorage.getItem("originPath") || "/properties";
-    navigate(originPath);
+    if (window.history.length > 2) {
+      window.history.back();
+    } else {
+      navigate(previousPath);
+    }
   };
 
   const handleShareClick = () => {
@@ -241,12 +370,20 @@ const PropertyDetail = () => {
     const interestPayment = Math.round(monthlyPayment - principalPayment);
 
     // For donut chart
-    const principalPercent = principalPayment / monthlyPayment;
-    const interestPercent = interestPayment / monthlyPayment;
+    const principalPercent =
+      monthlyPayment > 0 ? principalPayment / monthlyPayment : 0;
+    const interestPercent =
+      monthlyPayment > 0 ? interestPayment / monthlyPayment : 0;
     const donutRadius = 70;
     const donutCircumference = 2 * Math.PI * donutRadius;
-    const principalStroke = donutCircumference * principalPercent;
-    const interestStroke = donutCircumference * interestPercent;
+    const principalStroke = Math.max(
+      0,
+      Math.min(donutCircumference, donutCircumference * principalPercent)
+    );
+    const interestStroke = Math.max(
+      0,
+      Math.min(donutCircumference, donutCircumference * interestPercent)
+    );
 
     return (
       <div className="flex flex-col md:flex-row gap-6 mt-2">
@@ -350,7 +487,7 @@ const PropertyDetail = () => {
                 stroke="#2563eb"
                 strokeWidth={18}
                 strokeDasharray={`${interestStroke} ${donutCircumference}`}
-                strokeDashoffset={0}
+                strokeDashoffset="0"
                 transform="rotate(-90 90 90)"
               />
               {/* Principal (red) */}
@@ -362,7 +499,7 @@ const PropertyDetail = () => {
                 stroke="#ef4444"
                 strokeWidth={18}
                 strokeDasharray={`${principalStroke} ${donutCircumference}`}
-                strokeDashoffset={interestStroke * -1}
+                strokeDashoffset={interestStroke}
                 transform="rotate(-90 90 90)"
               />
               <text
@@ -484,12 +621,145 @@ const PropertyDetail = () => {
     return (
       <PageComponents>
         <div className="w-full max-w-6xl mx-auto py-2 md:py-5 lg:px-10">
-          <div className="animate-pulse">
-            <div className="h-64 bg-gray-200 rounded mb-6"></div>
-            <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+          <div className="flex justify-between items-center mb-4">
+            {/* Back Button */}
+            <button
+              onClick={handleBackClick}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-100 active:bg-gray-200 transition text-blue-600 font-medium"
+            >
+              <FaChevronLeft className="w-4 h-4" />
+              <span className="text-base">Back</span>
+            </button>
+
+            {/* Share and Favorite Buttons */}
+            <div className="flex gap-2">
+              <button
+                className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                disabled={true}
+                title="Add to favorites"
+              >
+                <FaRegHeart className="w-5 h-5 text-gray-600" />
+              </button>
+              <button
+                className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                disabled={true}
+              >
+                <FaShareAlt className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            {/* Image Gallery Skeleton */}
+            <div className="relative h-[300px] md:h-[600px] bg-gray-200 animate-pulse">
+              {/* Navigation Buttons Skeleton */}
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 rounded-full shadow-md">
+                <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+              </div>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 rounded-full shadow-md">
+                <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+              </div>
+            </div>
+
+            {/* Thumbnail Gallery Skeleton */}
+            <div className="py-2 bg-gray-50">
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg animate-pulse"
+                  ></div>
+                ))}
+              </div>
+            </div>
+
+            {/* Property Info Skeleton */}
+            <div className="p-4 md:p-6">
+              {/* Category and Status */}
+              <div className="flex justify-between items-start mb-4 gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="w-24 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="w-20 h-6 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+
+              {/* Title and Date */}
+              <div className="flex justify-between items-start py-2 md:py-2 gap-4">
+                <div className="w-[90%] md:w-[100%]">
+                  <div className="w-3/4 h-6 bg-gray-200 rounded animate-pulse mb-2"></div>
+                </div>
+                <div className="w-[40%] md:w-[20%]">
+                  <div className="w-24 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="w-32 h-8 bg-gray-200 rounded animate-pulse my-4"></div>
+
+              {/* Property Details Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-2 md:py-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 bg-gray-50 rounded-lg p-3"
+                  >
+                    <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="flex-1">
+                      <div className="w-16 h-3 bg-gray-200 rounded animate-pulse mb-1"></div>
+                      <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <hr className="my-4" />
+
+              {/* Description */}
+              <div className="mb-6">
+                <div className="w-40 h-5 bg-gray-200 rounded animate-pulse mb-3"></div>
+                <div className="space-y-2">
+                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-5/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="w-4/6 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+
+              <hr className="my-4" />
+
+              {/* Owner Information */}
+              <div className="flex justify-between items-center py-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 md:w-32 md:h-32 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="space-y-2">
+                    <div className="w-32 h-5 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="w-40 h-4 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Mortgage Calculator */}
+              <div className="border-t pt-4">
+                <div className="w-48 h-6 bg-gray-200 rounded animate-pulse mb-4"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="bg-white rounded-lg p-4 shadow">
+                        <div className="w-32 h-5 bg-gray-200 rounded animate-pulse mb-3"></div>
+                        <div className="w-full h-8 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-4">
+                    <div className="w-full h-64 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="w-full h-32 bg-gray-200 rounded-lg animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -524,10 +794,11 @@ const PropertyDetail = () => {
             Property Not Found
           </h2>
           <button
-            onClick={() => navigate("/properties")}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            onClick={handleBackClick}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-100 active:bg-gray-200 transition text-blue-600 font-medium"
           >
-            Back to Properties
+            <FaChevronLeft className="w-4 h-4" />
+            <span className="text-base">Back</span>
           </button>
         </div>
       </PageComponents>
@@ -547,117 +818,119 @@ const PropertyDetail = () => {
             <span className="text-base">Back</span>
           </button>
 
-          {/* Share and Favorite Buttons */}
-          <div className="flex gap-2">
-            <button
-              className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
-              onClick={handleToggleFavorite}
-              disabled={favLoading}
-              title={isFav ? "Remove from favorites" : "Add to favorites"}
-            >
-              {favLoading ? (
-                <svg
-                  className="animate-spin w-5 h-5 text-gray-400"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  />
-                </svg>
-              ) : isFav ? (
-                <FaHeart className="w-5 h-5 text-red-500" />
-              ) : (
-                <FaRegHeart className="w-5 h-5 text-gray-600" />
-              )}
-            </button>
-            <div className="relative" ref={shareMenuRef}>
+          {/* Share and Favorite Buttons - Conditionally Rendered */}
+          {property?.status !== "0" && (
+            <div className="flex gap-2">
               <button
-                onClick={handleShareClick}
-                className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all duration-200"
+                className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                onClick={handleToggleFavorite}
+                disabled={favLoading}
+                title={isFav ? "Remove from favorites" : "Add to favorites"}
               >
-                <FaShareAlt className="w-5 h-5 text-gray-600" />
+                {favLoading ? (
+                  <svg
+                    className="animate-spin w-5 h-5 text-gray-400"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+                ) : isFav ? (
+                  <FaHeart className="w-5 h-5 text-red-500" />
+                ) : (
+                  <FaRegHeart className="w-5 h-5 text-gray-600" />
+                )}
               </button>
+              <div className="relative" ref={shareMenuRef}>
+                <button
+                  onClick={handleShareClick}
+                  className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all duration-200"
+                >
+                  <FaShareAlt className="w-5 h-5 text-gray-600" />
+                </button>
 
-              {/* Share Menu */}
-              {showShareMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg p-4 z-50 animate-fade-in-up">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-gray-800">
-                        Share Property
-                      </h3>
+                {/* Share Menu */}
+                {showShareMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg p-4 z-50 animate-fade-in-up">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold text-gray-800">
+                          Share Property
+                        </h3>
+                        <button
+                          onClick={() => setShowShareMenu(false)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          <IoClose size={20} />
+                        </button>
+                      </div>
+
+                      {/* Social Media Buttons */}
+                      <div className="flex justify-between gap-2">
+                        <FacebookShareButton
+                          url={window.location.href}
+                          quote={property?.title}
+                        >
+                          <FacebookIcon size={40} round />
+                        </FacebookShareButton>
+
+                        <TwitterShareButton
+                          url={window.location.href}
+                          title={property?.title}
+                        >
+                          <TwitterIcon size={40} round />
+                        </TwitterShareButton>
+
+                        <TelegramShareButton
+                          url={window.location.href}
+                          title={property?.title}
+                        >
+                          <TelegramIcon size={40} round />
+                        </TelegramShareButton>
+
+                        <WhatsappShareButton
+                          url={window.location.href}
+                          title={property?.title}
+                        >
+                          <WhatsappIcon size={40} round />
+                        </WhatsappShareButton>
+                      </div>
+
+                      {/* Copy Link Button */}
                       <button
-                        onClick={() => setShowShareMenu(false)}
-                        className="text-gray-500 hover:text-gray-700"
+                        onClick={handleCopyLink}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                       >
-                        <IoClose size={20} />
+                        {copied ? (
+                          <>
+                            <FaCheck className="text-green-500" />
+                            <span className="text-green-500">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaCopy />
+                            <span>Copy Link</span>
+                          </>
+                        )}
                       </button>
                     </div>
-
-                    {/* Social Media Buttons */}
-                    <div className="flex justify-between gap-2">
-                      <FacebookShareButton
-                        url={window.location.href}
-                        quote={property?.title}
-                      >
-                        <FacebookIcon size={40} round />
-                      </FacebookShareButton>
-
-                      <TwitterShareButton
-                        url={window.location.href}
-                        title={property?.title}
-                      >
-                        <TwitterIcon size={40} round />
-                      </TwitterShareButton>
-
-                      <TelegramShareButton
-                        url={window.location.href}
-                        title={property?.title}
-                      >
-                        <TelegramIcon size={40} round />
-                      </TelegramShareButton>
-
-                      <WhatsappShareButton
-                        url={window.location.href}
-                        title={property?.title}
-                      >
-                        <WhatsappIcon size={40} round />
-                      </WhatsappShareButton>
-                    </div>
-
-                    {/* Copy Link Button */}
-                    <button
-                      onClick={handleCopyLink}
-                      className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                    >
-                      {copied ? (
-                        <>
-                          <FaCheck className="text-green-500" />
-                          <span className="text-green-500">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <FaCopy />
-                          <span>Copy Link</span>
-                        </>
-                      )}
-                    </button>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -767,39 +1040,43 @@ const PropertyDetail = () => {
           <div className="p-4 md:p-6">
             <div className="flex justify-between items-start mb-4 gap-4">
               <div className="flex items-center gap-2 text-white rounded-sm">
-                <img
-                  className="h-4 w-4 md:h-5 md:w-5"
-                  src={property.category.image}
-                  alt="category"
-                />
+                {property?.category?.image && (
+                  <img
+                    className="h-4 w-4 md:h-5 md:w-5"
+                    src={property.category.image}
+                    alt="category"
+                  />
+                )}
                 <p className="text-sm md:text-lg text-black">
-                  {property.category.category}
+                  {property?.category?.category || "No Category"}
                 </p>
               </div>
 
               <div className="text-right bg-blue-400 py-1 px-2">
-                <p className="text-sm text-white">{property.propery_type}</p>
+                <p className="text-sm text-white">
+                  {property?.propery_type || "No Type"}
+                </p>
               </div>
             </div>
             <div className="flex justify-between items-start py-2 md:py-2 gap-4">
               <div className="w-[90%] md:w-[100%]">
                 <h1 className="text-md md:text-2xl font-bold text-gray-900 font-khmer mb-2">
-                  {property.title}
+                  {property?.title || "No Title"}
                 </h1>
               </div>
               <div className="w-[40%] md:w-[20%] text-right">
                 <p className="text-sm md:text-xl text-black">
-                  {property.post_created}
+                  {property?.post_created || "No Date"}
                 </p>
               </div>
             </div>
             <p className="text-2xl py-2 md:py-4 font-bold text-blue-600">
-              ${property.price.toLocaleString()}
+              ${(property?.price || 0).toLocaleString()}
             </p>
 
             {/* Property Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-2 md:py-4">
-              {property.parameters?.map((param) => (
+              {property?.parameters?.map((param) => (
                 <div
                   key={param.id}
                   className="flex items-center gap-2 bg-gray-50 rounded-lg"
@@ -833,7 +1110,7 @@ const PropertyDetail = () => {
                       : ""
                   }`}
                 >
-                  {property.description}
+                  {property?.description || "No description available"}
                 </p>
                 {isDescriptionLong && (
                   <button
@@ -846,8 +1123,95 @@ const PropertyDetail = () => {
               </div>
             </div>
             <hr />
+            {/* Google Map Location */}
+            {(() => {
+              const shouldShowMap =
+                property?.latitude &&
+                property?.longitude &&
+                property.latitude !== "0" &&
+                property.longitude !== "0" &&
+                (userRole === "agency" ||
+                  (property?.agent_owner?.id === currentUser?.id &&
+                    (property?.agent_owner?.role === null ||
+                      userRole === "researcher")));
+
+              console.log("Map visibility check:", {
+                hasLatLong: Boolean(property?.latitude && property?.longitude),
+                latLongNotZero: Boolean(
+                  property?.latitude !== "0" && property?.longitude !== "0"
+                ),
+                isAgency: userRole === "agency",
+                isOwner: property?.agent_owner?.id === currentUser?.id,
+                ownerRole: property?.agent_owner?.role,
+                userRole: userRole,
+                shouldShowMap,
+              });
+
+              return (
+                shouldShowMap && (
+                  <div className="mt-6 mb-6">
+                    <h2 className="text-lg font-semibold mb-4">Location</h2>
+                    <div className="relative w-full h-80 rounded-lg overflow-hidden shadow-md">
+                      <iframe
+                        title="Property Location"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        allowFullScreen
+                        src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyCcFA5zPrJIUY5Q5dnWsMQFI7tFbeQVafs&q=${property.latitude},${property.longitude}`}
+                      ></iframe>
+                    </div>
+                  </div>
+                )
+              );
+            })()}
+
+            {/* Location Details */}
+            {(() => {
+              const hasLocationDetails = Boolean(
+                property?.province?.name ||
+                  property?.district?.name ||
+                  property?.commune?.name ||
+                  property?.village?.name
+              );
+              const shouldShowLocation =
+                hasLocationDetails &&
+                (userRole === "agency" ||
+                  (property?.agent_owner?.id === currentUser?.id &&
+                    (property?.agent_owner?.role === null ||
+                      userRole === "researcher")));
+
+              console.log("Location details visibility check:", {
+                hasLocationDetails,
+                isAgency: userRole === "agency",
+                isOwner: property?.agent_owner?.id === currentUser?.id,
+                ownerRole: property?.agent_owner?.role,
+                userRole: userRole,
+                shouldShowLocation,
+              });
+
+              return (
+                shouldShowLocation && (
+                  <div className="mt-6 mb-6">
+                    <h1 className="text-gray-600">
+                      <strong>Location: </strong>
+                      {[
+                        property?.village?.name,
+                        property?.commune?.name,
+                        property?.district?.name,
+                        property?.province?.name,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </h1>
+                  </div>
+                )
+              );
+            })()}
+
             {/* Nearby Facilities */}
-            {property.assign_facilities?.length > 0 && (
+            {property?.assign_facilities?.length > 0 && (
               <div className="py-2 md:py-4">
                 <h2 className="text-lg font-semibold mb-2">
                   Outdoor Facilities
@@ -880,7 +1244,7 @@ const PropertyDetail = () => {
             <div className="flex justify-between items-center py-4 md:py-4">
               <div className="w-[20%] md:w-auto rounded-full overflow-hidden">
                 <img
-                  src={property.agent_owner.profile}
+                  src={property?.agent_owner?.profile || "/default-profile.png"}
                   alt="profile"
                   className="w-20 h-16 md:w-32 md:h-32 object-cover rounded-full"
                 />
@@ -888,15 +1252,15 @@ const PropertyDetail = () => {
               <div className="flex justify-between items-center w-[80%] md:w-auto md:flex-grow md:ml-4">
                 <div className="w-[80%] md:w-auto px-2 md:px-4">
                   <h2 className="text-md md:text-xl font-semibold">
-                    {property.agent_owner.name}
+                    {property?.agent_owner?.name || "No Name"}
                   </h2>
                   <p className="text-sm md:text-lg text-gray-500">
-                    {property.agent_owner.email}
+                    {property?.agent_owner?.email || "No Email"}
                   </p>
                 </div>
                 <div className="w-[30%] md:w-auto px-2 md:px-4 flex gap-2 md:gap-4">
                   <a
-                    href={`tel:${property.mobile || "0718489909"}`}
+                    href={`tel:${property?.mobile || "0718489909"}`}
                     className="block"
                   >
                     <div className="bg-blue-500 rounded-full p-1 md:p-2 hover:bg-blue-600 transition-colors">
@@ -904,7 +1268,7 @@ const PropertyDetail = () => {
                     </div>
                   </a>
                   <a
-                    href={`https://t.me/${property.telegram_link || "121212"}`}
+                    href={`https://t.me/${property?.telegram_link || "121212"}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block"
@@ -922,10 +1286,61 @@ const PropertyDetail = () => {
               <div className="flex items-center gap-2 text-blue-600 font-semibold ">
                 <span className="text-lg">Mortgage Calculator</span>
               </div>
-              <MortgageCalculatorUI price={property.price} />
+              <MortgageCalculatorUI price={property?.price || 0} />
             </div>
           </div>
         </div>
+
+        {/* Large Image Modal */}
+        {showLargeImageModal && property && (
+          <div
+            className="fixed inset-0 z-[60] bg-black bg-opacity-80 flex items-center justify-center p-4"
+            onClick={() => setShowLargeImageModal(false)}
+          >
+            <div
+              className="relative max-w-screen-xl max-h-screen-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {" "}
+              {/* Prevent modal close on image click */}
+              <button
+                className="absolute top-4 right-4 z-[70] text-white text-2xl bg-gray-800/50 rounded-full p-2 hover:bg-gray-800"
+                onClick={() => setShowLargeImageModal(false)}
+              >
+                <IoClose />
+              </button>
+              {property?.gallery &&
+                (property.gallery.length > 0 || property.title_image) && (
+                  <>
+                    {/* Navigation Buttons */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrevImage();
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 z-[70] p-2 bg-gray-800/50 rounded-full shadow-md hover:bg-gray-800 text-white"
+                    >
+                      <FaChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNextImage();
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 z-[70] p-2 bg-gray-800/50 rounded-full shadow-md hover:bg-gray-800 text-white"
+                    >
+                      <FaChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
+              <img
+                src={selectedImage || property.title_image}
+                alt={property?.title}
+                className="max-w-full max-h-full object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        )}
       </div>
       <style>{`
         .font-khmer {

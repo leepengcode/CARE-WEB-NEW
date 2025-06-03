@@ -3,19 +3,33 @@ import { useEffect, useState } from "react";
 import { useStateContext } from "../../contexts/ContextProvider";
 import LoginPrompt from "../LoginPrompt";
 import PageComponents from "../PageComponents";
-import PropertyCard from "../shared/PropertyCard";
+import MyPropertyCard from "../shared/MyPropertyCard";
 import PropertyCardSkeleton from "../shared/PropertyCardSkeleton";
-import PropertyFilters from "./PropertyFilters";
+import MyPropertyFilter from "./MyPropertyFilter";
 
-async function fetchMyProperties({ userToken, role, userid, status }) {
-  const url = "http://127.0.0.1:8000/api/get_property";
+async function fetchMyProperties({
+  userToken,
+  role,
+  userid,
+  status,
+  offset = 0,
+  limit = 100,
+}) {
+  const url =
+    "https://externalchecking.com/api/api_rone_new/public/api/get_property";
   const params = new URLSearchParams({
-    role,
-    userid,
     status,
-    limit: 1000,
-    offset: 0,
+    offset,
+    limit,
   });
+
+  // Set role and userid based on API logic
+  // For null role, use "researcher" to get only their posted properties
+  params.set("role", role === null ? "researcher" : role);
+  params.append("userid", userid);
+
+  console.log("API Request URL:", `${url}?${params.toString()}`);
+
   const res = await fetch(`${url}?${params.toString()}`, {
     headers: {
       Authorization: `Bearer ${userToken}`,
@@ -34,7 +48,7 @@ export default function MyProperty() {
   const [view, setView] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProperties, setTotalProperties] = useState(0);
-  const propertiesPerPage = 12;
+  const propertiesPerPage = 21;
   const [currentFilters, setCurrentFilters] = useState({});
 
   const handlePageChange = (page) => {
@@ -60,45 +74,111 @@ export default function MyProperty() {
     setError(null);
     const fetchProps = async () => {
       try {
-        let role = currentUser.role || "user";
+        // Fetch latest user data to get current role
+        const userResponse = await fetch(
+          `https://externalchecking.com/api/api_rone_new/public/api/get_user_by_id?userid=${currentUser.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+        const userData = await userResponse.json();
+
+        if (userData.error) {
+          throw new Error(userData.message || "Failed to fetch user data");
+        }
+
+        // Use the role from the latest user data
+        let role = userData.data.role;
         let userid = currentUser.id;
-        // Fetch status=0 (pending)
-        const pending = await fetchMyProperties({
-          userToken,
+
+        console.log("Latest user data:", userData.data);
+        console.log("Fetching properties for:", {
           role,
           userid,
-          status: 0,
+          name: currentUser.name,
         });
-        // Fetch status=1 (active)
-        const active = await fetchMyProperties({
-          userToken,
-          role,
-          userid,
-          status: 1,
-        });
-        // Combine and deduplicate by id
-        const combined = [...pending, ...active].filter(
+
+        let allProperties = [];
+
+        // For agency role, fetch all properties with higher limit
+        if (role === "agency") {
+          const [pending, active] = await Promise.all([
+            fetchMyProperties({
+              userToken,
+              role,
+              userid,
+              status: 0,
+              limit: 100, // Increased limit for agency
+            }),
+            fetchMyProperties({
+              userToken,
+              role,
+              userid,
+              status: 1,
+              limit: 100, // Increased limit for agency
+            }),
+          ]);
+          allProperties = [...pending, ...active];
+        } else {
+          // For other roles (including null role), fetch with default limit
+          const [pending, active] = await Promise.all([
+            fetchMyProperties({
+              userToken,
+              role,
+              userid,
+              status: 0,
+            }),
+            fetchMyProperties({
+              userToken,
+              role,
+              userid,
+              status: 1,
+            }),
+          ]);
+          allProperties = [...pending, ...active];
+        }
+
+        // Log the responses for debugging
+        console.log("All properties raw data:", allProperties);
+
+        // Deduplicate by id
+        const combined = allProperties.filter(
           (item, idx, arr) => arr.findIndex((i) => i.id === item.id) === idx
         );
+
         // Map to PropertyCard format
         const mapped = combined.map((property) => ({
           id: property.id,
-          image: property.title_image,
+          image: property.title_image || property.image,
           status: property.propery_type,
-          type: property.category?.category,
-          category: property.category?.image,
-          price: `$${
-            property.price?.toLocaleString?.() ?? property.price ?? 0
-          }`,
+          state: property.status ? property.status.toString() : "",
+
+          category: property.category?.category,
+          category_image: property.category?.image || property.category,
+          price: property.price
+            ? parseFloat(String(property.price).replace(/[^0-9.-]+/g, "")) || 0
+            : 0,
           title: property.title,
           location: property.address,
           views: property.total_view,
-          time: property.post_created,
+          time: property.post_created || property.time,
           is_favourite: property.is_favourite,
+          gallery: property.gallery || [],
+          description: property.description || property.descriptions || "",
+          propery_type: property.propery_type || property.status,
+          post_created: property.post_created || property.time,
+          agent_owner: property.agent_owner || null,
+          mobile: property.mobile || null,
+          telegram_link: property.telegram_link || null,
         }));
 
+        // Sort properties by ID in descending order
+        const sortedProperties = mapped.sort((a, b) => b.id - a.id);
+
         // Apply filters if any exist
-        const filteredProperties = mapped.filter((property) => {
+        const filteredProperties = sortedProperties.filter((property) => {
           if (Object.keys(currentFilters).length === 0) return true;
 
           // Filter by type/category if specified
@@ -123,9 +203,25 @@ export default function MyProperty() {
           // Filter by status if specified
           if (
             currentFilters.status !== undefined &&
-            property.propery_type !== currentFilters.status
+            currentFilters.status !== null &&
+            property.state !== currentFilters.status
           ) {
             return false;
+          }
+
+          // Filter by keyword if specified
+          if (currentFilters.keyword) {
+            const searchTerm = currentFilters.keyword.toLowerCase();
+            const searchableText = [
+              property.title,
+              property.location,
+              property.type,
+              property.status,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
+            if (!searchableText.includes(searchTerm)) return false;
           }
 
           return true;
@@ -134,6 +230,7 @@ export default function MyProperty() {
         setProperties(filteredProperties);
         setTotalProperties(filteredProperties.length);
       } catch (err) {
+        console.error("Error fetching properties:", err);
         setError(err.message || "Failed to fetch properties");
       } finally {
         setLoading(false);
@@ -227,9 +324,12 @@ export default function MyProperty() {
     <PageComponents>
       <div className="w-full max-w-6xl mx-auto py-4 md:py-8 px-2 md:px-10">
         <div className="flex justify-between items-center mb-3">
-          <h1 className="text-md md:text-2xl">My Property</h1>
+          <h1 className="text-md md:text-2xl">
+            My Property{" "}
+            <span className="text-blue-600">({totalProperties})</span>
+          </h1>
           <div className="flex gap-2 items-center">
-            <PropertyFilters
+            <MyPropertyFilter
               onFilter={handleFilterApply}
               onClear={handleFilterClear}
             />
@@ -281,7 +381,7 @@ export default function MyProperty() {
                 currentPage * propertiesPerPage
               )
               .map((property) => (
-                <PropertyCard
+                <MyPropertyCard
                   key={property.id}
                   property={property}
                   view={view}

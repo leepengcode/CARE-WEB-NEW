@@ -40,7 +40,7 @@ export default function Signup() {
           `${import.meta.env.VITE_API_URL}/api/user_signup`,
           {
             firebase_id: firebaseId,
-            type: "phone",
+            type: "1",
             mobile: phone,
           },
           { signal: controller.signal }

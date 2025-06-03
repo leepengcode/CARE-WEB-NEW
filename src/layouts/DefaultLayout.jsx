@@ -4,6 +4,7 @@ import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import Breadcrumb from "../components/shared/Breadcrumb.jsx";
+import Footer from "../components/shared/Footer.jsx";
 import { useStateContext } from "../contexts/ContextProvider.jsx";
 
 function classNames(...classes) {
@@ -68,17 +69,17 @@ export default function DefaultLayout() {
     },
     {
       name: "Category",
-      to: "/category",
+      to: " ",
       current: true,
       children: [
-        { name: "Residential", to: "/category/residential" },
-        { name: "Condo", to: "/category/condo" },
-        { name: "Commercial", to: "/category/commercial" },
-        { name: "Industrial", to: "/category/industrial" },
-        { name: "Land", to: "/category/land" },
-        { name: "Business for sell", to: "/category/business-for-sell" },
-        { name: "Algricalture Land", to: "/category/agriculture-land" },
-        { name: "High Building", to: "/category/high-building" },
+        { name: "Residential", to: " /residential" },
+        { name: "Condo", to: " /condo" },
+        { name: "Commercial", to: " /commercial" },
+        { name: "Industrial", to: " /industrial" },
+        { name: "Land", to: " /land" },
+        { name: "Business for sell", to: " /business-for-sell" },
+        { name: "Algricalture Land", to: " /agriculture-land" },
+        { name: "High Building", to: " /high-building" },
       ],
     },
     {
@@ -91,6 +92,9 @@ export default function DefaultLayout() {
         { name: "Favorite", to: "/favorites" },
         { name: "Mortgage", to: "/mortgage-calculator" },
         { name: "Agency", to: "/agency" },
+        { name: "Consultant", to: "/consultant" },
+        { name: "Achievement", to: "/achievement" },
+        { name: "Services", to: "/services" },
       ],
     },
     { name: "Contact", to: "/contact", current: true },
@@ -347,7 +351,7 @@ export default function DefaultLayout() {
             </button>
           ) : (
             <NavLink
-              to="/"
+              to="/login"
               onClick={() => setMobileMenuOpen(false)}
               className="block mt-6 px-4 py-2 text-center rounded-md bg-blue-600 text-white hover:bg-blue-500"
             >
@@ -360,6 +364,7 @@ export default function DefaultLayout() {
       <div className="pt-20">
         <Breadcrumb />
         <Outlet />
+        <Footer />
       </div>
     </div>
   );

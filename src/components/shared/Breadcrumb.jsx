@@ -19,6 +19,9 @@ const PATH_NAMES = {
   agriculture: "Agriculture",
   highBuilding: "High Building",
   condo: "Condo",
+  favorites: "Favorite",
+  consultant: "Consultant",
+  achievement: "Achievement",
 
   // Add more mappings as needed
 };

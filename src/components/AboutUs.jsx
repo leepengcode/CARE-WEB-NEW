@@ -29,8 +29,7 @@ const TAB_CONTENT = [
         </p>
       </>
     ),
-    image:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+    image: "https://externalchecking.com/logo/aboutus.png",
   },
   {
     label: "Service",
@@ -74,8 +73,7 @@ const TAB_CONTENT = [
         </div>
       </>
     ),
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80",
+    image: "https://externalchecking.com/logo/aboutus.png",
   },
   {
     label: "History",
@@ -110,8 +108,7 @@ const TAB_CONTENT = [
         </div>
       </>
     ),
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+    image: "https://externalchecking.com/logo/aboutus.png",
   },
 ];
 

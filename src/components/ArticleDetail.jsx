@@ -48,7 +48,7 @@ export default function ArticleDetail() {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/get_articles_public`,
+        `https://externalchecking.com/api/api_rone_new/public/api/get_articles_public`,
         { params: { limit: 1000 } }
       );
       if (response.data && response.data.data) {
