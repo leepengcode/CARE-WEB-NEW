@@ -1,6 +1,7 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { MdApartment } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { fetchAllProperties } from "../../api/propertyApi";
 import PageComponents from "../PageComponents";
@@ -326,29 +327,37 @@ export default function Properties() {
             </button>
           </div>
         </div>
-        <div
-          className={`grid ${
-            view === "grid"
-              ? "grid-cols-2 lg:grid-cols-3"
-              : "grid-cols-1 lg:grid-cols-2"
-          } gap-4`}
-        >
-          {properties.map((property, i) => (
-            <motion.div
-              key={property.id}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              <div onClick={() => handlePropertyClick(property.id)}>
-                <PropertyCard property={property} view={view} />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        {totalPages > 1 && renderPagination()}
+        {properties.length === 0 && !loading && !error ? (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <MdApartment className="w-16 h-16 mb-4" />
+            <p className="text-lg">No properties available.</p>
+          </div>
+        ) : (
+          <div
+            className={`grid ${
+              view === "grid"
+                ? "grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1 lg:grid-cols-2"
+            } gap-4`}
+          >
+            {properties.map((property, i) => (
+              <motion.div
+                key={property.id}
+                custom={i}
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <div onClick={() => handlePropertyClick(property.id)}>
+                  <PropertyCard property={property} view={view} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 && properties.length > 0 && renderPagination()}
       </div>
     </PageComponents>
   );

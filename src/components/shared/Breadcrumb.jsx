@@ -21,7 +21,7 @@ const PATH_NAMES = {
   condo: "Condo",
   favorites: "Favorite",
   consultant: "Consultant",
-  achievement: "Achievement",
+  Certificate: "Certificate",
 
   // Add more mappings as needed
 };

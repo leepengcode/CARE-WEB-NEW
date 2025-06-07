@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { MdApartment, MdBarChart, MdHome, MdPeople } from "react-icons/md";
 import PageComponents from "./PageComponents";
 
+const ABOUT_IMAGE = "https://externalchecking.com/logo/aboutus.png";
+
 const TAB_CONTENT = [
   {
     label: "About Us",
@@ -9,106 +11,122 @@ const TAB_CONTENT = [
       <>
         <h3 className="text-lg font-semibold text-blue-900 mb-3">Our Story</h3>
         <p>
-          Established in 2009, realtyone.app is the leading real estate platform
-          in Cambodia. We have been at the forefront of digital real estate
-          innovation, connecting buyers, sellers, and renters across the
-          country.
+          Cambodia Angkor Real Estate Co. Ltd (CARE) was the first company of
+          its kind to be licensed by the Royal Government of Cambodia. Our
+          operator's license was granted on 8th January 2002 and a copy of the
+          license is available for inspection on this web-site.
         </p>
         <p className="mt-3">
-          From our offices in Phnom Penh, we assist property seekers to find,
-          inquire and secure properties for sale and rent in Cambodia. Our team
-          of experienced professionals is dedicated to making your property
-          journey seamless.
+          The company has spent the last few years developing and improving its
+          services and has grown to become one of the largest and most
+          professional real estate companies within Cambodia. We are constantly
+          striving to improve our customer care and to provide clear and concise
+          advice about the domestic property market.
         </p>
         <p className="mt-3">
-          We provide a comprehensive property buying and renting experience;
-          from searching to ultimately securing a property. By bringing together
-          all parts of the real estate industry, we simplify property search,
-          empower smart property decisions and make property transactions
-          enjoyable.
+          We hope that the above information gives potential investors an idea
+          of how Cambodia Angkor Real Estate Co. Ltd. conducts its business and
+          that, knowing this, you will feel confident that your investment is in
+          good hands.
         </p>
       </>
     ),
-    image: "https://externalchecking.com/logo/aboutus.png",
   },
   {
     label: "Service",
     content: (
       <>
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">
-          Our Services
-        </h3>
         <div className="space-y-3">
           <div>
-            <h4 className="font-semibold text-red-600">Market Research</h4>
+            <h4 className="font-semibold text-red-600">
+              Real Estate Agency & Consultancy
+            </h4>
             <p>
-              Research Cambodia's property market using our expert guides,
-              videos, survey reports and market data. Stay informed with the
-              latest market trends.
+              We provide assistance to clients seeking to purchase, sell, or
+              rent of any kind of property in Cambodia through the country's
+              most extensive and experienced sales network – one that covers
+              every district of the Kingdom.
             </p>
           </div>
           <div>
-            <h4 className="font-semibold text-red-600">Property Search</h4>
+            <h4 className="font-semibold text-red-600">Property Valuation</h4>
             <p>
-              Find property for sale and rent across all of Cambodia on the
-              realtyone.app website, app, physical expos and online events.
+              In a rapidly developing market like Cambodia, credible and
+              strategic valuation services are vital measure taken by lenders to
+              protect their own risk as well as to ensure they are not giving a
+              loan greater than the value of the property or not lending against
+              non-marketable one
             </p>
           </div>
           <div>
-            <h4 className="font-semibold text-red-600">Concierge Service</h4>
+            <h4 className="font-semibold text-red-600">Property Development</h4>
             <p>
-              Utilise our Concierge services to help you in selecting,
-              negotiating and securing a property. Our experts guide you through
-              every step.
+              We aim to identify the intrinsic value of each property that we
+              manage or design, and then execute a management plan that is best
+              suited to that property.
             </p>
           </div>
           <div>
-            <h4 className="font-semibold text-red-600">Property Marketing</h4>
+            <h4 className="font-semibold text-red-600">
+              Investment funds & Consultancy
+            </h4>
             <p>
-              Market your property for sale or rent to thousands of property
-              hunters via the realtyone.app website and App. Reach your target
-              audience effectively.
+              Our consultation services include all regulatory information as
+              well as data on macroeconomic trends, industry and sector analysis
+              and consumer trends.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-red-600">
+              Acquisition of Cambodia Citizenship
+            </h4>
+            <p>
+              Due to the accelerating demand for visa and citizenship for
+              foreign investors and other foreign nationals from every corner of
+              the world.
             </p>
           </div>
         </div>
       </>
     ),
-    image: "https://externalchecking.com/logo/aboutus.png",
   },
   {
     label: "History",
     content: (
       <>
-        <h3 className="text-lg font-semibold text-blue-900 mb-3">
-          Our Journey
+        <h3 className="text-lg font-semibold text-blue-900 mb-3">Vision</h3>
+        <div className="space-y-3">
+          <p>
+            To be the most professional real estate agency in Cambodia and the
+            fastest growing and successful agency in all of our branches
+            nationwide.
+          </p>
+        </div>
+        <h3 className="text-lg font-semibold text-blue-900 my-3">Mission</h3>
+        <div className="space-y-3">
+          <p>
+            To provide excellent real-estate services in Cambodia by exceeding
+            the expectations of our clients and by conducting business with
+            honesty and integrity.
+          </p>
+        </div>
+        <h3 className="text-lg font-semibold text-blue-900 my-3">
+          Core Values
         </h3>
         <div className="space-y-3">
           <p>
-            Our ecosystem of services include our website and apps, our
-            Concierge Service, physical expos held in Cambodia, online expos,
-            thousands of expert guides and videos, the Cambodia Real Estate
-            Awards and much more.
-          </p>
-          <div>
-            <h4 className="font-semibold text-red-600">Key Milestones</h4>
-            <ul className="list-disc list-inside space-y-2 mt-2">
-              <li>2009: Company founded in Phnom Penh</li>
-              <li>2012: Launched first mobile app</li>
-              <li>2015: Introduced Concierge Service</li>
-              <li>2018: Started Cambodia Real Estate Awards</li>
-              <li>2020: Expanded to online expos</li>
-            </ul>
-          </div>
-          <p className="mt-3">
-            Thanks to our unique approach, we help thousands of people secure a
-            property each year, with millions of users on our websites and apps,
-            150,000+ attendees at our physical events, and an active database of
-            over 100,000 property hunters.
+            C-A-R-E places top priority on the integrity, not only of its
+            products and services, but also its appreciation of local practices
+            and legal requirements. The company conducts transparent business,
+            is accountable for its actions and takes responsibility for its
+            results. C-A-R-E has established a reputation as a highly reliable
+            company by refusing to compromise its integrity in pursuit of
+            profit. Integrity is the cornerstone of the company's most valuable
+            intangible asset: Trust.
           </p>
         </div>
       </>
     ),
-    image: "https://externalchecking.com/logo/aboutus.png",
   },
 ];
 
@@ -188,7 +206,7 @@ export default function AboutUs() {
           <div className="w-full md:w-1/2 flex justify-center items-stretch">
             <div className="bg-white rounded-xl shadow-lg p-2 md:p-4 w-full h-full flex items-stretch">
               <img
-                src={TAB_CONTENT[activeTab].image}
+                src={ABOUT_IMAGE}
                 alt={TAB_CONTENT[activeTab].label}
                 className="rounded-lg w-full h-full object-cover transition-opacity duration-500"
                 style={{ minHeight: "180px" }}

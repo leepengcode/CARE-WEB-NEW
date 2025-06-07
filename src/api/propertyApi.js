@@ -59,14 +59,16 @@ export async function fetchAllProperties(page = 1, limit = 12, filters = {}) {
 export async function fetchPropertyById(id, userToken = null) {
   // If userToken is provided, use the authenticated endpoint
   if (userToken) {
-    const url = new URL("https://externalchecking.com/api/api_rone_new/public/api/get_property");
-    url.searchParams.append("property_id", id);
+    const url = "https://externalchecking.com/api/api_rone_new/public/api/get_property";
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(url, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
         Accept: "application/json",
+        "Content-Type": "application/json"
       },
+      body: JSON.stringify({ property_id: id })
     });
 
     if (!response.ok) {

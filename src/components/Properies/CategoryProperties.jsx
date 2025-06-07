@@ -1,6 +1,7 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { MdApartment } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { fetchAllProperties } from "../../api/propertyApi";
 import PageComponents from "../PageComponents";
@@ -31,8 +32,6 @@ export default function CategoryProperties({ category, title, image }) {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProperties, setTotalProperties] = useState(0);
-  const cacheRestoreRef = useRef(null);
-  const didMountRef = useRef(false);
   const propertiesPerPage = 24;
   const [currentFilters, setCurrentFilters] = useState({});
 
@@ -41,55 +40,60 @@ export default function CategoryProperties({ category, title, image }) {
     // eslint-disable-next-line
   }, [category, currentPage]);
 
-  const fetchData = async (filters = currentFilters, page = currentPage) => {
-    setLoading(true);
-    try {
-      // Remove null/undefined values from filters and remove category from filters
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(
-          ([key, value]) => value != null && key !== "category"
-        )
-      );
+  const fetchData = useCallback(
+    async (filters = currentFilters, page = currentPage) => {
+      setLoading(true);
+      try {
+        // Remove null/undefined values from filters and remove category from filters
+        const cleanFilters = Object.fromEntries(
+          Object.entries(filters).filter(
+            ([key, value]) => value != null && key !== "category"
+          )
+        );
 
-      const { data = [], total } = await fetchAllProperties(
-        page,
-        propertiesPerPage,
-        { ...cleanFilters, category }
-      );
+        const { data = [], total } = await fetchAllProperties(
+          page,
+          propertiesPerPage,
+          { ...cleanFilters, category }
+        );
 
-      if (!Array.isArray(data)) {
-        throw new Error("Invalid response format from server");
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid response format from server");
+        }
+
+        const mappedProperties = data
+          .filter(
+            (property) =>
+              property.status === 1 && property.category?.category === category
+          )
+          .map((property) => ({
+            id: property.id,
+            image: property.title_image,
+            status: property.propery_type,
+            type: property.category?.category,
+            category: property.category?.image,
+            price: `$${property.price.toLocaleString()}`,
+            title: property.title,
+            location: property.address,
+            views: property.total_view,
+            time: property.post_created,
+          }));
+
+        setProperties(mappedProperties);
+        setTotalProperties(total);
+        setError(null);
+      } catch (err) {
+        setError(
+          err.message || "Failed to fetch properties. Please try again."
+        );
+        setProperties([]);
+        setTotalProperties(0);
+      } finally {
+        setLoading(false);
       }
-
-      const mappedProperties = data
-        .filter(
-          (property) =>
-            property.status === 1 && property.category?.category === category
-        )
-        .map((property) => ({
-          id: property.id,
-          image: property.title_image,
-          status: property.propery_type,
-          type: property.category?.category,
-          category: property.category?.image,
-          price: `$${property.price.toLocaleString()}`,
-          title: property.title,
-          location: property.address,
-          views: property.total_view,
-          time: property.post_created,
-        }));
-
-      setProperties(mappedProperties);
-      setTotalProperties(total);
-      setError(null);
-    } catch (err) {
-      setError(err.message || "Failed to fetch properties. Please try again.");
-      setProperties([]);
-      setTotalProperties(0);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [category, currentFilters, propertiesPerPage]
+  ); // Added dependencies
 
   const handlePropertyClick = (propertyId) => {
     sessionStorage.setItem("propertiesScroll", window.scrollY);
@@ -292,29 +296,36 @@ export default function CategoryProperties({ category, title, image }) {
             </button>
           </div>
         </div>
-        <div
-          className={`grid ${
-            view === "grid"
-              ? "grid-cols-2 lg:grid-cols-3"
-              : "grid-cols-1 lg:grid-cols-2"
-          } gap-4`}
-        >
-          {properties.map((property, i) => (
-            <motion.div
-              key={property.id}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              <div onClick={() => handlePropertyClick(property.id)}>
-                <PropertyCard property={property} view={view} />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        {totalPages > 1 && renderPagination()}
+        {properties.length === 0 && !loading && !error ? (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <MdApartment className="w-16 h-16 mb-4" />
+            <p className="text-lg">No properties available in this category.</p>
+          </div>
+        ) : (
+          <div
+            className={`grid ${
+              view === "grid"
+                ? "grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1 lg:grid-cols-2"
+            } gap-4`}
+          >
+            {properties.map((property, i) => (
+              <motion.div
+                key={property.id}
+                custom={i}
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                <div onClick={() => handlePropertyClick(property.id)}>
+                  <PropertyCard property={property} view={view} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+        {totalPages > 1 && properties.length > 0 && renderPagination()}
       </div>
     </PageComponents>
   );

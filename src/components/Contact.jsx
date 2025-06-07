@@ -2,15 +2,25 @@ import React from "react";
 import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
 import PageComponents from "./PageComponents";
 
-const infoCards = [
+const contactInfo = [
   {
     icon: <FaEnvelope className="text-4xl text-red-500 mb-2" />,
     title: "Email",
     content: (
       <>
-        realtyoneapp@gmail.com
+        <a
+          href="mailto:director@angkorrealestate.com"
+          className="hover:text-red-500 transition-colors"
+        >
+          director@angkorrealestate.com
+        </a>
         <br />
-        son.lion007@gmail.com
+        <a
+          href="mailto:valuationpp@angkorrealestate.com"
+          className="hover:text-red-500 transition-colors"
+        >
+          valuationpp@angkorrealestate.com
+        </a>
       </>
     ),
   },
@@ -19,9 +29,19 @@ const infoCards = [
     title: "Phone",
     content: (
       <>
-        +855-16-282825
+        <a
+          href="tel:+85514699289"
+          className="hover:text-red-500 transition-colors"
+        >
+          +855-14 699 289
+        </a>
         <br />
-        +855-88-888737
+        <a
+          href="tel:+85577658687"
+          className="hover:text-red-500 transition-colors"
+        >
+          +855-77 658 687
+        </a>
       </>
     ),
   },
@@ -29,11 +49,14 @@ const infoCards = [
     icon: <FaMapMarkerAlt className="text-4xl text-red-500 mb-2" />,
     title: "Address",
     content: (
-      <>
-        Head Office: #34, Street 70, Sangkat Srah Chork,
-        <br />
-        Khan Daun Penh, Phnom Penh.
-      </>
+      <a
+        href="https://maps.app.goo.gl/HJYa5S8ZGwssS4mJ6"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-red-500 transition-colors"
+      >
+        St #206, Ou Baek K'am District, Sen Sok Commune, Phnom Penh, Cambodia
+      </a>
     ),
   },
 ];
@@ -52,7 +75,7 @@ export default function Contact() {
         </p>
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {infoCards.map((card, idx) => (
+          {contactInfo.map((card, idx) => (
             <div
               key={card.title}
               className="bg-blue-50 rounded-xl shadow-md p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1 animate-fade-in-up"
@@ -121,14 +144,13 @@ export default function Contact() {
         {/* Google Map */}
         <div className="w-full rounded-xl overflow-hidden shadow-md animate-fade-in-up">
           <iframe
-            title="Google Map"
-            src="https://www.google.com/maps?q=11.585056,104.912972&z=16&output=embed"
-            width="100%"
-            height="350"
+            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d232.23093017096568!2d104.87492866103734!3d11.543635056590798!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTHCsDMyJzM3LjMiTiAxMDTCsDUyJzI5LjkiRQ!5e1!3m2!1sen!2skh!4v1749176624182!5m2!1sen!2skh"
+            width="1200"
+            height="450"
             style={{ border: 0 }}
-            allowFullScreen=""
+            allowfullscreen=""
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerpolicy="no-referrer-when-downgrade"
           ></iframe>
         </div>
       </div>

@@ -20,34 +20,34 @@ const categories = [
   {
     name: "Residential",
     icon: <MdHome size={22} />,
-    to: " /residential",
+    to: "/residential",
   },
   {
     name: "Commercial",
     icon: <MdBusiness size={22} />,
-    to: " /commercial",
+    to: "/commercial",
   },
   {
     name: "Industrial",
     icon: <MdFactory size={22} />,
-    to: " /industrial",
+    to: "/industrial",
   },
   {
     name: "Agriculture",
     icon: <MdAgriculture size={22} />,
-    to: " /agriculture",
+    to: "/agriculture",
   },
-  { name: "Land", icon: <MdLocationOn size={22} />, to: " /land" },
+  { name: "Land", icon: <MdLocationOn size={22} />, to: "/land" },
   {
     name: "Building",
     icon: <FaBuilding size={22} />,
-    to: " /high-building",
+    to: "/high-building",
   },
-  { name: "Condo", icon: <MdApartment size={22} />, to: " /condo" },
+  { name: "Condo", icon: <MdApartment size={22} />, to: "/condo" },
   {
     name: "Business",
     icon: <MdStore size={22} />,
-    to: " /business-for-sell",
+    to: "/business-for-sell",
   },
 
   {
@@ -68,14 +68,14 @@ const categories = [
   {
     name: "Favorite",
     icon: <FaRegHeart size={22} />,
-    to: " /favorite",
+    to: "/favorites",
   },
   { name: "Article", icon: <MdArticle size={22} />, to: "/article" },
   { name: "Agency", icon: <MdGroups size={22} />, to: "/agency" },
   {
-    name: "Achievement",
+    name: "Certificate ",
     icon: <MdGroups size={22} />,
-    to: "/achievement",
+    to: "/Certificate ",
   },
   { name: "Services", icon: <MdGroups size={22} />, to: "/services" },
 ];

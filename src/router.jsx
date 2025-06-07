@@ -1,9 +1,9 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import AboutUs from "./components/AboutUs.jsx";
-import Achievement from "./components/Achievement.jsx";
 import Agency from "./components/Agency.jsx";
 import Article from "./components/Article.jsx";
 import ArticleDetail from "./components/ArticleDetail.jsx";
+import Certificate from "./components/Certificate.jsx";
 import Consultant from "./components/Consultant.jsx";
 import Contact from "./components/Contact.jsx";
 import Favorites from "./components/Favorites.jsx";
@@ -24,56 +24,56 @@ import Signup from "./views/Signup.jsx";
 
 const categoryRoutes = [
   {
-    path: " /residential",
+    path: "/residential",
     category: "Residential",
     title: "Residential",
     image:
       "https://saltosystems.com/sites/default/files/styles/breakpoint_1920/public/images/contents/residential_background_1.jpg?itok=yErIXYOm",
   },
   {
-    path: " /condo",
+    path: "/condo",
     category: "Condo",
     title: "Condo",
     image:
       "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
   },
   {
-    path: " /commercial",
+    path: "/commercial",
     category: "Commercial",
     title: "Commercial",
     image:
       "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
   },
   {
-    path: " /industrial",
+    path: "/industrial",
     category: "Industrial",
     title: "Industrial",
     image:
       "https://www.adoralivingspace.com/wp-content/uploads/2023/09/Ban2.jpg",
   },
   {
-    path: " /land",
+    path: "/land",
     category: "Land",
     title: "Land",
     image:
       "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
   },
   {
-    path: " /business-for-sell",
+    path: "/business-for-sell",
     category: "Business for sell",
     title: "Business for Sell",
     image:
       "https://poonawallafincorp.com/documents/213163/213167/blog_banner-business-models-dektop.jpg",
   },
   {
-    path: " /agriculture-land",
+    path: "/agriculture-land",
     category: "Algricalture Lan",
     title: "Agriculture Land",
     image:
       "https://www.rliland.com/Portals/0/xBlog/uploads/2022/5/17/fivestepsincreasevalueoflistingblogimage-countryside-1149680_1920-1210x423.jpg",
   },
   {
-    path: " /high-building",
+    path: "/high-building",
     category: "High Building",
     title: "High Building",
     image:
@@ -143,8 +143,8 @@ const router = createBrowserRouter([
         element: <Profile />,
       },
       {
-        path: "/achievement",
-        element: <Achievement />,
+        path: "/Certificate",
+        element: <Certificate />,
       },
       {
         path: "/consultant",

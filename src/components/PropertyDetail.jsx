@@ -1,5 +1,5 @@
 import { PhoneIcon } from "@heroicons/react/24/outline";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   FaCheck,
   FaChevronLeft,
@@ -98,44 +98,7 @@ const PropertyDetail = () => {
     }
   }, [property, currentUser, userRole]);
 
-  useEffect(() => {
-    fetchPropertyDetail();
-    setImgLoaded(false);
-  }, [id, userToken, location.state?.property]);
-
-  useEffect(() => {
-    if (descriptionRef.current) {
-      const lineHeight = parseInt(
-        window.getComputedStyle(descriptionRef.current).lineHeight
-      );
-      const height = descriptionRef.current.scrollHeight;
-      const lines = height / lineHeight;
-      setIsDescriptionLong(lines > 5);
-    }
-  }, [property?.description]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        shareMenuRef.current &&
-        !shareMenuRef.current.contains(event.target)
-      ) {
-        setShowShareMenu(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (property?.id) {
-      const favIds = getFavoriteIds();
-      setIsFav(favIds.includes(property.id));
-    }
-  }, [property?.id]);
-
-  const fetchPropertyDetail = async () => {
+  const fetchPropertyDetail = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -192,7 +155,7 @@ const PropertyDetail = () => {
         console.log("Property ID:", id);
         console.log("User Token Available:", !!userToken);
 
-        propertyData = await fetchPropertyById(id, userToken);
+        propertyData = await fetchPropertyById(id, userToken, "POST");
       }
 
       if (!propertyData) {
@@ -222,7 +185,44 @@ const PropertyDetail = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, userToken, location.state?.property]);
+
+  useEffect(() => {
+    fetchPropertyDetail();
+    setImgLoaded(false);
+  }, [fetchPropertyDetail]);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      const lineHeight = parseInt(
+        window.getComputedStyle(descriptionRef.current).lineHeight
+      );
+      const height = descriptionRef.current.scrollHeight;
+      const lines = height / lineHeight;
+      setIsDescriptionLong(lines > 5);
+    }
+  }, [property?.description]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        shareMenuRef.current &&
+        !shareMenuRef.current.contains(event.target)
+      ) {
+        setShowShareMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (property?.id) {
+      const favIds = getFavoriteIds();
+      setIsFav(favIds.includes(property.id));
+    }
+  }, [property?.id]);
 
   const scrollThumbnailIntoView = (index) => {
     if (!thumbnailContainerRef.current) return;

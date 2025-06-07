@@ -1,5 +1,6 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import { MdApartment } from "react-icons/md";
 import { useStateContext } from "../../contexts/ContextProvider";
 import LoginPrompt from "../LoginPrompt";
 import PageComponents from "../PageComponents";
@@ -17,23 +18,26 @@ async function fetchMyProperties({
 }) {
   const url =
     "https://externalchecking.com/api/api_rone_new/public/api/get_property";
-  const params = new URLSearchParams({
+
+  // Prepare request body
+  const requestBody = {
     status,
     offset,
     limit,
-  });
+    role: role === null ? "researcher" : role,
+    userid,
+  };
 
-  // Set role and userid based on API logic
-  // For null role, use "researcher" to get only their posted properties
-  params.set("role", role === null ? "researcher" : role);
-  params.append("userid", userid);
+  console.log("API Request URL:", url);
+  console.log("Request Body:", requestBody);
 
-  console.log("API Request URL:", `${url}?${params.toString()}`);
-
-  const res = await fetch(`${url}?${params.toString()}`, {
+  const res = await fetch(url, {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify(requestBody),
   });
   const json = await res.json();
   if (json.error) throw new Error(json.message || "API error");
@@ -318,17 +322,75 @@ export default function MyProperty() {
     );
   };
 
-  if (!userToken) return <LoginPrompt />;
+  if (!userToken) {
+    return <LoginPrompt message="Please log in to view your properties." />;
+  }
+
+  if (loading) {
+    return (
+      <PageComponents>
+        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 mt-5 gap-3 md:gap-0">
+            <h2 className="text-md md:text-xl">My Properties</h2>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <MyPropertyFilter
+                onFilter={handleFilterApply}
+                onClear={handleFilterClear}
+              />
+              <button
+                onClick={() => setView("grid")}
+                className={`p-2 rounded-md ${
+                  view === "grid" ? "bg-blue-800 text-white" : "bg-gray-200"
+                }`}
+              >
+                <Squares2X2Icon className="w-4 h-4 md:w-6 md:h-6" />
+              </button>
+              <button
+                onClick={() => setView("list")}
+                className={`p-2 rounded-md ${
+                  view === "list" ? "bg-blue-800 text-white" : "bg-gray-200"
+                }`}
+              >
+                <ListBulletIcon className="w-4 h-4 md:w-6 md:h-6" />
+              </button>
+            </div>
+          </div>
+          <div
+            className={`grid ${
+              view === "grid"
+                ? "grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-1 lg:grid-cols-2"
+            } gap-4`}
+          >
+            {Array.from({ length: propertiesPerPage }).map((_, i) => (
+              <PropertyCardSkeleton key={i} view={view} />
+            ))}
+          </div>
+        </div>
+      </PageComponents>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageComponents>
+        <MyPropertyFilter
+          onFilter={handleFilterApply}
+          onClear={handleFilterClear}
+        />
+        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+          <p className="text-red-600">Error: {error}</p>
+        </div>
+      </PageComponents>
+    );
+  }
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-8 px-2 md:px-10">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-md md:text-2xl">
-            My Property{" "}
-            <span className="text-blue-600">({totalProperties})</span>
-          </h1>
-          <div className="flex gap-2 items-center">
+      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 mt-5 gap-3 md:gap-0">
+          <h2 className="text-md md:text-2xl">My Properties</h2>
+          <div className="flex items-center gap-2 w-full md:w-auto">
             <MyPropertyFilter
               onFilter={handleFilterApply}
               onClear={handleFilterClear}
@@ -351,22 +413,12 @@ export default function MyProperty() {
             </button>
           </div>
         </div>
-        {loading ? (
-          <div
-            className={`grid ${
-              view === "grid"
-                ? "grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1 lg:grid-cols-2"
-            } gap-4`}
-          >
-            {Array.from({ length: 12 }).map((_, i) => (
-              <PropertyCardSkeleton key={i} view={view} />
-            ))}
+
+        {properties.length === 0 && !loading && !error ? (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <MdApartment className="w-16 h-16 mb-4" />
+            <p className="text-lg">No properties available in your list.</p>
           </div>
-        ) : error ? (
-          <div className="text-red-500 p-4">{error}</div>
-        ) : properties.length === 0 ? (
-          <div className="text-gray-500 p-4">No properties found.</div>
         ) : (
           <div
             className={`grid ${
@@ -389,7 +441,7 @@ export default function MyProperty() {
               ))}
           </div>
         )}
-        {totalPages > 1 && renderPagination()}
+        {totalPages > 1 && properties.length > 0 && renderPagination()}
       </div>
     </PageComponents>
   );

@@ -26,7 +26,12 @@ const Footer = () => {
       container.scrollLeft = scrollPosition;
     };
 
+    // Start scrolling immediately
     const interval = setInterval(scroll, 30);
+
+    // Initial scroll to ensure it starts moving
+    scroll();
+
     return () => clearInterval(interval);
   }, [isHovered]);
 
@@ -48,7 +53,7 @@ const Footer = () => {
     { name: "Mortgage", to: "/mortgage-calculator" },
     { name: "Agency", to: "/agency" },
     { name: "Consultant", to: "/consultant" },
-    { name: "Achievement", to: "/achievement" },
+    { name: "Certificate ", to: "/Certificate " },
   ];
 
   const socialLinks = [
@@ -87,52 +92,52 @@ const Footer = () => {
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_005.jpeg"
               alt="CIMB Bank"
-              className="h-12 object-contain"
+              className="h-6 md:h-12  w-auto  object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_001.jpg"
               alt="Kookmin Bank"
-              className="h-12 object-contain"
+              className="h-6 md:h-12   w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_002.jpeg"
               alt="Rural Development Bank"
-              className="h-12 object-contain"
+              className="h-6 md:h-12  w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_003.jpeg"
               alt="Maybank"
-              className="h-12 object-contain"
+              className="h-6 md:h-12  w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_009.jpeg"
               alt="Prince"
-              className="h-12 object-contain"
+              className="h-6 md:h-12   w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0011.jpeg"
               alt="Prince"
-              className="h-12 object-contain"
+              className="h-6 md:h-12   w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0013.jpeg"
               alt="Prince"
-              className="h-12 object-contain"
+              className="h-6 md:h-12  w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_0014.jpeg"
               alt="Prince"
-              className="h-12 object-contain"
+              className="h-6 md:h-12  w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_001.jpg"
               alt="Prince"
-              className="h-12 object-contain"
+              className="h-6 md:h-12  w-auto object-contain"
             />
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_002.jpeg"
               alt="Prince"
-              className="h-12 object-contain"
+              className="h-6 md:h-12 w-auto object-contain"
             />
           </div>
         </div>
