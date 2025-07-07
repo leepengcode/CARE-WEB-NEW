@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaBuilding, FaRegHeart, FaRuler } from "react-icons/fa";
 import {
   MdAgriculture,
@@ -14,8 +15,7 @@ import {
   MdStore,
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import PageComponents from "./PageComponents";
-
+import PageComponents from "../../components/PageComponents";
 const categories = [
   {
     name: "Residential",
@@ -35,7 +35,7 @@ const categories = [
   {
     name: "Agriculture",
     icon: <MdAgriculture size={22} />,
-    to: "/agriculture",
+    to: "/agriculture-land",
   },
   { name: "Land", icon: <MdLocationOn size={22} />, to: "/land" },
   {
@@ -51,9 +51,9 @@ const categories = [
   },
 
   {
-    name: "Consultant",
+    name: "Valuation",
     icon: <MdPerson size={22} />,
-    to: "/consultant",
+    to: "/valuation",
   },
   {
     name: "Measurement",
@@ -73,9 +73,9 @@ const categories = [
   { name: "Article", icon: <MdArticle size={22} />, to: "/article" },
   { name: "Agency", icon: <MdGroups size={22} />, to: "/agency" },
   {
-    name: "Certificate ",
+    name: "Certificate",
     icon: <MdGroups size={22} />,
-    to: "/Certificate ",
+    to: "/Certificate",
   },
   { name: "Services", icon: <MdGroups size={22} />, to: "/services" },
 ];
@@ -87,6 +87,7 @@ export default function Categories() {
   const [page, setPage] = useState(0);
   const scrollRef = useRef(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Update page based on scroll position
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function Categories() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-0 lg:px-6">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-0 lg:px-6">
         {/* Small screens: horizontal scrollable carousel */}
         <div className="block md:hidden relative">
           <div
@@ -132,15 +133,22 @@ export default function Categories() {
                       key={cat.name}
                       className="w-1/5 flex flex-col items-center focus:outline-none"
                       style={{ marginBottom: "1.5rem" }}
-                      onClick={() => navigate(cat.to)}
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                        navigate(cat.to);
+                      }}
                     >
-                      <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center mb-2 shadow-md">
-                        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white">
+                      <div className="bg-gradient-to-br from-gray-300 to-white rounded-2xl w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center mb-2 shadow-md transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-xl focus:scale-110 focus:shadow-xl">
+                        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-blue-700">
                           {cat.icon}
                         </span>
                       </div>
                       <span className="text-blue-700 font-semibold text-xs text-center">
-                        {cat.name}
+                        {t(
+                          `categories.${cat.name
+                            .toLowerCase()
+                            .replace(/ /g, "_")}`
+                        )}
                       </span>
                     </button>
                   ))}
@@ -169,20 +177,26 @@ export default function Categories() {
             <div
               key={cat.name}
               className="flex flex-col items-center cursor-pointer focus:outline-none"
-              onClick={() => navigate(cat.to)}
+              onClick={() => {
+                window.scrollTo(0, 0);
+                navigate(cat.to);
+              }}
               tabIndex={0}
               role="button"
               onKeyPress={(e) => {
-                if (e.key === "Enter") navigate(cat.to);
+                if (e.key === "Enter") {
+                  window.scrollTo(0, 0);
+                  navigate(cat.to);
+                }
               }}
             >
-              <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl w-12 h-12 md:w-14 md:h-14 flex items-center justify-center mb-2 shadow-md">
-                <span className="text-2xl md:text-3xl text-white">
+              <div className="bg-gradient-to-br from-gray-300 to-white rounded-2xl w-12 h-12 md:w-14 md:h-14 flex items-center justify-center mb-2 shadow-md transition-transform duration-100 ease-in-out hover:scale-110 hover:shadow-xl focus:scale-110 focus:shadow-xl">
+                <span className="text-2xl md:text-3xl text-blue-700">
                   {cat.icon}
                 </span>
               </div>
               <span className="text-blue-700 font-semibold text-base md:text-sm text-center mt-1">
-                {cat.name}
+                {t(`categories.${cat.name.toLowerCase().replace(/ /g, "_")}`)}
               </span>
             </div>
           ))}

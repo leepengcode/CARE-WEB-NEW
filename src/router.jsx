@@ -1,22 +1,25 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import AboutUs from "./components/AboutUs.jsx";
 import Agency from "./components/Agency.jsx";
 import Article from "./components/Article.jsx";
 import ArticleDetail from "./components/ArticleDetail.jsx";
 import Certificate from "./components/Certificate.jsx";
-import Consultant from "./components/Consultant.jsx";
 import Contact from "./components/Contact.jsx";
 import Favorites from "./components/Favorites.jsx";
 import Measurement from "./components/Measurement.jsx";
 import MortgageCalculator from "./components/MortgageCalculator.jsx";
-import AddProperty from "./components/Properies/AddProperty.jsx";
-import CategoryProperties from "./components/Properies/CategoryProperties.jsx";
-import MyProperty from "./components/Properies/MyProperty.jsx";
-import Properties from "./components/Properies/Properties.jsx";
 import PropertyDetail from "./components/PropertyDetail.jsx";
+import PropertyGuildDetail from "./components/PropertyGuildDetial.jsx";
 import Services from "./components/Services.jsx";
+import Privacy from "./components/shared/Privacy.jsx";
+import Valuation from "./components/Valuation.jsx";
+import AboutUs from "./features/Home/AboutUs.jsx";
+import Home from "./features/Home/Home.jsx";
+import AddProperty from "./features/Properties/AddProperty.jsx";
+import CategoryProperties from "./features/Properties/CategoryProperties.jsx";
+import EditProperty from "./features/Properties/EditProperty.jsx";
+import MyProperty from "./features/Properties/MyProperty.jsx";
+import Properties from "./features/Properties/Properties.jsx";
 import DefaultLayout from "./layouts/DefaultLayout.jsx";
-import Home from "./views/Home.jsx";
 import Login from "./views/Login.jsx";
 import OtpVerify from "./views/OtpVerify.jsx";
 import Profile from "./views/Profile.jsx";
@@ -35,49 +38,50 @@ const categoryRoutes = [
     category: "Condo",
     title: "Condo",
     image:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+      "https://www.mahsing.com.my/web/storage/2020/10/concept-main-banner.jpg",
   },
   {
     path: "/commercial",
     category: "Commercial",
     title: "Commercial",
     image:
-      "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
+      "https://www.realpage.com/storage/files/pages/images/2022/08/home-header.jpg",
   },
   {
     path: "/industrial",
     category: "Industrial",
     title: "Industrial",
     image:
-      "https://www.adoralivingspace.com/wp-content/uploads/2023/09/Ban2.jpg",
+      "https://st.depositphotos.com/1927453/3279/i/450/depositphotos_32796667-stock-photo-oil-refinery-industrial-plant-at.jpg",
   },
   {
     path: "/land",
     category: "Land",
     title: "Land",
     image:
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80",
+      "https://img.freepik.com/free-photo/land-plot-with-nature-landscape-location-pin_23-2149937913.jpg?semt=ais_hybrid&w=740",
+  },
+  {
+    path: "/agriculture-land",
+    category: "Algricalture Land",
+    title: "Agriculture Land",
+    image:
+      "https://media.istockphoto.com/id/1437629749/photo/land-plot-in-aerial-view-in-chiang-mai-of-thailand.jpg?s=612x612&w=0&k=20&c=07y-L9_WJwFGmvvhrZULYbfTfDtUPHnxJhbxWPTiqYg=",
   },
   {
     path: "/business-for-sell",
     category: "Business for sell",
     title: "Business for Sell",
     image:
-      "https://poonawallafincorp.com/documents/213163/213167/blog_banner-business-models-dektop.jpg",
+      "https://lionspiritmedia.co.uk/wp-content/uploads/2024/03/marketing_in_business_success.jpg.webp",
   },
-  {
-    path: "/agriculture-land",
-    category: "Algricalture Lan",
-    title: "Agriculture Land",
-    image:
-      "https://www.rliland.com/Portals/0/xBlog/uploads/2022/5/17/fivestepsincreasevalueoflistingblogimage-countryside-1149680_1920-1210x423.jpg",
-  },
+
   {
     path: "/high-building",
     category: "High Building",
     title: "High Building",
     image:
-      "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=800&q=80",
+      "https://images.adsttc.com/media/images/619d/4b60/f91c/818c/6e00/0006/large_jpg/shutterstock_728342668.jpg?1637698337",
   },
 ];
 
@@ -95,16 +99,24 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
+        path: "/privacy",
+        element: <Privacy />,
+      },
+      {
         path: "/mortgage-calculator",
         element: <MortgageCalculator />,
       },
       {
-        path: "/properties",
+        path: "/property",
         element: <Properties />,
       },
       {
         path: "/property/:id",
         element: <PropertyDetail />,
+      },
+      {
+        path: "/edit-property/:id",
+        element: <EditProperty />,
       },
       {
         path: "/article",
@@ -147,8 +159,8 @@ const router = createBrowserRouter([
         element: <Certificate />,
       },
       {
-        path: "/consultant",
-        element: <Consultant />,
+        path: "/valuation",
+        element: <Valuation />,
       },
       {
         path: "/measurement",
@@ -158,6 +170,11 @@ const router = createBrowserRouter([
         path: "/services",
         element: <Services />,
       },
+      {
+        path: "/property-guide-detail",
+        element: <PropertyGuildDetail />,
+      },
+
       ...categoryRoutes.map(({ path, category, title, image }) => ({
         path,
         element: (

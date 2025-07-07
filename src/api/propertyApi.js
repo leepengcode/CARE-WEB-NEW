@@ -46,7 +46,7 @@ export async function fetchAllProperties(page = 1, limit = 12, filters = {}) {
       url.searchParams.append(key, value);
     }
   });
-  console.log("Fetching properties with URL:", url.toString()); // Debug log
+  console.log("Fetching Properties with URL:", url.toString()); // Debug log
   const response = await fetch(url.toString());
   const json = await response.json();
   console.log("API response:", json); // Debug log
@@ -60,15 +60,21 @@ export async function fetchPropertyById(id, userToken = null) {
   // If userToken is provided, use the authenticated endpoint
   if (userToken) {
     const url = "https://externalchecking.com/api/api_rone_new/public/api/get_property";
+    console.log("Fetching property with ID:", id);
+    console.log("Using authenticated endpoint");
 
     const response = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
-        Accept: "application/json",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Accept: "application/json"
       },
-      body: JSON.stringify({ property_id: id })
+      body: JSON.stringify({ 
+        property_id: id,
+        role: "researcher", // Add role parameter
+        userid: null // Add userid parameter
+      })
     });
 
     if (!response.ok) {
@@ -76,51 +82,104 @@ export async function fetchPropertyById(id, userToken = null) {
     }
 
     const result = await response.json();
-    if (result.error || !Array.isArray(result.data) || result.data.length === 0) {
-       // Based on previous console logs, this endpoint returns an array.
-       // If the array is empty or there's an error, the property wasn't found for this user/token.
-       throw new Error(result.message || "Authenticated property not found");
+    console.log("API Response:", result);
+
+    if (result.error) {
+      throw new Error(result.message || "Failed to fetch property");
     }
 
-    // This endpoint returns an array, find the specific property by ID
+    if (!result.data || !Array.isArray(result.data)) {
+      console.error("Invalid response format:", result);
+      throw new Error("Invalid response format from server");
+    }
+
+    // Find the specific property in the array
     const property = result.data.find(p => String(p.id) === String(id));
+    console.log("Found property:", property);
 
     if (!property) {
-       throw new Error("Property with given ID not found in authenticated response");
+      console.error("Property not found in response data");
+      throw new Error("Property not found");
     }
 
-    return property;
+    // Map the property data to match the expected format
+    const mappedProperty = {
+      ...property,
+      title_image: property.image || property.title_image,
+      description: property.description || property.descriptions || "",
+      propery_type: property.propery_type || property.status,
+      post_created: property.post_created || property.time,
+      type: property.type || property.category?.category || "",
+      status: property.state || property.status,
+      price: property.price ? parseFloat(String(property.price).replace(/[^0-9.-]+/g, "")) || 0 : 0,
+      gallery: property.gallery || [],
+      category: property.category?.category ? property.category.category : {
+        category: property.category || "",
+        image: property.category_image || ""
+      }
+    };
+
+    console.log("Mapped property:", mappedProperty);
+    return mappedProperty;
   }
 
-  // For public properties, use the existing logic
-  const API_BASE_PUBLIC = "https://externalchecking.com/api/api_rone_new/public/api/get_property_public";
-  const params = {
-    limit: 1000,
-    offset: 0,
-    // We don't include status here for public fetch based on previous logic
-  };
-  
-  const url = new URL(API_BASE_PUBLIC);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value != null) {
-      url.searchParams.append(key, value);
-    }
+  // For public Properties, use the public endpoint
+  const url = "https://externalchecking.com/api/api_rone_new/public/api/get_property";
+  console.log("Fetching public property with ID:", id);
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({ 
+      property_id: id,
+      role: "researcher", // Add role parameter
+      userid: null // Add userid parameter
+    })
   });
-
-  const response = await fetch(url.toString());
-  const json = await response.json();
   
-  if (json.error || !Array.isArray(json.data)) {
-     throw new Error(json.message || "Public property fetch failed");
+  const result = await response.json();
+  console.log("Public API Response:", result);
+
+  if (result.error) {
+    throw new Error(result.message || "Failed to fetch property");
   }
 
-  const property = json.data.find(p => String(p.id) === String(id));
+  if (!result.data || !Array.isArray(result.data)) {
+    console.error("Invalid response format:", result);
+    throw new Error("Invalid response format from server");
+  }
+
+  // Find the specific property in the array
+  const property = result.data.find(p => String(p.id) === String(id));
+  console.log("Found public property:", property);
 
   if (!property) {
-    throw new Error("Public property not found");
+    console.error("Property not found in response data");
+    throw new Error("Property not found");
   }
 
-  return property;
+  // Map the property data to match the expected format
+  const mappedProperty = {
+    ...property,
+    title_image: property.image || property.title_image,
+    description: property.description || property.descriptions || "",
+    propery_type: property.propery_type || property.status,
+    post_created: property.post_created || property.time,
+    type: property.type || property.category?.category || "",
+    status: property.state || property.status,
+    price: property.price ? parseFloat(String(property.price).replace(/[^0-9.-]+/g, "")) || 0 : 0,
+    gallery: property.gallery || [],
+    category: property.category?.category ? property.category.category : {
+      category: property.category || "",
+      image: property.category_image || ""
+    }
+  };
+
+  console.log("Mapped public property:", mappedProperty);
+  return mappedProperty;
 }
 
 export async function fetchAddress(code = "", types) {
@@ -185,18 +244,21 @@ export async function toggleFavorite(propertyId, type, userToken) {
   return res.data;
 }
 
-export async function fetchPropertyForEdit(id, userToken) {
+export async function fetchPropertyForEdit(id, userToken, role, userid) {
   if (!userToken) {
     throw new Error("Authentication required");
   }
 
   const response = await fetch(
-    `https://externalchecking.com/api/api_rone_new/public/api/get_property?property_id=${id}`,
+    "https://externalchecking.com/api/api_rone_new/public/api/get_property",
     {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
         Accept: "application/json",
       },
+      body: JSON.stringify({ id, role, userid })
     }
   );
 
@@ -209,6 +271,12 @@ export async function fetchPropertyForEdit(id, userToken) {
     throw new Error(result.message || "Failed to fetch property");
   }
 
-  return result.data;
+  // Find the specific property in the array
+  const property = result.data.find(p => String(p.id) === String(id));
+  if (!property) {
+    throw new Error("Property not found");
+  }
+
+  return property;
 }
 

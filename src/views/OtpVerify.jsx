@@ -1,6 +1,7 @@
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
+import { authApi } from "../api/authApi";
 
 export default function OtpVerify() {
   const { state } = useLocation();
@@ -13,6 +14,7 @@ export default function OtpVerify() {
   const [timer, setTimer] = useState(110);
   const inputs = useRef([]);
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     if (timer > 0) {
@@ -49,19 +51,13 @@ export default function OtpVerify() {
     const otpCode = otp.join("");
 
     try {
-      console.log(
-        "Checking OTP at:",
-        `${import.meta.env.VITE_API_URL}/api/check-otp`
-      );
-      const otpRes = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/check-otp`,
-        { phone, otp: otpCode }
-      );
-      if (otpRes.data && otpRes.data.error === 0) {
-        console.log("OTP verification success:", otpRes.data);
+      console.log("Checking OTP...");
+      const otpRes = await authApi.verifyOtp(phone, otpCode);
+      if (otpRes && otpRes.error === 0) {
+        console.log("OTP verification success:", otpRes);
         navigate("/signup", { state: { phone, firebaseId } });
       } else {
-        setError(otpRes.data.message || "Invalid OTP code. Please try again.");
+        setError(otpRes.message || "Invalid OTP code. Please try again.");
       }
     } catch (err) {
       console.error("API error:", err);
@@ -86,16 +82,10 @@ export default function OtpVerify() {
     setOtp(["", "", "", "", "", ""]);
     setError("");
     try {
-      console.log(
-        "Resending OTP to:",
-        `${import.meta.env.VITE_API_URL}/api/save-phone-list`
-      );
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/save-phone-list`,
-        { phone }
-      );
-      if (res.data && res.data.error !== 0) {
-        setError(res.data.message || "Failed to resend OTP. Please try again.");
+      console.log("Resending OTP...");
+      const res = await authApi.savePhone(phone);
+      if (res && res.error !== 0) {
+        setError(res.message || "Failed to resend OTP. Please try again.");
       }
     } catch (err) {
       console.error("Resend OTP error:", err);
@@ -110,15 +100,17 @@ export default function OtpVerify() {
     .padStart(2, "0")}Sec`;
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md flex flex-col items-start">
+    <div
+      className={`min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4${
+        i18n.language === "km" ? " khmer-font" : ""
+      }`}
+    >
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md flex flex-col items-start relative">
         <h2 className="text-3xl md:text-4xl font-bold text-blue-700 text-start leading-tight mb-2">
-          OTP Verification
-          <br />
-          Screen
+          {t("otp.title")}
         </h2>
         <p className="text-blue-500 text-base mb-8 mt-2">
-          Enter OTP code sent to +{phone}
+          {t("otp.enter_code", { phone })}
         </p>
         <form
           className="w-full flex flex-col items-center"
@@ -145,7 +137,8 @@ export default function OtpVerify() {
           <div className="mb-6 text-blue-600 text-sm">
             {timer > 0 ? (
               <>
-                Resend code in <span className="font-semibold">{timerStr}</span>
+                {t("otp.resend_in")}{" "}
+                <span className="font-semibold">{timerStr}</span>
               </>
             ) : (
               <button
@@ -153,7 +146,7 @@ export default function OtpVerify() {
                 className="underline font-medium"
                 onClick={handleResend}
               >
-                Resend code
+                {t("otp.resend_code")}
               </button>
             )}
           </div>
@@ -162,7 +155,7 @@ export default function OtpVerify() {
             className="w-full py-3 rounded-2xl bg-blue-700 text-white text-lg font-semibold shadow-md hover:bg-blue-800 transition"
             disabled={loading}
           >
-            {loading ? "Verifying..." : "Confirm"}
+            {loading ? t("otp.verifying") : t("otp.confirm")}
           </button>
         </form>
       </div>

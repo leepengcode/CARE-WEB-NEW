@@ -5,10 +5,12 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import LoginPrompt from "../../components/LoginPrompt";
+import PageComponents from "../../components/PageComponents";
+import CustomDropdown from "../../components/shared/CustomDropdown";
 import { useStateContext } from "../../contexts/ContextProvider";
-import LoginPrompt from "../LoginPrompt";
-import PageComponents from "../PageComponents";
-import CustomDropdown from "../shared/CustomDropdown";
 
 // Define libraries as a static constant outside the component
 const googleMapLibraries = ["places"];
@@ -37,71 +39,62 @@ function showToast(message, type = "info") {
 }
 
 export default function AddProperty() {
-  // Load Google Maps script
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_KEY,
-    libraries: googleMapLibraries,
-  });
+  const { t } = useTranslation();
+  const { userToken, currentUser } = useStateContext();
+  const navigate = useNavigate();
 
-  // State to manage checked facilities and their distances
+  // Debug logs for role check
+  console.log("Current User:", currentUser);
+  console.log("User Role:", currentUser?.role);
+  console.log("Is Agency Role:", currentUser?.role === "agency");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
   const [facilities, setFacilities] = useState({});
-
-  // State for property details
   const [propertyType, setPropertyType] = useState(null);
   const [rentDurationType, setRentDurationType] = useState("");
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-
-  // State for address dropdowns and selections
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [districtOptions, setDistrictOptions] = useState([]);
   const [communeOptions, setCommuneOptions] = useState([]);
   const [villageOptions, setVillageOptions] = useState([]);
-  const [countryOptions] = useState([
-    { value: "", label: "Select" },
-    { value: "KH", label: "Cambodia" },
-  ]);
-
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedCommune, setSelectedCommune] = useState("");
   const [selectedVillage, setSelectedVillage] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("KH");
-
-  // State for facilities
   const [facilityOptions, setFacilityOptions] = useState([]);
-
-  // State for additional property facilities (Bathroom, Bedroom, etc.)
   const [parameterValues, setParameterValues] = useState({});
   const [relevantParameters, setRelevantParameters] = useState([]);
-
-  // State for map-related functionality
   const [searchBox, setSearchBox] = useState(null);
-  const [center, setCenter] = useState({ lat: 11.5564, lng: 104.9282 }); // Phnom Penh
+  const [center, setCenter] = useState({ lat: 11.5564, lng: 104.9282 });
   const [markerPosition, setMarkerPosition] = useState({
     lat: 11.5564,
     lng: 104.9282,
   });
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-
-  // State for image previews
   const [titleImagePreview, setTitleImagePreview] = useState(null);
   const [threeDImagePreview, setThreeDImagePreview] = useState(null);
   const [galleryImagesPreview, setGalleryImagesPreview] = useState([]);
 
-  // Fetch categories from API
-  const { userToken } = useStateContext();
+  const countryOptions = [
+    { value: "", label: t("add_property_page.select_placeholder") },
+    { value: "KH", label: t("countries.cambodia") },
+  ];
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
-
+  // Function to fetch categories from API
   const fetchCategories = async () => {
     try {
-      // If no token, we can't fetch categories that require authentication
       if (!userToken) {
         console.warn("No user token available to fetch categories.");
-        setCategoryOptions([{ value: "", label: "Login to load categories" }]);
+        setCategoryOptions([
+          {
+            value: "",
+            label: t("add_property_page.login_to_load_categories"),
+          },
+        ]);
         return;
       }
 
@@ -114,13 +107,15 @@ export default function AddProperty() {
         }
       );
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(t("errors.http_error", { status: response.status }));
       }
       const result = await response.json();
 
       if (!Array.isArray(result.data)) {
         console.error("API response data is not an array:", result);
-        setCategoryOptions([{ value: "", label: "Error loading categories" }]);
+        setCategoryOptions([
+          { value: "", label: t("add_property_page.error_loading_categories") },
+        ]);
         return;
       }
 
@@ -129,16 +124,20 @@ export default function AddProperty() {
         label: category.category,
       }));
 
-      setCategoryOptions([{ value: "", label: "Select Category" }, ...options]);
+      setCategoryOptions([
+        {
+          value: "",
+          label: t("add_property_page.select_category_placeholder"),
+        },
+        ...options,
+      ]);
     } catch (err) {
       console.error("Error fetching categories:", err);
-      setCategoryOptions([{ value: "", label: "Error loading categories" }]);
+      setCategoryOptions([
+        { value: "", label: t("add_property_page.error_loading_categories") },
+      ]);
     }
   };
-
-  useEffect(() => {
-    fetchCategories();
-  }, [userToken]); // Add userToken to dependency array
 
   // Function to fetch parameters based on selected category
   const fetchParametersByCategory = async (categoryId) => {
@@ -150,7 +149,6 @@ export default function AddProperty() {
         return;
       }
 
-      // First, try to fetch parameters from the API
       const response = await fetch(
         `https://externalchecking.com/api/api_rone_new/public/api/get_parameters?category_id=${categoryId}`,
         {
@@ -161,7 +159,7 @@ export default function AddProperty() {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(t("errors.http_error", { status: response.status }));
       }
 
       const result = await response.json();
@@ -181,12 +179,11 @@ export default function AddProperty() {
         setRelevantParameters(parameters);
         setParameterValues({});
       } else {
-        // If API fails, use fallback parameters
         console.warn("Using fallback parameters due to API error");
         const fallbackParameters = [
           {
             id: "24",
-            name: "Bathroom",
+            name: t("add_property_page.parameter_bathroom"),
             type_of_parameter: "number",
             type_values: null,
             image:
@@ -195,7 +192,7 @@ export default function AddProperty() {
           },
           {
             id: "25",
-            name: "Bedroom",
+            name: t("add_property_page.parameter_bedroom"),
             type_of_parameter: "number",
             type_values: null,
             image:
@@ -204,7 +201,7 @@ export default function AddProperty() {
           },
           {
             id: "31",
-            name: "Number Of Floor",
+            name: t("add_property_page.parameter_floors"),
             type_of_parameter: "number",
             type_values: null,
             image:
@@ -213,16 +210,20 @@ export default function AddProperty() {
           },
           {
             id: "32",
-            name: "Tittle",
+            name: t("add_property_page.parameter_title"),
             type_of_parameter: "dropdown",
-            type_values: ["Hard Tittle", "Soft Tittle", "Normal"],
+            type_values: [
+              t("add_property_page.hard_title"),
+              t("add_property_page.soft_title"),
+              t("add_property_page.normal_title"),
+            ],
             image:
               "https://externalchecking.com/api/api_rone_new/public/images//parameter_img/1702270797.8818.png",
             categories: [categoryId.toString()],
           },
           {
             id: "33",
-            name: "Land size",
+            name: t("add_property_page.parameter_land_size"),
             type_of_parameter: "textbox",
             type_values: null,
             image:
@@ -231,7 +232,7 @@ export default function AddProperty() {
           },
           {
             id: "34",
-            name: "House size",
+            name: t("add_property_page.parameter_house_size"),
             type_of_parameter: "textbox",
             type_values: null,
             image:
@@ -240,7 +241,7 @@ export default function AddProperty() {
           },
           {
             id: "38",
-            name: "Tittle No",
+            name: t("add_property_page.parameter_title_no"),
             type_of_parameter: "textbox",
             type_values: null,
             image:
@@ -259,7 +260,7 @@ export default function AddProperty() {
       const fallbackParameters = [
         {
           id: "24",
-          name: "Bathroom",
+          name: t("add_property_page.parameter_bathroom"),
           type_of_parameter: "number",
           type_values: null,
           image:
@@ -268,7 +269,7 @@ export default function AddProperty() {
         },
         {
           id: "25",
-          name: "Bedroom",
+          name: t("add_property_page.parameter_bedroom"),
           type_of_parameter: "number",
           type_values: null,
           image:
@@ -277,7 +278,7 @@ export default function AddProperty() {
         },
         {
           id: "31",
-          name: "Number Of Floor",
+          name: t("add_property_page.parameter_floors"),
           type_of_parameter: "number",
           type_values: null,
           image:
@@ -286,16 +287,20 @@ export default function AddProperty() {
         },
         {
           id: "32",
-          name: "Tittle",
+          name: t("add_property_page.parameter_title"),
           type_of_parameter: "dropdown",
-          type_values: ["Hard Tittle", "Soft Tittle", "Normal"],
+          type_values: [
+            t("add_property_page.hard_title"),
+            t("add_property_page.soft_title"),
+            t("add_property_page.normal_title"),
+          ],
           image:
             "https://externalchecking.com/api/api_rone_new/public/images//parameter_img/1702270797.8818.png",
           categories: [categoryId.toString()],
         },
         {
           id: "33",
-          name: "Land size",
+          name: t("add_property_page.parameter_land_size"),
           type_of_parameter: "textbox",
           type_values: null,
           image:
@@ -304,7 +309,7 @@ export default function AddProperty() {
         },
         {
           id: "34",
-          name: "House size",
+          name: t("add_property_page.parameter_house_size"),
           type_of_parameter: "textbox",
           type_values: null,
           image:
@@ -313,7 +318,7 @@ export default function AddProperty() {
         },
         {
           id: "38",
-          name: "Tittle No",
+          name: t("add_property_page.parameter_title_no"),
           type_of_parameter: "textbox",
           type_values: null,
           image:
@@ -331,36 +336,7 @@ export default function AddProperty() {
     }
   };
 
-  // Effect to fetch parameters when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      fetchParametersByCategory(selectedCategory);
-    } else {
-      setRelevantParameters([]);
-      setParameterValues({});
-    }
-  }, [selectedCategory]);
-
-  const handleFacilityChange = (facilityId, isChecked) => {
-    setFacilities((prevFacilities) => {
-      const newFacilities = { ...prevFacilities };
-      if (isChecked) {
-        newFacilities[facilityId] = { facility_id: facilityId, distance: "" };
-      } else {
-        delete newFacilities[facilityId];
-      }
-      return newFacilities;
-    });
-  };
-
-  const handleDistanceChange = (facilityId, distance) => {
-    setFacilities((prevFacilities) => ({
-      ...prevFacilities,
-      [facilityId]: { ...prevFacilities[facilityId], distance: distance },
-    }));
-  };
-
-  // Fetch facilities from API
+  // Function to fetch facilities from API
   const fetchFacilities = async () => {
     try {
       if (!userToken) {
@@ -377,7 +353,7 @@ export default function AddProperty() {
         }
       );
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(t("errors.http_error", { status: response.status }));
       }
       const result = await response.json();
 
@@ -395,10 +371,6 @@ export default function AddProperty() {
     }
   };
 
-  useEffect(() => {
-    fetchFacilities();
-  }, [userToken]);
-
   // Function to fetch address data
   const fetchAddress = async (code = "", types) => {
     try {
@@ -406,12 +378,12 @@ export default function AddProperty() {
         `https://externalchecking.com/api/api_rone_new/public/api/get_address?code=${code}`
       );
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(t("errors.http_error", { status: response.status }));
       }
       const result = await response.json();
 
       if (!Array.isArray(result)) {
-        return [{ value: "", label: "No data available" }];
+        return [{ value: "", label: t("add_property_page.no_data_available") }];
       }
 
       const options = result
@@ -422,15 +394,44 @@ export default function AddProperty() {
         }));
 
       if (options.length === 0) {
-        return [{ value: "", label: "No data available" }];
+        return [{ value: "", label: t("add_property_page.no_data_available") }];
       }
 
-      return [{ value: "", label: "Select" }, ...options];
+      return [
+        { value: "", label: t("add_property_page.select_placeholder") },
+        ...options,
+      ];
     } catch (err) {
       console.error(`Error fetching types=${types} for code=${code}:`, err);
-      return [{ value: "", label: "Error fetching data" }];
+      return [{ value: "", label: t("add_property_page.error_fetching_data") }];
     }
   };
+
+  // Load Google Maps script
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAP_KEY,
+    libraries: googleMapLibraries,
+  });
+
+  // Fetch categories
+  useEffect(() => {
+    fetchCategories();
+  }, [userToken]);
+
+  // Fetch parameters when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchParametersByCategory(selectedCategory);
+    } else {
+      setRelevantParameters([]);
+      setParameterValues({});
+    }
+  }, [selectedCategory]);
+
+  // Fetch facilities
+  useEffect(() => {
+    fetchFacilities();
+  }, [userToken]);
 
   // Fetch provinces on component mount
   useEffect(() => {
@@ -485,6 +486,57 @@ export default function AddProperty() {
       setSelectedVillage("");
     }
   }, [selectedCommune]);
+
+  // Check if user is agency role
+  if (currentUser && currentUser.role === "agency") {
+    console.log("Access Denied - User is agency");
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            {t("add_property_page.access_denied")}
+          </h2>
+          <p className="text-gray-600">
+            {t("add_property_page.agency_message")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user is logged in
+  if (!userToken) {
+    console.log("Login Required - No token");
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            {t("add_property_page.login_required")}
+          </h2>
+          <p className="text-gray-600">{t("add_property_page.login_prompt")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleFacilityChange = (facilityId, isChecked) => {
+    setFacilities((prevFacilities) => {
+      const newFacilities = { ...prevFacilities };
+      if (isChecked) {
+        newFacilities[facilityId] = { facility_id: facilityId, distance: "" };
+      } else {
+        delete newFacilities[facilityId];
+      }
+      return newFacilities;
+    });
+  };
+
+  const handleDistanceChange = (facilityId, distance) => {
+    setFacilities((prevFacilities) => ({
+      ...prevFacilities,
+      [facilityId]: { ...prevFacilities[facilityId], distance: distance },
+    }));
+  };
 
   // Handle search box place changes
   const onPlacesChanged = () => {
@@ -551,39 +603,49 @@ export default function AddProperty() {
 
     // Validate required fields
     if (!selectedCategory) {
-      validationErrors.category = "Please select a category";
+      validationErrors.category = t("add_property_page.validation.category");
     }
 
     if (!propertyType) {
-      validationErrors.propertyType = "Please select a property type";
+      validationErrors.propertyType = t(
+        "add_property_page.validation.property_type"
+      );
     }
 
     if (!e.target.title.value) {
-      validationErrors.title = "Please enter a title";
+      validationErrors.title = t("add_property_page.validation.title");
     }
 
     if (!titleImagePreview) {
-      validationErrors.titleImage = "Please upload a title image";
+      validationErrors.titleImage = t(
+        "add_property_page.validation.title_image"
+      );
     }
 
     if (!e.target.description.value) {
-      validationErrors.description = "Please enter a description";
+      validationErrors.description = t(
+        "add_property_page.validation.description"
+      );
     }
 
     if (propertyType === "1" && !e.target.price.value) {
-      validationErrors.price = "Please enter a price";
+      validationErrors.price = t("add_property_page.validation.price");
     }
 
     if (propertyType === "2" && !rentDurationType) {
-      validationErrors.rentDuration = "Please select rent duration";
+      validationErrors.rentDuration = t(
+        "add_property_page.validation.rent_duration"
+      );
     }
 
     if (!latitude || !longitude) {
-      validationErrors.location = "Please select a location on the map";
+      validationErrors.location = t("add_property_page.validation.location");
     }
 
     if (!e.target.client_address.value) {
-      validationErrors.clientAddress = "Please enter client address";
+      validationErrors.clientAddress = t(
+        "add_property_page.validation.client_address"
+      );
     }
 
     // Check if there are any validation errors
@@ -674,7 +736,7 @@ export default function AddProperty() {
       formData.append("address", e.target.address.value || "");
 
       // Owner details
-      formData.append("owner_id", e.target.owner_id.value || "");
+      formData.append("owner_id", currentUser?.id || "");
       formData.append("owner_name", e.target.owner_name.value || "");
       formData.append("owner_phone", e.target.owner_phone.value || "");
       formData.append("owner_address", e.target.owner_address.value || "");
@@ -689,7 +751,9 @@ export default function AddProperty() {
           formData.append("title_image", titleImageFile, "title_image.jpg");
         } catch (error) {
           console.error("Error processing title image:", error);
-          setFormError("Error processing title image. Please try again.");
+          setFormError(
+            t("add_property_page.toast.image_processing_error_title")
+          );
           return;
         }
       }
@@ -702,7 +766,7 @@ export default function AddProperty() {
           formData.append("threeD_image", threeDImageFile, "threeD_image.jpg");
         } catch (error) {
           console.error("Error processing 3D image:", error);
-          setFormError("Error processing 3D image. Please try again.");
+          setFormError(t("add_property_page.toast.image_processing_error_3d"));
           return;
         }
       }
@@ -722,7 +786,9 @@ export default function AddProperty() {
           }
         } catch (error) {
           console.error("Error processing gallery images:", error);
-          setFormError("Error processing gallery images. Please try again.");
+          setFormError(
+            t("add_property_page.toast.image_processing_error_gallery")
+          );
           return;
         }
       }
@@ -806,7 +872,7 @@ export default function AddProperty() {
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
         console.error("Non-JSON Response:", text);
-        throw new Error("Server returned non-JSON response");
+        throw new Error(t("add_property_page.toast.non_json_error"));
       }
 
       const result = await response.json();
@@ -814,23 +880,24 @@ export default function AddProperty() {
 
       if (result.error) {
         const errorMessage =
-          result.message ||
-          "Failed to submit property. Please check your input and try again.";
+          result.message || t("add_property_page.toast.submit_failed");
         setFormError(errorMessage);
         showToast(errorMessage, "error");
       } else {
-        showToast("Property added successfully!", "success");
-        // Reset form or redirect
+        showToast(t("add_property_page.toast.success"), "success");
+        navigate("/my-property");
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "auto" });
+        }, 100);
       }
     } catch (error) {
       console.error("Error submitting property:", error);
       let errorMessage;
-      if (error.message === "Server returned non-JSON response") {
-        errorMessage =
-          "Server error occurred. Please check the console for details and try again.";
+      if (error.message === t("add_property_page.toast.non_json_error")) {
+        errorMessage = t("add_property_page.toast.server_error");
       } else {
         errorMessage =
-          error.message || "Failed to submit property. Please try again.";
+          error.message || t("add_property_page.toast.generic_error");
       }
       setFormError(errorMessage);
       showToast(errorMessage, "error");
@@ -872,7 +939,9 @@ export default function AddProperty() {
             }
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="">Select {param.name}</option>
+            <option value="">
+              {t("add_property_page.select_placeholder")} {param.name}
+            </option>
             {param.type_values &&
               param.type_values.map((value) => (
                 <option key={value} value={value}>
@@ -902,10 +971,36 @@ export default function AddProperty() {
 
   if (!userToken) return <LoginPrompt />;
 
+  // Add check for agency users
+  if (currentUser?.role === "agency") {
+    return (
+      <PageComponents>
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-10">
+          <div className="bg-white p-6 rounded-lg shadow text-center">
+            <h1 className="text-2xl font-semibold mb-4">
+              {t("add_property_page.access_denied")}
+            </h1>
+            <p className="text-gray-600 mb-4">
+              {t("add_property_page.agency_message")}
+            </p>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              {t("add_property_page.go_back")}
+            </button>
+          </div>
+        </div>
+      </PageComponents>
+    );
+  }
+
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-8 px-2 md:px-10">
-        <h1 className="text-2xl font-semibold mb-6">Add New Property</h1>
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-10">
+        <h1 className="text-2xl font-semibold mb-6">
+          {t("add_property_page.title")}
+        </h1>
 
         {formError && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -915,30 +1010,37 @@ export default function AddProperty() {
 
         <form onSubmit={handleSubmit}>
           {/* Owner Section */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-xl font-semibold mb-4">Owner</h2>
+          <div className="bg-white p-4 rounded-lg shadow mb-6">
+            <h2 className="text-xl font-semibold mb-4">
+              {t("add_property_page.owner_section")}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="owner_id"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Owner ID
-                </label>
-                <input
-                  type="text"
-                  name="owner_id"
-                  id="owner_id"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div></div>
+              {/* Hidden input for owner_id (actual value for submission) */}
+              <input
+                type="hidden"
+                name="owner_id"
+                id="owner_id"
+                value={currentUser?.id || ""}
+              />
+              {/* Visible input for display only */}
+              <input
+                type="text"
+                value={
+                  currentUser
+                    ? `${currentUser.name || ""}${
+                        currentUser.mobile ? ` (${currentUser.mobile})` : ""
+                      }`
+                    : ""
+                }
+                readOnly
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-gray-100 cursor-not-allowed"
+              />
               <div>
                 <label
                   htmlFor="owner_name"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Name
+                  {t("add_property_page.name_label")}
                 </label>
                 <input
                   type="text"
@@ -952,7 +1054,7 @@ export default function AddProperty() {
                   htmlFor="owner_phone"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Phone
+                  {t("add_property_page.phone_label")}
                 </label>
                 <input
                   type="text"
@@ -966,7 +1068,7 @@ export default function AddProperty() {
                   htmlFor="owner_address"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Address
+                  {t("add_property_page.address_label")}
                 </label>
                 <textarea
                   name="owner_address"
@@ -980,7 +1082,7 @@ export default function AddProperty() {
                   htmlFor="owner_note"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Note
+                  {t("add_property_page.note_label")}
                 </label>
                 <textarea
                   name="owner_note"
@@ -996,14 +1098,17 @@ export default function AddProperty() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Details Section */}
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Details</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                {t("add_property_page.details_section")}
+              </h2>
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label
                     htmlFor="category_id"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Category <span className="text-red-500">*</span>
+                    {t("add_property_page.category_label")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   {/* Assuming Category is a dropdown, replace with CustomDropdown if needed */}
                   <CustomDropdown
@@ -1013,10 +1118,13 @@ export default function AddProperty() {
                       label:
                         categoryOptions.find(
                           (opt) => opt.value === selectedCategory
-                        )?.label || "Select Category",
+                        )?.label ||
+                        t("add_property_page.select_category_placeholder"),
                     }}
                     onChange={(option) => setSelectedCategory(option.value)}
-                    placeholder="Select Category"
+                    placeholder={t(
+                      "add_property_page.select_category_placeholder"
+                    )}
                   />
                 </div>
                 <div>
@@ -1024,7 +1132,8 @@ export default function AddProperty() {
                     htmlFor="title"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Title <span className="text-red-500">*</span>
+                    {t("add_property_page.title_label")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1038,7 +1147,8 @@ export default function AddProperty() {
                     htmlFor="property_type"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Property Type <span className="text-red-500">*</span>
+                    {t("add_property_page.property_type_label")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="mt-2 space-x-4">
                     <label className="inline-flex items-center">
@@ -1050,7 +1160,9 @@ export default function AddProperty() {
                         onChange={(e) => setPropertyType(e.target.value)}
                         className="form-radio"
                       />
-                      <span className="ml-2">For Sell</span>
+                      <span className="ml-2">
+                        {t("add_property_page.for_sell")}
+                      </span>
                     </label>
                     <label className="inline-flex items-center">
                       <input
@@ -1061,7 +1173,9 @@ export default function AddProperty() {
                         onChange={(e) => setPropertyType(e.target.value)}
                         className="form-radio"
                       />
-                      <span className="ml-2">For Rent</span>
+                      <span className="ml-2">
+                        {t("add_property_page.for_rent")}
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -1073,22 +1187,39 @@ export default function AddProperty() {
                       htmlFor="rentdurationtype"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Duration For Price <span className="text-red-500">*</span>
+                      {t("add_property_page.duration_label")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     {/* Assuming Duration is a dropdown */}
                     <CustomDropdown
                       options={[
-                        { value: "", label: "Select" },
-                        { value: "Daily", label: "Daily" },
-                        { value: "Monthly", label: "Monthly" },
-                        { value: "Yearly", label: "Yearly" },
+                        {
+                          value: "",
+                          label: t("add_property_page.select_placeholder"),
+                        },
+                        {
+                          value: "Daily",
+                          label: t("add_property_page.daily"),
+                        },
+                        {
+                          value: "Monthly",
+                          label: t("add_property_page.monthly"),
+                        },
+                        {
+                          value: "Yearly",
+                          label: t("add_property_page.yearly"),
+                        },
                       ]}
                       value={{
                         value: rentDurationType,
-                        label: rentDurationType || "Select",
+                        label:
+                          rentDurationType ||
+                          t("add_property_page.select_placeholder"),
                       }}
                       onChange={(option) => setRentDurationType(option.value)}
-                      placeholder="Select Duration"
+                      placeholder={t(
+                        "add_property_page.select_duration_placeholder"
+                      )}
                     />
                   </div>
                 )}
@@ -1099,7 +1230,7 @@ export default function AddProperty() {
                       htmlFor="price"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Price($)
+                      {t("add_property_page.price_label")}
                       {propertyType === "1" && (
                         <span className="text-red-500">*</span>
                       )}
@@ -1117,13 +1248,16 @@ export default function AddProperty() {
 
             {/* Description Section */}
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Description</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                {t("add_property_page.description_label")}
+              </h2>
               <div>
                 <label
                   htmlFor="description"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Description <span className="text-red-500">*</span>
+                  {t("add_property_page.description_label")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   name="description"
@@ -1137,7 +1271,9 @@ export default function AddProperty() {
 
           {/* Near By Places Section */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-xl font-semibold mb-4">Near By Places</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {t("add_property_page.facilities_section")}
+            </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {facilityOptions.map((facility) => (
                 <div key={facility.id} className="space-y-2">
@@ -1166,7 +1302,7 @@ export default function AddProperty() {
                         htmlFor={`distance_${facility.id}`}
                         className="block text-sm text-gray-700"
                       >
-                        Distance (km)
+                        {t("add_property_page.distance_label")}
                       </label>
                       <input
                         type="number"
@@ -1174,7 +1310,9 @@ export default function AddProperty() {
                         min="0"
                         name={`facilities[${facility.id}].distance`}
                         id={`distance_${facility.id}`}
-                        placeholder="Enter distance"
+                        placeholder={t(
+                          "add_property_page.distance_placeholder"
+                        )}
                         value={facilities[facility.id].distance}
                         onChange={(e) =>
                           handleDistanceChange(facility.id, e.target.value)
@@ -1190,7 +1328,9 @@ export default function AddProperty() {
 
           {/* Additional Facilities Section (Bathroom, Bedroom, etc.) */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-xl font-semibold mb-4">Facilities</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {t("add_property_page.facilities_section")}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {relevantParameters.map((param) => (
                 <div key={param.id}>
@@ -1208,13 +1348,17 @@ export default function AddProperty() {
 
           {/* Location Section */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-xl font-semibold mb-4">Location</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {t("add_property_page.location_section")}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Map with Search Bar */}
               <div className="md:col-span-1">
                 <div className="md:col-span-1">
                   {loadError ? (
-                    <div className="text-red-500">Error loading maps</div>
+                    <div className="text-red-500">
+                      {t("add_property_page.map_loading_error")}
+                    </div>
                   ) : !isLoaded ? (
                     <div className="flex items-center justify-center h-[490px] bg-gray-100">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -1227,7 +1371,7 @@ export default function AddProperty() {
                       >
                         <input
                           type="text"
-                          placeholder="Enter a location"
+                          placeholder={t("add_property_page.map_placeholder")}
                           className="w-full p-2 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mb-2"
                         />
                       </StandaloneSearchBox>
@@ -1256,18 +1400,22 @@ export default function AddProperty() {
                     htmlFor="country"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Country
+                    {t("add_property_page.country_label")}
                   </label>
                   <CustomDropdown
                     options={countryOptions}
                     value={{
                       value: selectedCountry,
-                      label: countryOptions.find(
-                        (opt) => opt.value === selectedCountry
-                      )?.label,
+                      label:
+                        countryOptions.find(
+                          (opt) => opt.value === selectedCountry
+                        )?.label ||
+                        t("add_property_page.select_country_placeholder"),
                     }}
                     onChange={(option) => setSelectedCountry(option.value)}
-                    placeholder="Select Country"
+                    placeholder={t(
+                      "add_property_page.select_country_placeholder"
+                    )}
                   />
                 </div>
 
@@ -1279,18 +1427,22 @@ export default function AddProperty() {
                       htmlFor="province"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Province
+                      {t("add_property_page.province_label")}
                     </label>
                     <CustomDropdown
                       options={provinceOptions}
                       value={{
                         value: selectedProvince,
-                        label: provinceOptions.find(
-                          (opt) => opt.value === selectedProvince
-                        )?.label,
+                        label:
+                          provinceOptions.find(
+                            (opt) => opt.value === selectedProvince
+                          )?.label ||
+                          t("add_property_page.select_province_placeholder"),
                       }}
                       onChange={(option) => setSelectedProvince(option.value)}
-                      placeholder="Select Province"
+                      placeholder={t(
+                        "add_property_page.select_province_placeholder"
+                      )}
                     />
                   </div>
                   {/* District */}
@@ -1299,18 +1451,22 @@ export default function AddProperty() {
                       htmlFor="district"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      District
+                      {t("add_property_page.district_label")}
                     </label>
                     <CustomDropdown
                       options={districtOptions}
                       value={{
                         value: selectedDistrict,
-                        label: districtOptions.find(
-                          (opt) => opt.value === selectedDistrict
-                        )?.label,
+                        label:
+                          districtOptions.find(
+                            (opt) => opt.value === selectedDistrict
+                          )?.label ||
+                          t("add_property_page.select_district_placeholder"),
                       }}
                       onChange={(option) => setSelectedDistrict(option.value)}
-                      placeholder="Select District"
+                      placeholder={t(
+                        "add_property_page.select_district_placeholder"
+                      )}
                       isDisabled={
                         !selectedProvince || provinceOptions.length <= 1
                       }
@@ -1326,18 +1482,22 @@ export default function AddProperty() {
                       htmlFor="commune"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Commune
+                      {t("add_property_page.commune_label")}
                     </label>
                     <CustomDropdown
                       options={communeOptions}
                       value={{
                         value: selectedCommune,
-                        label: communeOptions.find(
-                          (opt) => opt.value === selectedCommune
-                        )?.label,
+                        label:
+                          communeOptions.find(
+                            (opt) => opt.value === selectedCommune
+                          )?.label ||
+                          t("add_property_page.select_commune_placeholder"),
                       }}
                       onChange={(option) => setSelectedCommune(option.value)}
-                      placeholder="Select Commune"
+                      placeholder={t(
+                        "add_property_page.select_commune_placeholder"
+                      )}
                       isDisabled={
                         !selectedDistrict || districtOptions.length <= 1
                       }
@@ -1349,18 +1509,22 @@ export default function AddProperty() {
                       htmlFor="village"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Village
+                      {t("add_property_page.village_label")}
                     </label>
                     <CustomDropdown
                       options={villageOptions}
                       value={{
                         value: selectedVillage,
-                        label: villageOptions.find(
-                          (opt) => opt.value === selectedVillage
-                        )?.label,
+                        label:
+                          villageOptions.find(
+                            (opt) => opt.value === selectedVillage
+                          )?.label ||
+                          t("add_property_page.select_village_placeholder"),
                       }}
                       onChange={(option) => setSelectedVillage(option.value)}
-                      placeholder="Select Village"
+                      placeholder={t(
+                        "add_property_page.select_village_placeholder"
+                      )}
                       isDisabled={
                         !selectedCommune || communeOptions.length <= 1
                       }
@@ -1375,7 +1539,8 @@ export default function AddProperty() {
                       htmlFor="latitude"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Latitude <span className="text-red-500">*</span>
+                      {t("add_property_page.latitude_label")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -1391,7 +1556,8 @@ export default function AddProperty() {
                       htmlFor="longitude"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Longitude <span className="text-red-500">*</span>
+                      {t("add_property_page.longitude_label")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -1410,7 +1576,8 @@ export default function AddProperty() {
                     htmlFor="client_address"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Client Address <span className="text-red-500">*</span>
+                    {t("add_property_page.client_address_label")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1426,7 +1593,7 @@ export default function AddProperty() {
                     htmlFor="address"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Address
+                    {t("add_property_page.address_label")}
                   </label>
                   <textarea
                     name="address"
@@ -1441,7 +1608,9 @@ export default function AddProperty() {
 
           {/* Images Section */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-xl font-semibold mb-4">Images</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {t("add_property_page.images_section")}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Title Image */}
               <div>
@@ -1449,7 +1618,7 @@ export default function AddProperty() {
                   htmlFor="title_image"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Title Image
+                  {t("add_property_page.title_image_label")}
                 </label>
                 <div className="mt-1">
                   {titleImagePreview ? (
@@ -1475,7 +1644,7 @@ export default function AddProperty() {
                       htmlFor="title_image"
                       className="block w-full h-32 bg-gray-100 border-2 border-dashed border-gray-300 rounded-md text-center pt-12 text-gray-500 hover:bg-gray-200 cursor-pointer"
                     >
-                      Drag & Drop your files or Browse
+                      {t("add_property_page.dnd_placeholder")}
                     </label>
                   )}
                   <input
@@ -1495,7 +1664,7 @@ export default function AddProperty() {
                   htmlFor="threeD_image"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  3D Image
+                  {t("add_property_page.threeD_image_label")}
                 </label>
                 <div className="mt-1">
                   {threeDImagePreview ? (
@@ -1521,7 +1690,7 @@ export default function AddProperty() {
                       htmlFor="threeD_image"
                       className="block w-full h-32 bg-gray-100 border-2 border-dashed border-gray-300 rounded-md text-center pt-12 text-gray-500 hover:bg-gray-200 cursor-pointer"
                     >
-                      Drag & Drop your files or Browse
+                      {t("add_property_page.dnd_placeholder")}
                     </label>
                   )}
                   <input
@@ -1541,7 +1710,7 @@ export default function AddProperty() {
                   htmlFor="gallery_images"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Gallery Images
+                  {t("add_property_page.gallery_images_label")}
                 </label>
                 <div className="mt-1">
                   {galleryImagesPreview.length === 0 ? (
@@ -1549,7 +1718,7 @@ export default function AddProperty() {
                       htmlFor="gallery_images"
                       className="block w-full h-32 bg-gray-100 border-2 border-dashed border-gray-300 rounded-md text-center pt-12 text-gray-500 hover:bg-gray-200 cursor-pointer"
                     >
-                      Drag & Drop your files or Browse
+                      {t("add_property_page.dnd_placeholder")}
                     </label>
                   ) : (
                     <div className="space-y-2">
@@ -1578,7 +1747,7 @@ export default function AddProperty() {
                         htmlFor="gallery_images"
                         className="block w-full text-center text-sm text-indigo-600 hover:text-indigo-800 cursor-pointer mt-2"
                       >
-                        + Add More Images
+                        {t("add_property_page.add_more_images")}
                       </label>
                     </div>
                   )}
@@ -1602,7 +1771,7 @@ export default function AddProperty() {
                   htmlFor="video_link"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Video Link
+                  {t("add_property_page.video_link_label")}
                 </label>
                 <input
                   type="text"
@@ -1625,7 +1794,9 @@ export default function AddProperty() {
                   : "bg-indigo-600 hover:bg-indigo-700"
               } py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
             >
-              {isSubmitting ? "Adding Property..." : "Add Property"}
+              {isSubmitting
+                ? t("add_property_page.submitting_button")
+                : t("add_property_page.submit_button")}
             </button>
           </div>
         </form>

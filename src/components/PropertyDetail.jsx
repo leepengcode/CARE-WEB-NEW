@@ -49,9 +49,6 @@ const PropertyDetail = () => {
   const [showLargeImageModal, setShowLargeImageModal] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
-  // Get the previous path from location state or default to properties
-  const previousPath = location.state?.from || "/properties";
-
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!userToken || !currentUser?.id) {
@@ -110,73 +107,65 @@ const PropertyDetail = () => {
 
       if (propertyFromState) {
         console.log("=== Property Data from State ===");
-        console.log("Raw PropertyFromState object:", propertyFromState); // Log the whole object
-        console.log("Potential description fields in state data:", {
-          description: propertyFromState.description,
-          descriptions: propertyFromState.descriptions,
-          body: propertyFromState.body,
-        });
+        console.log("Raw PropertyFromState object:", propertyFromState);
+
+        // Normalize category to object if needed
+        let normalizedCategory = propertyFromState.category;
+        if (typeof normalizedCategory === "string" || !normalizedCategory) {
+          normalizedCategory = {
+            category: propertyFromState.category || "",
+            image: propertyFromState.category_image || "",
+          };
+        }
 
         // Map the data correctly, trying multiple potential description field names
         propertyData = {
           ...propertyFromState,
           title_image: propertyFromState.image || propertyFromState.title_image,
-          description: propertyFromState.description || "", // Try multiple names
+          description:
+            propertyFromState.description ||
+            propertyFromState.descriptions ||
+            "",
           propery_type:
             propertyFromState.propery_type || propertyFromState.status,
           post_created:
             propertyFromState.post_created ||
             propertyFromState.time ||
             new Date().toISOString(),
-          type:
-            propertyFromState.type ||
-            propertyFromState.category?.category ||
-            "",
+          type: propertyFromState.type || "",
           status: propertyFromState.state || propertyFromState.status,
           price: propertyFromState.price
             ? parseFloat(
                 String(propertyFromState.price).replace(/[^0-9.-]+/g, "")
               ) || 0
             : 0,
-          gallery: propertyFromState.gallery || [], // Ensure gallery is an array
-          // Handle category properly, trying multiple potential field names/structures
-          category: propertyFromState.category?.category
-            ? propertyFromState.category.category
-            : {
-                category: propertyFromState.category || "",
-                image: propertyFromState.category_image || "",
-              },
+          gallery: propertyFromState.gallery || [],
+          category: normalizedCategory,
         };
 
         console.log("Mapped Property Data (from State):", propertyData);
-      } else {
-        // Normal property fetch (authenticated or public based on token)
-        console.log("=== Fetching Property by ID ===");
-        console.log("Property ID:", id);
-        console.log("User Token Available:", !!userToken);
+        setProperty(propertyData);
+        setSelectedImage(propertyData.title_image);
+        return;
+      }
 
-        propertyData = await fetchPropertyById(id, userToken, "POST");
+      // Try fetching with token first, fallback to public if token error
+      try {
+        propertyData = await fetchPropertyById(id, userToken);
+      } catch (err) {
+        if (
+          err.message &&
+          err.message.toLowerCase().includes("authorization token not found")
+        ) {
+          propertyData = await fetchPropertyById(id, null);
+        } else {
+          throw err;
+        }
       }
 
       if (!propertyData) {
         throw new Error("Property not found");
       }
-
-      // Log the final property data being set
-      console.log("=== Final Property Data Being Set ===");
-      console.log("Property ID:", propertyData.id);
-      console.log("Property Status:", propertyData.status);
-      console.log("Property Type:", propertyData.type);
-      console.log("Property Title:", propertyData.title);
-      console.log("Property Title Image:", propertyData.title_image);
-      console.log("Property Category:", propertyData.category);
-      console.log("Property Description:", propertyData.description);
-      console.log("Property Price:", propertyData.price);
-      console.log("Property Gallery:", propertyData.gallery);
-      console.log("Property Post Created:", propertyData.post_created);
-      console.log("Property Type:", propertyData.propery_type);
-      console.log("Raw Property Data:", propertyData);
-
       setProperty(propertyData);
       setSelectedImage(propertyData.title_image);
     } catch (error) {
@@ -188,9 +177,25 @@ const PropertyDetail = () => {
   }, [id, userToken, location.state?.property]);
 
   useEffect(() => {
-    fetchPropertyDetail();
-    setImgLoaded(false);
-  }, [fetchPropertyDetail]);
+    // Only fetch if property is not passed in state
+    if (!location.state?.property) {
+      fetchPropertyDetail();
+      setImgLoaded(false);
+    } else {
+      // Normalize category to object if needed
+      let normalizedCategory = location.state.property.category;
+      if (typeof normalizedCategory === "string" || !normalizedCategory) {
+        normalizedCategory = {
+          category: location.state.property.category || "",
+          image: location.state.property.category_image || "",
+        };
+      }
+      setProperty({ ...location.state.property, category: normalizedCategory });
+      setSelectedImage(location.state.property.title_image);
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line
+  }, [id, userToken]);
 
   useEffect(() => {
     if (descriptionRef.current) {
@@ -264,10 +269,59 @@ const PropertyDetail = () => {
   };
 
   const handleBackClick = () => {
-    if (window.history.length > 2) {
-      window.history.back();
+    // Try to restore scroll position for known lists
+    const from = location.state?.from;
+    let scrollKey = null;
+    if (from?.includes("recently")) scrollKey = "recentlyAddedScroll";
+    else if (from?.includes("mostlike")) scrollKey = "mostLikedScroll";
+    else if (from?.includes("mostview")) scrollKey = "mostViewedScroll";
+
+    if (from) {
+      // Store scroll position before navigation
+      if (scrollKey) {
+        const scroll = sessionStorage.getItem(scrollKey);
+        if (scroll) {
+          // Set a flag to restore scroll after navigation
+          sessionStorage.setItem("restoreScroll", scroll);
+          sessionStorage.setItem("restoreScrollKey", scrollKey);
+        }
+      }
+
+      // Use navigate(-1) to go back
+      navigate(-1);
     } else {
-      navigate(previousPath);
+      // If no 'from' state, navigate to Property page
+      navigate("/Property");
+    }
+  };
+
+  // Add this useEffect to handle scroll restoration after navigation
+  useEffect(() => {
+    const restoreScroll = sessionStorage.getItem("restoreScroll");
+    const restoreScrollKey = sessionStorage.getItem("restoreScrollKey");
+
+    if (restoreScroll && restoreScrollKey) {
+      // Clean up the session storage
+      sessionStorage.removeItem("restoreScroll");
+      sessionStorage.removeItem("restoreScrollKey");
+
+      // Restore scroll position
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(restoreScroll, 10));
+      }, 100);
+    }
+  }, []);
+
+  // Alternative approach - simpler and more reliable
+  const handleBackClickSimple = () => {
+    const from = location.state?.from;
+
+    if (from) {
+      // Simply go back without scroll restoration complications
+      navigate(-1);
+    } else {
+      // Navigate to Property page if no previous state
+      navigate("/Property");
     }
   };
 
@@ -617,10 +671,23 @@ const PropertyDetail = () => {
     );
   }
 
+  useEffect(() => {
+    // Only scroll to top if not restoring from a known list
+    const from = location.state?.from;
+    let scrollKey = null;
+    if (from?.includes("recently")) scrollKey = "recentlyAddedScroll";
+    else if (from?.includes("mostlike")) scrollKey = "mostLikedScroll";
+    else if (from?.includes("mostview")) scrollKey = "mostViewedScroll";
+
+    if (!scrollKey) {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   if (isLoading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-2 md:py-5 lg:px-10">
+        <div className="w-full max-w-7xl mx-auto py-2 md:py-5 lg:px-10">
           <div className="flex justify-between items-center mb-4">
             {/* Back Button */}
             <button
@@ -770,16 +837,16 @@ const PropertyDetail = () => {
   if (error) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
+        <div className="w-full max-w-7xl mx-auto py-2 md:py-5 md:px-10">
           <h2 className="text-2xl font-bold text-red-600 mb-4">
             Error Loading Property
           </h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate("/properties")}
+            onClick={() => navigate(-1)}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Back to Properties
+            Back
           </button>
         </div>
       </PageComponents>
@@ -789,7 +856,7 @@ const PropertyDetail = () => {
   if (!property) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
+        <div className="w-full max-w-7xl mx-auto py-2 md:py-5 md:px-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Property Not Found
           </h2>
@@ -807,7 +874,7 @@ const PropertyDetail = () => {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-2 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-2 md:py-5 lg:px-10">
         <div className="flex justify-between items-center mb-4">
           {/* Back Button */}
           <button
@@ -1040,15 +1107,13 @@ const PropertyDetail = () => {
           <div className="p-4 md:p-6">
             <div className="flex justify-between items-start mb-4 gap-4">
               <div className="flex items-center gap-2 text-white rounded-sm">
-                {property?.category?.image && (
-                  <img
-                    className="h-4 w-4 md:h-5 md:w-5"
-                    src={property.category.image}
-                    alt="category"
-                  />
-                )}
+                <img
+                  className="h-4 w-4 md:h-5 md:w-5"
+                  src={property?.category?.image}
+                  alt={property?.category?.category}
+                />
                 <p className="text-sm md:text-lg text-black">
-                  {property?.category?.category || "No Category"}
+                  {property?.category?.category}
                 </p>
               </div>
 
@@ -1058,7 +1123,7 @@ const PropertyDetail = () => {
                 </p>
               </div>
             </div>
-            <div className="flex justify-between items-start py-2 md:py-2 gap-4">
+            <div className="flex justify-between items-start-sy-2 md:py-2 gap-4">
               <div className="w-[90%] md:w-[100%]">
                 <h1 className="text-md md:text-2xl font-bold text-gray-900 font-khmer mb-2">
                   {property?.title || "No Title"}
@@ -1121,16 +1186,40 @@ const PropertyDetail = () => {
                   </button>
                 )}
               </div>
+              {/* Video Embed */}
+              {property?.video_link && (
+                <div className="mt-6">
+                  <h2 className="text-lg font-semibold mb-2">Property Video</h2>
+                  <div className="aspect-w-16 aspect-h-9 h-72 w-full max-w-7xl mx-auto rounded-lg overflow-hidden shadow-lg">
+                    <iframe
+                      src={
+                        property.video_link.includes("youtube.com")
+                          ? property.video_link
+                              .replace("watch?v=", "embed/")
+                              .split("&")[0]
+                          : property.video_link
+                      }
+                      title="Property Video"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
             </div>
             <hr />
             {/* Google Map Location */}
             {(() => {
+              const isOwner = property?.added_by === currentUser?.id;
               const shouldShowMap =
                 property?.latitude &&
                 property?.longitude &&
                 property.latitude !== "0" &&
                 property.longitude !== "0" &&
-                (userRole === "agency" ||
+                (isOwner ||
+                  userRole === "agency" ||
                   (property?.agent_owner?.id === currentUser?.id &&
                     (property?.agent_owner?.role === null ||
                       userRole === "researcher")));
@@ -1140,8 +1229,9 @@ const PropertyDetail = () => {
                 latLongNotZero: Boolean(
                   property?.latitude !== "0" && property?.longitude !== "0"
                 ),
+                isOwner,
                 isAgency: userRole === "agency",
-                isOwner: property?.agent_owner?.id === currentUser?.id,
+                isAgentOwner: property?.agent_owner?.id === currentUser?.id,
                 ownerRole: property?.agent_owner?.role,
                 userRole: userRole,
                 shouldShowMap,
@@ -1159,7 +1249,9 @@ const PropertyDetail = () => {
                         style={{ border: 0 }}
                         loading="lazy"
                         allowFullScreen
-                        src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyCcFA5zPrJIUY5Q5dnWsMQFI7tFbeQVafs&q=${property.latitude},${property.longitude}`}
+                        src={`https://www.google.com/maps/embed/v1/place?key=${
+                          import.meta.env.VITE_GOOGLE_MAP_KEY
+                        }&q=${property.latitude},${property.longitude}`}
                       ></iframe>
                     </div>
                   </div>
@@ -1175,17 +1267,20 @@ const PropertyDetail = () => {
                   property?.commune?.name ||
                   property?.village?.name
               );
+              const isOwner = property?.added_by === currentUser?.id;
               const shouldShowLocation =
                 hasLocationDetails &&
-                (userRole === "agency" ||
+                (isOwner ||
+                  userRole === "agency" ||
                   (property?.agent_owner?.id === currentUser?.id &&
                     (property?.agent_owner?.role === null ||
                       userRole === "researcher")));
 
               console.log("Location details visibility check:", {
                 hasLocationDetails,
+                isOwner,
                 isAgency: userRole === "agency",
-                isOwner: property?.agent_owner?.id === currentUser?.id,
+                isAgentOwner: property?.agent_owner?.id === currentUser?.id,
                 ownerRole: property?.agent_owner?.role,
                 userRole: userRole,
                 shouldShowLocation,

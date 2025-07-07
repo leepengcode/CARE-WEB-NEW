@@ -26,7 +26,7 @@ const cardVariants = {
 export default function Residential() {
   const navigate = useNavigate();
   const [view, setView] = useState("grid");
-  const [properties, setProperties] = useState([]);
+  const [Properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -140,7 +140,7 @@ export default function Residential() {
       setTotalProperties(total);
       setError(null);
     } catch (err) {
-      setError(err.message || "Failed to fetch properties. Please try again.");
+      setError(err.message || "Failed to fetch Properties. Please try again.");
       setProperties([]);
       setTotalProperties(0);
     } finally {
@@ -348,7 +348,7 @@ export default function Residential() {
               : "grid-cols-1 lg:grid-cols-2"
           } gap-4`}
         >
-          {properties.map((property, i) => (
+          {Properties.map((property, i) => (
             <motion.div
               key={property.id}
               custom={i}

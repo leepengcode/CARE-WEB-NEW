@@ -7,32 +7,80 @@ const Footer = () => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
+  const handleWheelEvent = (e) => {
+    e.preventDefault();
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const deltaX = e.deltaX || 0;
+    const deltaY = e.deltaY || 0;
+    const scrollAmount = deltaX !== 0 ? deltaX : deltaY;
+
+    container.scrollLeft += scrollAmount;
+  };
+
   // Auto-scroll effect
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
 
     let scrollPosition = 0;
-    const scrollSpeed = 1;
-    const maxScroll = container.scrollWidth - container.clientWidth;
+    const scrollSpeed = 0.5; // Reduced speed for smoother scrolling
+    let animationId;
 
     const scroll = () => {
-      if (isHovered) return; // Stop scrolling when hovered
-
-      scrollPosition += scrollSpeed;
-      if (scrollPosition >= maxScroll) {
-        scrollPosition = 0; // Reset to start for infinite loop
+      if (isHovered) {
+        // If hovered, just request next frame without scrolling
+        animationId = requestAnimationFrame(scroll);
+        return;
       }
-      container.scrollLeft = scrollPosition;
+
+      const maxScroll = container.scrollWidth - container.clientWidth;
+
+      if (maxScroll > 0) {
+        scrollPosition += scrollSpeed;
+        if (scrollPosition >= maxScroll) {
+          scrollPosition = 0; // Reset to start for infinite loop
+        }
+        container.scrollLeft = scrollPosition;
+      }
+
+      animationId = requestAnimationFrame(scroll);
     };
 
-    // Start scrolling immediately
-    const interval = setInterval(scroll, 30);
+    // Mouse wheel event handler
+    const handleWheel = (e) => {
+      // Only prevent default if we're actually scrolling
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (maxScroll > 0) {
+        e.preventDefault();
 
-    // Initial scroll to ensure it starts moving
-    scroll();
+        // Use deltaX for horizontal scroll, deltaY for vertical scroll
+        const deltaX = e.deltaX || 0;
+        const deltaY = e.deltaY || 0;
 
-    return () => clearInterval(interval);
+        // If deltaX is available, use it; otherwise use deltaY
+        const scrollAmount = deltaX !== 0 ? deltaX : deltaY;
+
+        container.scrollLeft += scrollAmount;
+      }
+    };
+
+    // Add mouse wheel event listener with capture
+    container.addEventListener("wheel", handleWheel, {
+      passive: false,
+      capture: true,
+    });
+
+    // Start scrolling
+    animationId = requestAnimationFrame(scroll);
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      container.removeEventListener("wheel", handleWheel, { capture: true });
+    };
   }, [isHovered]);
 
   const categories = [
@@ -52,7 +100,7 @@ const Footer = () => {
     { name: "Favorite", to: "/favorites" },
     { name: "Mortgage", to: "/mortgage-calculator" },
     { name: "Agency", to: "/agency" },
-    { name: "Consultant", to: "/consultant" },
+    { name: "Valuation", to: "/valuation" },
     { name: "Certificate ", to: "/Certificate " },
   ];
 
@@ -85,9 +133,15 @@ const Footer = () => {
           </h3>
           <div
             ref={scrollRef}
-            className="flex gap-8 overflow-x-auto pb-4 hide-scrollbar"
+            className="flex gap-8 overflow-x-auto pb-4 hide-scrollbar cursor-grab active:cursor-grabbing"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onWheel={handleWheelEvent}
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
+            }}
           >
             <img
               src="https://www.angkorrealestate.com/wp-content/themes/care/img/bank_005.jpeg"
@@ -231,6 +285,17 @@ const Footer = () => {
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
+          scroll-behavior: smooth;
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+        }
+        .hide-scrollbar:hover {
+          scroll-behavior: auto;
+        }
+        .hide-scrollbar:focus {
+          outline: none;
         }
       `}</style>
     </div>

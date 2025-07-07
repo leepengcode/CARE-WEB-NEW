@@ -1,0 +1,683 @@
+{
+  "login": {
+    "enter_mobile": "请输入您的手机号码",
+    "send_code": "我们将向您发送验证码",
+    "next": "下一步",
+    "sending": "发送中...",
+    "terms": "点击登录即表示您同意我们的",
+    "terms_link": "条款与条件",
+    "privacy_link": "隐私政策"
+  },
+  "menu": {
+    "home": "首页",
+    "property": "房产",
+    "Properties": "所有房产",
+    "my_property": "我的房产",
+    "add_property": "添加房产",
+    "category": "类别",
+    "residential": "住宅",
+    "condo": "公寓",
+    "commercial": "商业",
+    "industrial": "工业",
+    "land": "土地",
+    "business_for_sell": "待售生意",
+    "agriculture_land": "农业用地",
+    "high_building": "高楼",
+    "page": "页面",
+    "about": "关于我们",
+    "article": "文章",
+    "favorite": "收藏夹",
+    "mortgage": "按揭",
+    "agency": "中介",
+    "valuation": "估价",
+    "certificate": "证书",
+    "services": "服务",
+    "contact": "联系我们",
+    "login": "登录",
+    "my_profile": "我的资料",
+    "sign_out": "退出登录",
+    "menu": "菜单"
+  },
+  "otp": {
+    "title": "验证码验证",
+    "enter_code": "请输入发送到 +{{phone}} 的验证码",
+    "resend_in": "重新发送验证码在",
+    "resend_code": "重新发送验证码",
+    "verifying": "验证中...",
+    "confirm": "确认",
+    "error_network": "网络错误。请检查您的网络连接并重试。",
+    "error_server": "服务器错误。请重试。",
+    "error_unexpected": "发生意外错误。请重试。",
+    "error_invalid": "验证码无效。请重试。"
+  },
+   "property_guide": {
+    "title": "房产指南",
+    "desc": "我们为您提供关于买卖、租赁和投资房产的技巧、工具和操作指南。",
+    "read_more": "阅读更多",
+    "mortgage_title": "按揭计算器",
+    "mortgage_desc": "发现理想的房贷，准确计算每月还款额，并根据市场利率和您的财务状况轻松确定最大可负担额度。",
+    "try_now": "立即试用"
+  },
+  "property_guide_detail": {
+    "title": "完整房产指南",
+    "buying_title": "购房指南",
+    "buying_desc": "购房是您一生中最重要的投资之一。本指南涵盖从预算到成交的所有环节。",
+    "buying_list1": "了解您的财务状况",
+    "buying_list2": "获得按揭预批",
+    "buying_list3": "寻找合适的房产",
+    "buying_list4": "出价与谈判",
+    "buying_list5": "房产检查与尽职调查",
+    "buying_list6": "完成交易",
+    "selling_title": "房产出售",
+    "selling_desc": "出售房产需要精心策划和准备。了解如何最大化房产价值并吸引买家。",
+    "selling_list1": "为出售做准备",
+    "selling_list2": "设定合适的价格",
+    "selling_list3": "营销策略",
+    "selling_list4": "与中介合作",
+    "selling_list5": "处理出价与谈判",
+    "selling_list6": "完成出售",
+    "renting_title": "租赁指南",
+    "renting_desc": "无论您是租客还是房东，了解租赁流程都至关重要。本指南涵盖租赁市场的各个方面。",
+    "renting_list1": "寻找合适的租赁房产",
+    "renting_list2": "了解租赁协议",
+    "renting_list3": "租客权利与义务",
+    "renting_list4": "房东责任",
+    "renting_list5": "房产维护",
+    "renting_list6": "终止租赁",
+    "investing_title": "房产投资",
+    "investing_desc": "房产投资若操作得当可带来丰厚回报。了解不同投资策略及如何建立盈利投资组合。",
+    "investing_list1": "房产投资类型",
+    "investing_list2": "市场分析与调研",
+    "investing_list3": "投资房产融资",
+    "investing_list4": "风险管理",
+    "investing_list5": "税务影响",
+    "investing_list6": "投资组合多元化"
+  },
+  "categories": {
+    "residential": "住宅",
+    "commercial": "商业",
+    "industrial": "工业",
+    "agriculture": "农业",
+    "land": "土地",
+    "building": "建筑物",
+    "condo": "公寓",
+    "business": "生意",
+    "valuation": "估价",
+    "measurement": "测量",
+    "mortgage": "按揭",
+    "favorite": "收藏夹",
+    "article": "文章",
+    "agency": "中介",
+    "certificate": "证书",
+    "services": "服务"
+  },
+  "nearby_properties": {
+    "title": "附近房产 ({{location}})"
+  },
+  "recently_added": {
+    "title": "最新添加"
+  },
+  "most_like": {
+    "title": "最受欢迎房产"
+  },
+  "most_view": {
+    "title": "最多浏览房产"
+  },
+  "about": {
+    "title": "关于我们",
+    "subtitle": "柬埔寨吴哥房地产有限公司（CARE）- 自2002年以来在柬埔寨值得信赖、专业领先的房地产中介公司。",
+    "tabs": {
+      "about": "关于我们",
+      "service": "服务",
+      "history": "历史"
+    },
+    "our_story": "我们的故事",
+    "our_story_content1": "柬埔寨吴哥房地产有限公司（CARE）是首家获得柬埔寨皇家政府颁发执照的此类公司。我们的营业执照于2002年1月8日颁发，执照副本可在本网站查阅。",
+    "our_story_content2": "公司在过去几年中不断发展和完善服务，现已成长为柬埔寨规模最大、最专业的房地产公司之一。我们持续努力提升客户服务，并就本地房地产市场提供清晰明了的建议。",
+    "our_story_content3": "我们希望上述信息能够让潜在投资者了解柬埔寨吴哥房地产有限公司的经营方式，并增强您对我们公司管理投资的信心。",
+    "service": {
+      "agency_title": "房地产中介与咨询",
+      "agency_content": "我们通过柬埔寨最广泛、最有经验的销售网络，为客户提供购买、出售或出租各种房地产的协助，覆盖全国每个区域。",
+      "valuation_title": "房地产评估",
+      "valuation_content": "在像柬埔寨这样迅速发展的市场中，可信赖和有策略的评估服务对贷款人来说是至关重要的措施，可保护其风险，并确保贷款金额不超过房地产的价值或不针对无法出售的资产贷款。",
+      "development_title": "房地产开发",
+      "development_content": "我们致力于发掘每一个我们管理或设计的房地产的内在价值，并制定最适合该房地产的管理计划。",
+      "investment_title": "投资基金与咨询",
+      "investment_content": "我们的咨询服务涵盖所有监管信息，以及宏观经济趋势、行业与领域分析及消费者趋势等数据。",
+      "citizenship_title": "获取柬埔寨国籍",
+      "citizenship_content": "鉴于全球各地投资者及其他外国公民对签证和国籍的需求日益增长。"
+    },
+    "vision_title": "愿景",
+    "vision_content": "成为柬埔寨最专业的房地产公司，并在全国各分支中成为发展最快、最成功的中介机构。",
+    "mission_title": "使命",
+    "mission_content": "通过超越客户期望，秉持诚实和正直的原则，提供卓越的房地产服务。",
+    "core_values_title": "核心价值观",
+    "core_values_content": "CARE高度重视其产品与服务的诚信，并尊重当地惯例与法律要求。公司坚持透明经营，对其行为负责，并承担其结果。CARE以不牺牲诚信来换取利润的立场，树立了高度可靠的声誉。诚信是公司最宝贵的无形资产——信任的基石。"
+  },
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "我们随时为您的房产需求提供帮助。如有房产咨询、合作机会或任何问题，欢迎联系我们！",
+    "cards": {
+      "email": "邮箱",
+      "phone": "电话",
+      "address": "地址",
+      "email1": "director@angkorrealestate.com",
+      "email2": "valuationpp@angkorrealestate.com",
+      "phone1": "+855-14 699 289",
+      "phone2": "+855-77 658 687",
+      "address_value": "柬埔寨金边市森速区奥白甘分区206号街"
+    },
+    "form": {
+      "title": "发送信息给我们",
+      "name": "姓名*",
+      "email": "邮箱*",
+      "subject": "主题*",
+      "phone": "电话",
+      "message": "信息*",
+      "send": "发送信息",
+      "sending": "发送中...",
+      "success": "您的信息已成功发送！",
+      "error": "发送信息时出错，请重试。"
+    }
+  },
+  "article": {
+    "title": "文章",
+    "subtitle": "探索柬埔寨吴哥房地产的最新新闻、见解和动态。",
+    "search_placeholder": "搜索文章...",
+    "search_button": "搜索",
+    "no_results": "未找到结果。",
+    "date_label": "日期",
+    "pagination_prev": "上一页",
+    "pagination_next": "下一页"
+  },
+  "favorite": {
+    "title": "收藏夹",
+    "subtitle": "在一个地方查看和管理您收藏的房产。",
+    "login_required": "需要登录",
+    "login_message": "请登录以查看您的房产。",
+    "no_favorites": "未找到收藏的房产。",
+    "loading": "正在加载收藏夹...",
+    "error": "获取收藏夹失败。",
+    "grid": "网格视图",
+    "list": "列表视图",
+    "filters": "筛选",
+    "clear_filters": "清除筛选"
+  },
+  "mortgage_calculator": {
+    "title": "按揭计算器",
+    "subtitle": "计算您的每月按揭还款额、总利息，并获取智能按揭规划建议。",
+    "loan_amount": "贷款金额",
+    "interest_rate": "利率",
+    "loan_term": "贷款期限",
+    "years": "年",
+    "per_month": "/ 月",
+    "principal_payment_per_month": "每月本金还款",
+    "interest_payment_per_month": "每月利息还款",
+    "summary": "摘要",
+    "principal_payment": "本金还款",
+    "interest_payment": "利息还款",
+    "monthly_payment": "每月还款",
+    "total_payments": "还款总额",
+    "total_interest_payments": "总利息支付",
+    "tips_title": "按揭规划建议",
+    "tip_compare_rates": "比较利率：多方比较以获得最佳按揭利率，即使微小差异也能在贷款期内为您节省大量资金。",
+    "tip_shorter_terms": "考虑较短期限：较短的贷款期限（如15年）通常利率更低，总利息更少，但每月还款更高。",
+    "tip_budget_costs": "预算额外费用：规划按揭预算时请考虑房产税、保险和维护费用。",
+    "tip_extra_payments": "额外还款：每月多还款可更快减少本金并节省利息。",
+    "tip_credit_score": "检查您的信用评分：更高的信用评分有助于获得更优利率，申请前请先检查您的信用。"
+  },
+  "agency_page": {
+    "title": "我们的中介",
+    "subtitle": "结识我们值得信赖的中介合作伙伴，找到合适的专业人士协助您的房产需求。",
+    "not_found": "未找到中介",
+    "contact_telegram": "通过 Telegram 联系"
+  },
+  "certificate_page": {
+    "title": "我们的证书",
+    "subtitle": "浏览我们的公司及专业官方证书。",
+    "info1": "我们的证书是公司合法性、专业会员资格及估价师资质的<bold>官方证明</bold>。",
+    "info2": "证书<bold>建立信任</bold>，让客户、合作伙伴和银行放心，确保透明并遵守柬埔寨法规。",
+    "info3": "每一份证书都是我们在提供可靠、专业房地产及估价服务道路上的<bold>里程碑</bold>。",
+    "info4": "我们自豪地展示资质，让您对我们的工作质量和诚信充满<bold>信心</bold>。"
+  },
+  "certificate_titles": {
+    "company_registration": "公司注册证书",
+    "membership_certificate": "会员证书",
+    "valuation_certificate_oung": "估价师证书（Oung Vann Duong）",
+    "valuation_certificate_vong": "估价师证书（Vong Thinnon）",
+    "valuation_certificate_kiev": "估价师证书（Kiev Dany）",
+    "valuation_certificate_heun": "估价师证书（Heun Srey Phek）",
+    "valuation_certificate_san1": "估价师证书 (Sorn Sovanndara)",
+    "valuation_certificate_san2": "估价师证书 (Eang Kimsreang)"
+  },
+  "services_page": {
+    "title": "我们的服务",
+    "subtitle": "探索我们为助您在柬埔寨房产市场取得成功而提供的全方位房地产服务。",
+    "service_list": {
+      "agency": {
+        "title": "房地产中介与咨询",
+        "desc": "为您在柬埔寨买卖、租赁房产提供专业建议与支持，量身定制满足您的需求。"
+      },
+      "valuation": {
+        "title": "物业估价",
+        "desc": "为银行、投资者和个人提供准确、可信、具战略性的估价服务。"
+      },
+      "development": {
+        "title": "房地产开发",
+        "desc": "为住宅和商业地产提供全面的项目管理与开发解决方案。"
+      },
+      "investment": {
+        "title": "投资基金咨询",
+        "desc": "为房地产投资基金提供战略建议，包括法规和市场见解。"
+      },
+      "citizenship": {
+        "title": "获得柬埔寨公民身份",
+        "desc": "为外国投资者和个人申请柬埔寨国籍提供专业指导。"
+      },
+      "support": {
+        "title": "客户支持与售后服务",
+        "desc": "为所有客户提供持续支持与售后服务，确保满意与长期成功。"
+      }
+    },
+    "why_choose": "为什么选择我们",
+    "why": [
+      {
+        "title": "免费口头估价表",
+        "desc": "获取免费的口头估价表，快速了解您的房产价值。我们的标准估价表将及时免费提供。"
+      },
+      {
+        "title": "职业责任保险",
+        "desc": "我们提供职业责任保险，保障客户因任何可能影响房产价值的错误而造成的经济损失。"
+      },
+      {
+        "title": "专业与经验丰富的团队",
+        "desc": "拥有二十余年房地产行业经验，CARE 深谙市场价格与趋势，历经经济低迷与市场波动，能够为客户提供有价值的见解与指导。"
+      },
+      {
+        "title": "无与伦比的市场覆盖",
+        "desc": "总部位于金边，并在暹粒、西哈努克和马德望等主要省市设有分支机构，CARE 能够迅速覆盖柬埔寨全国。"
+      },
+      {
+        "title": "持续改进与创新",
+        "desc": "CARE 致力于行业前沿，不断投资于估价报告生成系统、ERP 系统，以及培训和研究，以提升能力和服务。"
+      },
+      {
+        "title": "客观与独立估价",
+        "desc": "作为独立估价公司，CARE 严格遵守专业标准和道德规范进行估价。"
+      },
+      {
+        "title": "及时可靠的结果",
+        "desc": "CARE 承诺及时高效地提供估价报告，帮助客户做出及时明智的决策。"
+      }
+    ]
+  },
+  "breadcrumb": {
+    "home": "首页",
+    "mortgage-calculator": "房贷计算器",
+    "my-property": "我的房产",
+    "add-property": "添加房产",
+    "business-for-sell": "待售生意",
+    "agriculture-land": "农业用地",
+    "high-building": "高楼",
+    "property": "房产",
+    "profile": "个人资料",
+    "services": "服务",
+    "contact": "联系我们",
+    "agency": "中介",
+    "Properties": "所有房产",
+    "category": "类别",
+    "page": "页面",
+    "about": "关于我们",
+    "article": "文章",
+    "residential": "住宅",
+    "commercial": "商业",
+    "industrial": "工业",
+    "land": "土地",
+    "business": "生意",
+    "agriculture": "农业",
+    "highBuilding": "高楼",
+    "condo": "公寓",
+    "favorites": "收藏夹",
+    "valuation": "估价",
+    "certificate": "证书" ,
+     "edit-property": "编辑房产信息"
+  },
+  "properties_page": {
+    "title": "所有房产",
+    "no_properties": "没有可用的房产。",
+    "error_message": "错误：{{error}}",
+    "pagination_prev": "上一页",
+    "pagination_next": "下一页",
+    "filters": {
+      "title": "筛选",
+      "clear": "清除筛选",
+      "apply": "应用筛选",
+      "keyword_placeholder": "关键词",
+      "type_label": "房产类型",
+      "all_types": "所有类型",
+      "status_label": "状态",
+      "all_statuses": "所有状态",
+      "pending": "待定",
+      "active": "已激活",
+      "price_range_label": "价格范围",
+      "min_price_placeholder": "最低价",
+      "max_price_placeholder": "最高价",
+      "sale_rent_placeholder": "出售/出租",
+      "sell": "出售",
+      "rent": "出租",
+      "province_placeholder": "省",
+      "district_placeholder": "区",
+      "commune_placeholder": "公社",
+      "village_placeholder": "村",
+      "all": "全部"
+    }
+  },
+  "my_property_page": {
+    "title": "我的房产",
+    "login_required": "需要登录",
+    "login_message": "请登录以查看您的房产。",
+    "no_properties": "您没有列出任何房产。",
+    "error_message": "错误：{{error}}",
+    "filters": {
+      "title": "筛选我的房产"
+    }
+  },
+  "add_property_page": {
+    "title": "添加新房产",
+    "access_denied": "访问被拒绝",
+    "agency_message": "代理商帐户不允许添加房产。",
+    "go_back": "返回",
+    "login_required": "需要登录",
+    "login_prompt": "请登录以添加新房产。",
+    "owner_section": "所有者",
+    "name_label": "名称",
+    "phone_label": "电话",
+    "address_label": "地址",
+    "note_label": "备注",
+    "details_section": "详情",
+    "category_label": "类别",
+    "title_label": "标题",
+    "property_type_label": "房产类型",
+    "for_sell": "出售",
+    "for_rent": "出租",
+    "duration_label": "价格有效期",
+    "price_label": "价格 ($)",
+    "description_label": "描述",
+    "facilities_section": "设施",
+    "distance_placeholder": "输入距离",
+    "distance_label": "距离 (km)",
+    "location_section": "位置",
+    "map_placeholder": "输入位置",
+    "country_label": "国家",
+    "province_label": "省",
+    "district_label": "区",
+    "commune_label": "公社",
+    "village_label": "村",
+    "latitude_label": "纬度",
+    "longitude_label": "经度",
+    "client_address_label": "客户地址",
+    "images_section": "图片",
+    "title_image_label": "标题图片",
+    "threeD_image_label": "3D 图片",
+    "gallery_images_label": "图库图片",
+    "video_link_label": "视频链接",
+    "dnd_placeholder": "拖放文件或浏览",
+    "add_more_images": "+ 添加更多图片",
+    "submit_button": "添加房产",
+    "submitting_button": "正在添加房产...",
+    "select_placeholder": "选择",
+    "select_category_placeholder": "选择类别",
+    "select_duration_placeholder": "选择有效期",
+    "select_country_placeholder": "选择国家",
+    "select_province_placeholder": "选择省份",
+    "select_district_placeholder": "选择区域",
+    "select_commune_placeholder": "选择公社",
+    "select_village_placeholder": "选择村庄",
+    "daily": "每日",
+    "monthly": "每月",
+    "yearly": "每年",
+    "map_loading_error": "地图加载失败",
+    "no_data_available": "无可用数据",
+    "error_loading_categories": "加载类别时出错",
+    "login_to_load_categories": "登录以加载类别",
+    "parameter_bathroom": "浴室",
+    "parameter_bedroom": "卧室",
+    "parameter_floors": "楼层数",
+    "parameter_title": "地契",
+    "hard_title": "硬地契",
+    "soft_title": "软地契",
+    "normal_title": "普通",
+    "parameter_land_size": "土地面积",
+    "parameter_house_size": "房屋面积",
+    "parameter_title_no": "地契编号",
+    "validation": {
+      "category": "请选择一个类别",
+      "property_type": "请选择房产类型",
+      "title": "请输入标题",
+      "title_image": "请上传标题图片",
+      "description": "请输入描述",
+      "price": "请输入价格",
+      "rent_duration": "请选择租期",
+      "location": "请在地图上选择一个位置",
+      "client_address": "请输入客户地址"
+    },
+    "toast": {
+      "success": "房产已成功添加！",
+      "submit_failed": "提交房产失败。请检查您的输入并重试。",
+      "non_json_error": "服务器返回了非JSON响应",
+      "server_error": "发生服务器错误。请检查控制台以获取详细信息并重试。",
+      "generic_error": "提交房产失败。请再试一次。"
+    }
+  },
+  "edit_property_page": {
+    "title": "编辑房产",
+    "back": "返回",
+    "owner_section": "所有者",
+    "name_label": "名称",
+    "phone_label": "电话",
+    "address_label": "地址",
+    "note_label": "备注",
+    "details_section": "详情",
+    "category_label": "类别",
+    "title_label": "标题",
+    "property_type_label": "房产类型",
+    "for_sell": "出售",
+    "for_rent": "出租",
+    "duration_label": "价格有效期",
+    "price_label": "价格 ($)",
+    "description_label": "描述",
+    "facilities_section": "设施",
+    "nearby_places_section": "附近地点",
+    "distance_placeholder": "输入距离",
+    "distance_label": "距离 (km)",
+    "location_section": "位置",
+    "map_placeholder": "输入位置",
+    "country_label": "国家",
+    "province_label": "省",
+    "district_label": "区",
+    "commune_label": "公社",
+    "village_label": "村",
+    "latitude_label": "纬度",
+    "longitude_label": "经度",
+    "client_address_label": "客户地址",
+    "images_section": "图片",
+    "title_image_label": "标题图片",
+    "threeD_image_label": "3D 图片",
+    "gallery_images_label": "图库图片",
+    "video_link_label": "视频链接",
+    "dnd_placeholder": "拖放文件或浏览",
+    "add_more_images": "+ 添加更多图片",
+    "submit_button": "更新房产",
+    "submitting_button": "正在更新房产...",
+    "select_placeholder": "选择",
+    "select_category_placeholder": "选择类别",
+    "select_duration_placeholder": "选择有效期",
+    "select_country_placeholder": "选择国家",
+    "select_province_placeholder": "选择省份",
+    "select_district_placeholder": "选择区域",
+    "select_commune_placeholder": "选择公社",
+    "select_village_placeholder": "选择村庄",
+    "daily": "每日",
+    "monthly": "每月",
+    "yearly": "每年",
+    "map_loading_error": "地图加载失败",
+    "no_data_available": "无可用数据",
+    "error_loading_categories": "加载类别时出错",
+    "login_to_load_categories": "登录以加载类别",
+    "parameter_bathroom": "浴室",
+    "parameter_bedroom": "卧室",
+    "parameter_floors": "楼层数",
+    "parameter_title": "地契",
+    "hard_title": "硬地契",
+    "soft_title": "软地契",
+    "normal_title": "普通",
+    "parameter_land_size": "土地面积",
+    "parameter_house_size": "房屋面积",
+    "parameter_title_no": "地契编号",
+    "validation": {
+      "category": "请选择一个类别",
+      "property_type": "请选择房产类型",
+      "title": "请输入标题",
+      "title_image": "请上传标题图片",
+      "description": "请输入描述",
+      "price": "请输入价格",
+      "rent_duration": "请选择租期",
+      "location": "请在地图上选择一个位置",
+      "client_address": "请输入客户地址"
+    },
+    "toast": {
+      "success": "房产已成功更新！",
+      "submit_failed": "更新房产失败。请检查您的输入并重试。",
+      "non_json_error": "服务器返回了非JSON响应",
+      "server_error": "发生服务器错误。请检查控制台以获取详细信息并重试。",
+      "generic_error": "更新房产失败。请再试一次。"
+    },
+    "error": "错误",
+    "loading": "正在加载房产...",
+    "authorization_error": "您无权编辑此房产",
+    "missing_fields": "请填写所有数据并提交"
+  },
+  "countries": {
+    "cambodia": "柬埔寨"
+  },
+  "errors": {
+    "failed_to_fetch_properties": "获取房产失败。请再试一次。",
+    "failed_to_fetch_user_data": "获取用户数据失败。",
+    "api_error": "API 错误",
+    "http_error": "HTTP 错误！状态：{{status}}"
+  },
+  "profile_page": {
+    "title": "我的资料",
+    "subtitle": "管理您的账户，更新您的信息，并个性化您的体验。",
+    "account_management": "账户管理",
+    "upload_photo": "上传照片",
+    "change_photo": "更换照片",
+    "sign_out": "退出登录",
+    "sign_out_confirm": "您确定要退出登录吗？",
+    "sign_out_yes": "是",
+    "sign_out_no": "否",
+    "signed_out_success": "退出登录成功！",
+    "profile_updated_success": "资料更新成功！",
+    "profile_updated_error": "资料已更新，但刷新信息失败。",
+    "profile_update_failed": "资料更新失败！",
+    "loading": "正在加载资料...",
+    "error": "加载资料失败",
+    "profile_information": "资料信息",
+    "username_placeholder": "用户名",
+    "contact_info": "联系信息",
+    "email_placeholder": "邮箱",
+    "telegram_placeholder": "Telegram 链接",
+    "about_user": "关于用户",
+    "address_placeholder": "地址",
+    "location_placeholder": "搜索城市",
+    "notification": "通知",
+    "notification_enabled": "已启用",
+    "notification_disabled": "已禁用",
+    "update_profile": "更新资料",
+    "updating": "正在更新..."
+  },
+  "category_properties_page": {
+    "all_properties": "所有房产",
+    "no_properties": "该类别下没有可用的房产。",
+    "error_message": "错误：{{error}}",
+    "pagination_prev": "上一页",
+    "pagination_next": "下一页"
+  },
+  "partner_page": {
+    "title": "我们的合作伙伴",
+    "alt": "银行合作伙伴"
+  },
+   "hero": {
+    "title": "联系估价团队",
+    "subtitle": "通过 Telegram 直接联系我们的估价专家，享受快速、专业的支持。"
+  },
+  "info": {
+    "description": "在柬埔寨这样快速发展的市场中，可信赖和有策略的估价服务是贷款人保护自身风险、确保贷款金额不超过房产价值或避免对不可流通资产放贷的重要措施。我们的全国估价团队会检查每一处房产，研究市场趋势及新基础设施和其他可能影响房产价值（正面或负面）的发展。这些洞察为数百位客户带来了可观的投资回报。我们及时、准确、诚信且专业的估价报告被本地和国际银行、个人客户及法院广泛采用。"
+  },
+  "benefits": {
+    "why_title": "为什么选择我们的估价？",
+    "why_1": "准确、最新的市场分析",
+    "why_2": "受银行和法院信赖",
+    "why_3": "快速响应与高效支持",
+    "why_4": "透明、诚信且保密",
+    "for_you_title": "为您带来的好处",
+    "for_you_1": "最大化您的房产价值",
+    "for_you_2": "做出明智的投资决策",
+    "for_you_3": "降低风险，避免多付",
+    "for_you_4": "专家指导让您安心无忧"
+  },
+  "process": {
+    "title": "我们的估价流程",
+    "step_1": "初步咨询与房产信息收集",
+    "step_2": "现场检查与市场调研",
+    "step_3": "全面分析与报告编制",
+    "step_4": "交付详细、可操作的估价报告",
+    "step_5": "后续支持，解答疑问"
+  },
+  "testimonials": {
+    "title": "客户评价",
+    "1": {
+      "text": "估价报告详尽且交付迅速，帮助我达成了很好的交易！",
+      "name": "陈达拉先生"
+    },
+    "2": {
+      "text": "非常专业的团队，所有问题都得到了耐心解答，流程顺畅。",
+      "name": "Srey Leak 女士"
+    },
+    "3": {
+      "text": "强烈推荐！估价准确，报告易于理解。",
+      "name": "Vannak 先生"
+    }
+  },
+  "faq": {
+    "title": "常见问题",
+    "q1": {
+      "question": "估价需要多长时间？",
+      "answer": "大多数估价会在房产检查后2-3个工作日内完成。"
+    },
+    "q2": {
+      "question": "我的信息保密吗？",
+      "answer": "绝对保密。所有客户信息和报告都严格保密并专业处理。"
+    },
+    "q3": {
+      "question": "估价报告可以用于银行贷款吗？",
+      "answer": "可以，我们的报告被柬埔寨大多数本地和国际银行认可。"
+    },
+    "q4": {
+      "question": "如何开始？",
+      "answer": "只需通过 Telegram 联系我们的团队或填写在线表格，我们会全程指导您。"
+    }
+  },
+  "contacts": [
+    {
+      "name": "សន សុវណ្ណតារា",
+      "title": "估价专员",
+      "button": "联系 @Sovanndara07"
+    },
+    {
+      "name": "Alex Vanndoung",
+      "title": "估价主管",
+      "button": "联系 @Vanndoung7"
+    }
+  ]
+} 

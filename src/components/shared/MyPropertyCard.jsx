@@ -1,8 +1,10 @@
 import { EyeIcon, MapPinIcon } from "@heroicons/react/20/solid";
 import React, { useState } from "react";
+import { FaEdit } from "react-icons/fa";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useNavigate } from "react-router-dom";
+import { useStateContext } from "../../contexts/ContextProvider";
 
 // Helper function to trim text
 function trimText(text, maxLength = 30) {
@@ -14,6 +16,7 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
   const isGridView = view === "grid";
   const [imgLoaded, setImgLoaded] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useStateContext();
 
   const handleCardClick = async () => {
     try {
@@ -47,6 +50,11 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
         state: { from: window.location.pathname, property: property },
       });
     }
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    navigate(`/edit-property/${property.id}`);
   };
 
   return (
@@ -96,7 +104,7 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
             </>
           )}
           <img
-            src={property.image}
+            src={property.title_image}
             alt="Property"
             className={`w-full h-32 md:h-48 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105 hover:scale-105 ${
               !imgLoaded ? "invisible" : ""
@@ -105,30 +113,39 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
           />
 
           <div
-            className={`absolute bottom-1 md:bottom-2 left-1 md:left-2 bg-gray-500 text-white text-sm px-1 md:px-2 py-0 rounded-md z-10`}
+            className={`absolute bottom-1 md:bottom-2 left-1 md:left-2 bg-gray-500 text-white text-xs px-1 md:px-2 py-0 rounded-md z-10`}
           >
-            {property.status}
+            {property.propery_type}
           </div>
           {isGridView && (
             <>
-              <div className="absolute flex justify-between items-center gap-1 top-1 left-1 md:top-2 md:left-2 bg-gray-400 text-white text-sm px-2 py-1 md:py-1 rounded-full">
+              <div className="absolute flex justify-between items-center gap-1 top-1 left-1 md:top-2 md:left-2 bg-gray-400 text-white text-xs px-2 py-0.5 md:py-1 rounded-full">
                 <EyeIcon className="w-4 h-4 md:w-5 md:h-5 text-white" />
-                <span className="text-sm md:text-md text-white">
-                  {property.views}
+                <span className="text-xs md:text-md text-white">
+                  {property.total_view}
                 </span>
               </div>
               <div className="absolute top-0 right-0 md:top-2 md:right-2">
                 <div
-                  className={`px-2 py-1 rounded-full text-xs md:text-sm font-medium ${
-                    property.state === "1"
+                  className={`px-2 py-0.5 rounded-full text-xs md:text-sm font-medium ${
+                    property.status == "1"
                       ? "bg-green-500 text-white"
                       : "bg-yellow-500 text-white"
                   }`}
                 >
-                  {property.state === "1" ? "Approved" : "Pending"}
+                  {property.status == "1" ? "Approved" : "Pending"}
                 </div>
               </div>
             </>
+          )}
+          {!isGridView && currentUser?.role !== "agency" && (
+            <button
+              onClick={handleEditClick}
+              className="absolute top-2 right-2 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors z-10"
+              title="Edit Property"
+            >
+              <FaEdit className="w-3 h-3" />
+            </button>
           )}
         </div>
         <div
@@ -139,16 +156,28 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
           {isGridView ? (
             <>
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-white rounded-sm">
+                <div className="flex items-center gap-1 md:gap-2 text-white rounded-sm">
                   <img
-                    className="h-4 w-4 md:h-5 md:w-5"
-                    src={property.category_image}
+                    className="h-3 w-3 md:h-5 md:w-5"
+                    src={property.category?.image}
                     alt="category"
                   />
-                  <span className="text-sm md:text-md text-gray-500">
-                    {property?.category}
+                  <span className="text-xs md:text-md text-gray-500">
+                    {property.category?.category}
                   </span>
                 </div>
+                {currentUser?.role !== "agency" && (
+                  <button
+                    onClick={handleEditClick}
+                    className="bg-blue-500 text-white px-2 py-0.5 rounded-full hover:bg-blue-600 transition-colors flex items-center gap-1"
+                    title="Edit Property"
+                  >
+                    <div className="flex justify-center gap-1">
+                      <FaEdit className="w-3 h-3" />
+                      <span className="text-xs">Edit</span>
+                    </div>
+                  </button>
+                )}
               </div>
               <h1 className="text-sm md:text-lg mt-2 font-semibold text-blue-900 font-khmer">
                 {trimText(property.title, 20)}
@@ -162,11 +191,11 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
               <div className="flex md:py-1 items-center gap-1">
                 <MapPinIcon className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
                 <span className="text-sm md:text-md text-gray-500 font-khmer">
-                  {trimText(property.location, 14)}
+                  {trimText(property.address, 14)}
                 </span>
               </div>
               <span className="text-sm md:text-md text-black">
-                {property.time}
+                {property.post_created}
               </span>
             </>
           ) : (
@@ -175,28 +204,28 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
                 <div className="flex items-center gap-2 text-white rounded-sm">
                   <img
                     className="h-4 w-4 md:h-5 md:w-5"
-                    src={property.category}
+                    src={property.category?.image}
                     alt="category"
                   />
                   <span className="text-sm md:text-md text-gray-500">
-                    {property.type}
+                    {property.category?.category}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex justify-between items-center gap-2">
                     <EyeIcon className="w-4 h-4 md:w-5 md:h-5 mt-1 text-blue-800" />
                     <span className="text-sm md:text-md text-blue-900">
-                      {property.views}
+                      {property.total_view}
                     </span>
                   </div>
                   <div
                     className={`px-2 py-1 rounded-full text-xs md:text-sm font-medium ${
-                      property.state === "1"
+                      property.status == "1"
                         ? "bg-green-500 text-white"
                         : "bg-yellow-500 text-white"
                     }`}
                   >
-                    {property.state === "1" ? "Approved" : "Pending"}
+                    {property.status == "1" ? "Approved" : "Pending"}
                   </div>
                 </div>
               </div>
@@ -208,14 +237,14 @@ const MyPropertyCard = ({ property, view = "grid" }) => {
                   {property.price}
                 </h1>
                 <span className="text-sm md:text-md text-black">
-                  {property.time}
+                  {property.post_created}
                 </span>
               </div>
 
               <div className="flex items-center gap-1">
                 <MapPinIcon className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
                 <span className="text-sm md:text-md text-gray-500 font-khmer">
-                  {trimText(property.location, 30)}
+                  {trimText(property.address, 30)}
                 </span>
               </div>
             </>

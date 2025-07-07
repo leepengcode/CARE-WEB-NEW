@@ -1,6 +1,17 @@
 import { Autocomplete } from "@react-google-maps/api";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  FaBell,
+  FaCamera,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaSignOutAlt,
+  FaTelegramPlane,
+  FaUser,
+  FaUserCircle,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PageComponents from "../components/PageComponents.jsx";
 import { useStateContext } from "../contexts/ContextProvider.jsx";
@@ -25,6 +36,7 @@ function showToast(message, type = "info") {
 }
 
 export default function Profile() {
+  const { t } = useTranslation();
   const { userToken, currentUser, setUserToken, setCurrentUser } =
     useStateContext();
   const [profile, setProfile] = useState(null);
@@ -33,11 +45,11 @@ export default function Profile() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    mobile: "",
     telegram_link: "",
     address: "",
     location: localStorage.getItem("userLocation") || "",
     notification: true,
+    mobile: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [updating, setUpdating] = useState(false);
@@ -59,7 +71,6 @@ export default function Profile() {
           setForm({
             name: currentUser.name || "",
             email: currentUser.email || "",
-            mobile: currentUser.mobile || "",
             telegram_link: currentUser.telegram_link || "",
             address: currentUser.address || "",
             location: currentUser.location || "",
@@ -67,7 +78,9 @@ export default function Profile() {
               currentUser.notification !== undefined
                 ? !!currentUser.notification
                 : true,
+            mobile: currentUser.mobile || "",
           });
+          console.log("currentUser:", currentUser);
         } else {
           const res = await axios.get(
             `${import.meta.env.VITE_API_URL}/api/get_user_by_id`,
@@ -81,7 +94,6 @@ export default function Profile() {
             setForm({
               name: res.data.data.name || "",
               email: res.data.data.email || "",
-              mobile: res.data.data.mobile || "",
               telegram_link: res.data.data.telegram_link || "",
               address: res.data.data.address || "",
               location: res.data.data.location || "",
@@ -89,20 +101,22 @@ export default function Profile() {
                 res.data.data.notification !== undefined
                   ? !!res.data.data.notification
                   : true,
+              mobile: res.data.data.mobile || "",
             });
+            console.log("profile from API:", res.data.data);
           } else {
-            setError(res.data.message || "Failed to load profile");
+            setError(res.data.message || t("profile_page.error"));
           }
         }
       } catch {
-        setError("Failed to load profile");
+        setError(t("profile_page.error"));
       } finally {
         setLoading(false);
       }
     };
     fetchProfile();
     // eslint-disable-next-line
-  }, [userToken, currentUser, navigate]);
+  }, [userToken, currentUser, navigate, t]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -132,7 +146,6 @@ export default function Profile() {
       formData.append("userid", profile?.id || currentUser?.id);
       formData.append("name", form.name);
       formData.append("email", form.email);
-      formData.append("mobile", form.mobile);
       formData.append("telegram_link", form.telegram_link);
       formData.append("address", form.address);
       formData.append("notification", form.notification ? 1 : 0);
@@ -165,13 +178,13 @@ export default function Profile() {
         setProfile(updatedUser);
         setCurrentUser(updatedUser);
         setAvatarFile(null);
-        showToast("Profile updated successfully!", "success");
+        showToast(t("profile_page.profile_updated_success"), "success");
       } else {
-        showToast("Profile updated, but failed to refresh info.", "error");
+        showToast(t("profile_page.profile_updated_error"), "error");
       }
     } catch (err) {
       showToast(
-        err.response?.data?.message || "Failed to update profile!",
+        err.response?.data?.message || t("profile_page.profile_update_failed"),
         "error"
       );
     } finally {
@@ -186,10 +199,16 @@ export default function Profile() {
       "fixed left-1/2 top-1/3 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-6 flex flex-col items-center";
     confirmDiv.style.transform = "translateX(-50%)";
     confirmDiv.innerHTML = `
-      <div class="mb-4 text-lg font-semibold text-gray-800">Are you sure you want to sign out?</div>
+      <div class="mb-4 text-lg font-semibold text-gray-800">${t(
+        "profile_page.sign_out_confirm"
+      )}</div>
       <div class="flex gap-4">
-        <button id="confirm-yes" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes</button>
-        <button id="confirm-no" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">No</button>
+        <button id="confirm-yes" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">${t(
+          "profile_page.sign_out_yes"
+        )}</button>
+        <button id="confirm-no" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">${t(
+          "profile_page.sign_out_no"
+        )}</button>
       </div>
     `;
     document.body.appendChild(confirmDiv);
@@ -200,7 +219,7 @@ export default function Profile() {
       localStorage.removeItem("userToken");
       localStorage.removeItem("currentUser");
       navigate("/");
-      showToast("Signed out successfully!", "success");
+      showToast(t("profile_page.signed_out_success"), "success");
     };
     document.getElementById("confirm-no").onclick = () => {
       document.body.removeChild(confirmDiv);
@@ -236,23 +255,41 @@ export default function Profile() {
     }
   };
 
-  if (loading) return <div className="p-6 text-center">Loading profile...</div>;
+  if (loading)
+    return <div className="p-6 text-center">{t("profile_page.loading")}</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (!profile) return null;
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-8 px-2 md:px-10">
-        <div className="w-full max-w-6xl bg-white shadow-lg rounded-lg overflow-hidden md:flex">
+      {/* Hero Section */}
+      <div className="w-full mt-5 md:mt-0 max-w-7xl mx-auto animate-fade-in-up md:px-10 md:pt-5">
+        <div className="relative w-full h-[140px] md:h-[200px] rounded-2xl overflow-hidden mb-10 flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 shadow-lg">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <FaUserCircle className="text-blue-200 text-5xl md:text-7xl opacity-30" />
+          </div>
+          <div className="relative z-10 text-center">
+            <h1 className="text-2xl md:text-4xl font-bold text-blue-900 mb-2 drop-shadow-lg">
+              {t("profile_page.title")}
+            </h1>
+            <p className="text-blue-800 text-base md:text-lg font-medium max-w-2xl mx-auto">
+              {t("profile_page.subtitle")}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-0 px-2 md:px-10 animate-fade-in-up">
+        <div className="w-full max-w-6xl bg-white shadow-2xl rounded-2xl overflow-hidden md:flex border border-blue-100">
           {/* Left Column: Account Management */}
-          <div className="md:w-1/3 p-6 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col items-center">
-            <h2 className="text-lg font-semibold mb-6 text-gray-900">
-              Account Management
+          <div className="md:w-1/3 p-8 border-b md:border-b-0 md:border-r border-blue-100 flex flex-col items-center bg-gradient-to-br from-blue-50 via-white to-blue-100">
+            <h2 className="text-lg font-semibold mb-6 text-blue-900 flex items-center gap-2">
+              <FaUser className="text-blue-400" />{" "}
+              {t("profile_page.account_management")}
             </h2>
             {/* Photo Upload */}
             <div className="relative mb-6">
               <div
-                className="w-40 h-40 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden border-4 border-blue-200 cursor-pointer"
+                className="w-36 h-36 md:w-40 md:h-40 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden border-4 border-blue-200 cursor-pointer shadow-lg hover:scale-105 transition-all duration-200"
                 onClick={handleAvatarClick}
               >
                 {avatarFile ? (
@@ -268,22 +305,7 @@ export default function Profile() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <svg
-                    width="64"
-                    height="64"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="text-blue-400 w-16 h-16"
-                  >
-                    <circle cx="12" cy="8" r="4" strokeWidth="2" />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 20c0-2.5 3.5-4 8-4s8 1.5 8 4"
-                    />
-                  </svg>
+                  <FaUserCircle className="text-blue-300 w-20 h-20 md:w-28 md:h-28" />
                 )}
                 <input
                   type="file"
@@ -294,128 +316,135 @@ export default function Profile() {
                 />
               </div>
               <button
-                className="absolute bottom-2 right-2 bg-blue-500 rounded-full p-1 border-2 border-white shadow"
+                className="absolute bottom-2 right-2 bg-blue-500 rounded-full p-2 border-2 border-white shadow hover:bg-blue-600 transition-all"
                 onClick={handleAvatarClick}
                 type="button"
+                title={t("profile_page.change_photo")}
               >
-                <svg
-                  width="18"
-                  height="18"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="text-white"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.232 5.232l3.536 3.536M9 11l6 6M3 17v4h4l10.293-10.293a1 1 0 000-1.414l-3.586-3.586a1 1 0 00-1.414 0L3 17z"
-                  />
-                </svg>
+                <FaCamera className="text-white text-lg" />
               </button>
             </div>
             <button
               onClick={handleAvatarClick}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 text-sm hover:bg-gray-50 mb-6"
+              className="w-full px-4 py-2 border border-blue-200 rounded-md text-blue-700 text-sm hover:bg-blue-50 mb-6 font-semibold transition-all"
               type="button"
             >
-              Upload Photo
+              {t("profile_page.upload_photo")}
             </button>
 
             {/* Sign Out Button */}
             <button
               onClick={handleSignOut}
-              className="w-full px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold hover:bg-red-600"
+              className="w-full px-4 py-2 bg-red-500 text-white rounded-md text-sm font-semibold hover:bg-red-600 flex items-center justify-center gap-2 shadow-md transition-all"
               type="button"
             >
-              Sign Out
+              <FaSignOutAlt className="text-white" />{" "}
+              {t("profile_page.sign_out")}
             </button>
           </div>
 
           {/* Right Column: Profile Information */}
-          <div className="md:w-2/3 p-6">
+          <div className="md:w-2/3 p-8">
             {/* Profile Information Section */}
-            <h2 className="text-lg font-semibold mb-6 text-gray-900">
-              Profile Information
+            <h2 className="text-lg font-semibold mb-6 text-blue-900 flex items-center gap-2">
+              <FaUser className="text-blue-400" />{" "}
+              {t("profile_page.profile_information")}
             </h2>
-            <form className="w-full space-y-6" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+            <form className="w-full space-y-8" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                 {/* Username */}
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-1">
-                    Username
-                  </label>
-                  {/* Mapping 'name' to Username based on current code structure */}
+                <div className="relative flex items-center">
+                  <FaUser className="absolute left-3 text-blue-400 text-lg" />
                   <input
                     name="name"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
                     value={form.name}
                     onChange={handleChange}
-                    placeholder="Username"
+                    placeholder={t("profile_page.username_placeholder")}
                   />
                 </div>
               </div>
 
               {/* Contact Info Section */}
-              <div className="space-y-4 pt-6 border-t border-gray-200">
-                <h3 className="text-md font-semibold text-gray-900">
-                  Contact Info
+              <div className="space-y-4 pt-6 border-t border-blue-100">
+                <h3 className="text-md font-semibold text-blue-900 flex items-center gap-2">
+                  <FaEnvelope className="text-blue-400" />{" "}
+                  {t("profile_page.contact_info")}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+                  {/* Phone Number (Read Only) */}
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 text-blue-400 text-lg">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.25 6.75v10.5A2.25 2.25 0 004.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75M2.25 6.75A2.25 2.25 0 014.5 4.5h15a2.25 2.25 0 012.25 2.25m-19.5 0l9 7.5 9-7.5"
+                        />
+                      </svg>
+                    </span>
+                    <input
+                      name="mobile"
+                      className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed opacity-70"
+                      value={form?.mobile}
+                      type="text"
+                      readOnly
+                      disabled
+                    />
+                  </div>
                   {/* Email */}
-                  <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Email (required)
-                    </label>
+                  <div className="relative flex items-center">
+                    <FaEnvelope className="absolute left-3 text-blue-400 text-lg" />
                     <input
                       name="email"
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
                       value={form.email}
                       onChange={handleChange}
-                      placeholder="Email"
+                      placeholder={t("profile_page.email_placeholder")}
                       type="email"
                     />
                   </div>
                   {/* Telegram */}
-                  <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Telegram
-                    </label>
+                  <div className="relative flex items-center">
+                    <FaTelegramPlane className="absolute left-3 text-blue-400 text-lg" />
                     <input
                       name="telegram_link"
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
                       value={form.telegram_link}
                       onChange={handleChange}
-                      placeholder="Telegram Link"
+                      placeholder={t("profile_page.telegram_placeholder")}
                     />
                   </div>
                 </div>
               </div>
 
               {/* About the User Section */}
-              <div className="space-y-4 pt-6 border-t border-gray-200">
-                <h3 className="text-md font-semibold text-gray-900">
-                  About the User
+              <div className="space-y-4 pt-6 border-t border-blue-100">
+                <h3 className="text-md font-semibold text-blue-900 flex items-center gap-2">
+                  <FaMapMarkerAlt className="text-blue-400" />{" "}
+                  {t("profile_page.about_user")}
                 </h3>
                 {/* Address */}
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-1">
-                    Address
-                  </label>
+                <div className="relative flex items-center">
+                  <FaMapMarkerAlt className="absolute left-3 text-blue-400 text-lg" />
                   <input
                     name="address"
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
                     value={form.address}
                     onChange={handleChange}
-                    placeholder="Address"
+                    placeholder={t("profile_page.address_placeholder")}
                   />
                 </div>
                 {/* Location */}
-                <div>
-                  <label className="block text-gray-700 text-sm font-medium mb-1">
-                    Select Location
-                  </label>
+                <div className="relative flex items-center">
+                  <FaMapMarkerAlt className="absolute left-3 text-blue-400 text-lg" />
                   <Autocomplete
                     onLoad={onLoad}
                     onPlaceChanged={onPlaceChanged}
@@ -424,22 +453,25 @@ export default function Profile() {
                   >
                     <input
                       name="location"
-                      className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
                       value={form.location}
                       onChange={handleChange}
-                      placeholder="Search for a city"
+                      placeholder={t("profile_page.location_placeholder")}
                     />
                   </Autocomplete>
                 </div>
 
                 {/* Notification Toggle */}
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-gray-700 text-sm font-medium">
-                    Notification
+                  <span className="text-blue-900 text-sm font-medium flex items-center gap-2">
+                    <FaBell className="text-blue-400" />{" "}
+                    {t("profile_page.notification")}
                   </span>
                   <label className="inline-flex items-center cursor-pointer">
-                    <span className="mr-2 text-gray-500 text-sm">
-                      {form.notification ? "Enabled" : "Disabled"}
+                    <span className="mr-2 text-blue-500 text-sm">
+                      {form.notification
+                        ? t("profile_page.notification_enabled")
+                        : t("profile_page.notification_disabled")}
                     </span>
                     <input
                       type="checkbox"
@@ -449,8 +481,8 @@ export default function Profile() {
                       className="sr-only"
                     />
                     <div
-                      className={`w-11 h-6 bg-gray-200 rounded-full shadow-inner transition-colors duration-200 ${
-                        form.notification ? "bg-blue-500" : "bg-gray-200"
+                      className={`w-11 h-6 bg-blue-200 rounded-full shadow-inner transition-colors duration-200 ${
+                        form.notification ? "bg-blue-500" : "bg-blue-200"
                       }`}
                     >
                       <div
@@ -465,15 +497,26 @@ export default function Profile() {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded-md text-sm font-semibold mt-4 shadow-md hover:bg-blue-700 transition"
+                className="w-full bg-blue-600 text-white py-3 rounded-full text-base font-semibold mt-4 shadow-lg hover:bg-blue-700 transition-all duration-200"
                 disabled={updating}
               >
-                {updating ? "Updating..." : "Update Profile"}
+                {updating
+                  ? t("profile_page.updating")
+                  : t("profile_page.update_profile")}
               </button>
             </form>
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px);}
+          to { opacity: 1; transform: translateY(0);}
+        }
+        .animate-fade-in-up {
+          animation: fadeInUp 0.5s cubic-bezier(.4,0,.2,1) both;
+        }
+      `}</style>
     </PageComponents>
   );
 }

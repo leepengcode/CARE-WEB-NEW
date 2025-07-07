@@ -75,6 +75,7 @@ function setFavoriteIds(ids) {
 const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
   const isGridView = view === "grid";
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const navigate = useNavigate();
   const { userToken } = useStateContext();
   const [isFav, setIsFav] = useState(false);
@@ -159,10 +160,14 @@ const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
       <div
         onClick={handleCardClick}
         className={`group bg-gray-100 rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-200 ${
-          isGridView ? "flex flex-col" : "flex h-28 md:h-36"
+          isGridView ? "flex flex-col" : "flex flex-row h-28 md:h-36"
         }`}
       >
-        <div className={`relative ${isGridView ? "w-full" : "w-[40%]"}`}>
+        <div
+          className={`relative ${
+            isGridView ? "w-full" : "flex-shrink-0 flex-grow-0 basis-2/5 h-full"
+          }`}
+        >
           {/* Image Skeleton using react-loading-skeleton */}
           {!imgLoaded && (
             <>
@@ -202,25 +207,30 @@ const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
             </>
           )}
           <img
-            src={property.image}
+            src={
+              imgError
+                ? "https://via.placeholder.com/300x200?text=No+Image"
+                : property.title_image
+            }
             alt="Property"
             className={`w-full h-32 md:h-48 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105 hover:scale-105 ${
               !imgLoaded ? "invisible" : ""
             }`}
             onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
           />
 
           <div
-            className={`absolute bottom-1 md:bottom-2 left-1  md:left-2 bg-gray-500 text-white text-sm   px-1 md:px-2 py-0 rounded-md z-10`}
+            className={`absolute bottom-1 md:bottom-2 left-1  md:left-2 bg-gray-500 text-white text-xs   px-1 md:px-2 py-0 rounded-md z-10`}
           >
-            {property.status}
+            {property?.propery_type}
           </div>
           {isGridView && (
             <>
-              <div className="absolute flex justify-between items-center gap-1  top-1 left-1 md:top-2 md:left-2 bg-gray-400 text-white text-sm px-2 py-1 md:py-1 rounded-full">
+              <div className="absolute flex justify-between items-center gap-1  top-1 left-1 md:top-2 md:left-2 bg-gray-400 text-white text-xs px-2 py-0 md:py-1 rounded-full">
                 <EyeIcon className="w-4 h-4 md:w-5 md:h-5  text-white" />
                 <span className="text-sm md:text-md text-white">
-                  {property.views}
+                  {property.total_view}
                 </span>
               </div>
               <button
@@ -245,7 +255,9 @@ const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
         </div>
         <div
           className={`w-full ${
-            isGridView ? "py-1 md:py-2 px-2 md:px-3" : "w-[70%] py-2 px-3"
+            isGridView
+              ? "py-1 md:py-2 px-2 md:px-3"
+              : "flex-grow py-2 px-3 min-w-0"
           }`}
         >
           {isGridView ? (
@@ -254,11 +266,11 @@ const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
                 <div className="flex items-center gap-2 text-white rounded-sm">
                   <img
                     className="h-4 w-4 md:h-5 md:w-5"
-                    src={property.category}
+                    src={property.category?.image}
                     alt="category"
                   />
                   <span className=" text-sm md:text-md text-gray-500 ">
-                    {property.type}
+                    {property.category?.category}
                   </span>
                 </div>
               </div>
@@ -271,38 +283,38 @@ const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
                 </h1>
               </div>
 
-              <div className="flex md:py-1 items-center gap-1">
+              <div className="flex  md:py-1 items-center gap-1">
                 <MapPinIcon className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                <span className="text-sm md:text-md text-gray-500 font-khmer">
-                  {trimText(property.location, 14)}
+                <span className="text-sm md:text-md mt-1 text-gray-500 font-khmer">
+                  {trimText(property.address, 14)}
                 </span>
               </div>
               <span className="text-sm md:text-md text-black">
-                {property.time}
+                {property.post_created}
               </span>
             </>
           ) : (
             <>
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2 text-white rounded-sm">
+                <div className="flex items-center gap-1 text-white rounded-sm">
                   <img
-                    className="h-4 w-4 md:h-5 md:w-5"
-                    src={property.category}
+                    className="h-3 w-3 md:h-5 md:w-5"
+                    src={property.category?.image}
                     alt="category"
                   />
-                  <span className=" text-sm md:text-md text-gray-500 ">
-                    {property.type}
+                  <span className=" text-xs md:text-md mt-1 md:mt text-gray-500 ">
+                    {property.category?.category}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-white rounded-sm">
                   <div className="flex justify-between items-center gap-2">
                     <EyeIcon className="w-4 h-4 md:w-5 md:h-5 mt-1 text-blue-800" />
-                    <span className="text-sm md:text-md text-blue-900">
-                      {property.views}
+                    <span className="text-xs mt-1 md:mt-0 md:text-md text-blue-900">
+                      {property.total_view}
                     </span>
                   </div>
                   <button
-                    className="w-6 h-6 md:w-8 md:h-8 rounded-full mx-auto flex items-center justify-center focus:outline-none"
+                    className="w-4 h-4 md:w-8 md:h-8 rounded-full mx-auto flex items-center justify-center focus:outline-none"
                     onClick={handleToggleFavorite}
                     disabled={favLoading}
                     title={isFav ? "Remove from favorites" : "Add to favorites"}
@@ -325,15 +337,15 @@ const PropertyCard = ({ property, view = "grid", onFavoriteChange }) => {
                 <h1 className="text-md md:text-lg font-semibold">
                   {property.price}
                 </h1>
-                <span className="text-sm md:text-md text-black">
-                  {property.time}
+                <span className="text-xs md:text-md text-black">
+                  {property.post_created}
                 </span>
               </div>
 
-              <div className="flex  items-center gap-1">
+              <div className="flex  gap-1">
                 <MapPinIcon className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
-                <span className="text-sm md:text-md text-gray-500 font-khmer">
-                  {trimText(property.location, 30)}
+                <span className="text-sm md:text-md  text-gray-500 font-khmer">
+                  {trimText(property.address, 20)}
                 </span>
               </div>
             </>

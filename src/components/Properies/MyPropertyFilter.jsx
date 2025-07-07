@@ -1,26 +1,29 @@
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import CustomDropdown from "../shared/CustomDropdown";
 
-const propertyTypeOptions = [
-  { value: null, label: "All" },
-  { value: "Residential", label: "Residential" },
-  { value: "Condo", label: "Condo" },
-  { value: "Commercial", label: "Commercial" },
-  { value: "Industrial", label: "Industrial" },
-  { value: "Land", label: "Land" },
-  { value: "Business for Sell", label: "Business for Sell" },
-  { value: "Agricultural Land", label: "Agricultural Land" },
-  { value: "High Building", label: "High Building" },
-];
-
-const statusOptions = [
-  { value: null, label: "All" },
-  { value: "0", label: "Pending" },
-  { value: "1", label: "Approved" },
-];
-
 const MyPropertyFilter = ({ onFilter, onClear }) => {
+  const { t } = useTranslation();
+
+  const propertyTypeOptions = [
+    { value: null, label: t("properties_page.filters.all_types") },
+    { value: "Residential", label: t("categories.residential") },
+    { value: "Condo", label: t("categories.condo") },
+    { value: "Commercial", label: t("categories.commercial") },
+    { value: "Industrial", label: t("categories.industrial") },
+    { value: "Land", label: t("categories.land") },
+    { value: "Business for Sell", label: t("categories.business") },
+    { value: "Agricultural Land", label: t("categories.agriculture") },
+    { value: "High Building", label: t("categories.building") },
+  ];
+
+  const statusOptions = [
+    { value: null, label: t("properties_page.filters.all_statuses") },
+    { value: "0", label: t("properties_page.filters.pending") },
+    { value: "1", label: t("properties_page.filters.active") },
+  ];
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   // Filter states
   const [propertyType, setPropertyType] = useState(null);
@@ -72,7 +75,9 @@ const MyPropertyFilter = ({ onFilter, onClear }) => {
       >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">My Property Filters</h2>
+            <h2 className="text-xl font-semibold">
+              {t("my_property_page.filters.title")}
+            </h2>
             <button
               onClick={toggleFilters}
               className="text-gray-500 hover:text-gray-700"
@@ -98,33 +103,33 @@ const MyPropertyFilter = ({ onFilter, onClear }) => {
               options={propertyTypeOptions}
               value={propertyType}
               onChange={setPropertyType}
-              placeholder="Property Type"
+              placeholder={t("properties_page.filters.type_label")}
             />
             <CustomDropdown
               options={statusOptions}
               value={status}
               onChange={setStatus}
-              placeholder="Status"
+              placeholder={t("properties_page.filters.status_label")}
             />
             <input
               type="number"
               value={minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
-              placeholder="Min Price"
+              placeholder={t("properties_page.filters.min_price_placeholder")}
               className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="number"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
-              placeholder="Max Price"
+              placeholder={t("properties_page.filters.max_price_placeholder")}
               className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Keyword"
+              placeholder={t("properties_page.filters.keyword_placeholder")}
               className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -137,7 +142,7 @@ const MyPropertyFilter = ({ onFilter, onClear }) => {
               }}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Apply Filters
+              {t("properties_page.filters.apply")}
             </button>
             <button
               onClick={() => {
@@ -146,7 +151,7 @@ const MyPropertyFilter = ({ onFilter, onClear }) => {
               }}
               className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
             >
-              Clear Filters
+              {t("properties_page.filters.clear")}
             </button>
           </div>
         </div>

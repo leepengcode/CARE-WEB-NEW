@@ -1,0 +1,685 @@
+{
+  "login": {
+    "enter_mobile": "Enter Your Mobile Number",
+    "send_code": "We will send you a confirmation code",
+    "next": "Next",
+    "sending": "Sending...",
+    "terms": "By clicking login you agree to our",
+    "terms_link": "Terms & Conditions",
+    "privacy_link": "Privacy Policy"
+  },
+  "menu": {
+    "home": "Home",
+    "property": "Properties",
+    "Properties": "Properties",
+    "my_property": "My Property",
+    "add_property": "Add Property",
+    "category": "Category",
+    "residential": "Residential",
+    "condo": "Condo",
+    "commercial": "Commercial",
+    "industrial": "Industrial",
+    "land": "Land",
+    "business_for_sell": "Business for sell",
+    "agriculture_land": "Agriculture Land",
+    "high_building": "High Building",
+    "page": "Page",
+    "about": "About",
+    "article": "Article",
+    "favorite": "Favorite",
+    "mortgage": "Mortgage",
+    "agency": "Agency",
+    "valuation": "Valuation",
+    "certificate": "Certificate",
+    "services": "Services",
+    "contact": "Contact",
+    "login": "Login",
+    "my_profile": "My Profile",
+    "sign_out": "Sign out",
+    "menu": "Menu"
+  },
+ 
+  "otp": {
+    "title": "OTP Verification",
+    "enter_code": "Enter OTP code sent to +{{phone}}",
+    "resend_in": "Resend code in",
+    "resend_code": "Resend code",
+    "verifying": "Verifying...",
+    "confirm": "Confirm",
+    "error_network": "Network error. Please check your internet connection and try again.",
+    "error_server": "Server error. Please try again.",
+    "error_unexpected": "An unexpected error occurred. Please try again.",
+    "error_invalid": "Invalid OTP code. Please try again."
+  },
+  "property_guide": {
+    "title": "Property Guide",
+    "desc": "We provide you with tips, tools, and step-by-step guides on buying, selling, renting, and investing in real estate.",
+    "read_more": "Read More",
+    "mortgage_title": "Mortgage Calculator",
+    "mortgage_desc": "Find the ideal mortgage, accurately calculate your monthly repayments, and easily determine your maximum affordability based on market interest rates and your financial situation.",
+    "try_now": "Try Now"
+  },
+  "property_guide_detail": {
+    "title": "Complete Property Guide",
+    "buying_title": "Home Buying Guide",
+    "buying_desc": "Buying a home is one of the most important investments in your life. This guide covers everything from budgeting to closing the deal.",
+    "buying_list1": "Understand your financial situation",
+    "buying_list2": "Get mortgage pre-approval",
+    "buying_list3": "Find the right property",
+    "buying_list4": "Make an offer and negotiate",
+    "buying_list5": "Property inspection and due diligence",
+    "buying_list6": "Close the deal",
+    "selling_title": "Property Selling",
+    "selling_desc": "Selling a property requires careful planning and preparation. Learn how to maximize your property's value and attract buyers.",
+    "selling_list1": "Prepare for sale",
+    "selling_list2": "Set the right price",
+    "selling_list3": "Marketing strategy",
+    "selling_list4": "Work with agents",
+    "selling_list5": "Handle offers and negotiations",
+    "selling_list6": "Complete the sale",
+    "renting_title": "Rental Guide",
+    "renting_desc": "Whether you are a tenant or a landlord, understanding the rental process is crucial. This guide covers all aspects of the rental market.",
+    "renting_list1": "Find the right rental property",
+    "renting_list2": "Understand the lease agreement",
+    "renting_list3": "Tenant rights and responsibilities",
+    "renting_list4": "Landlord responsibilities",
+    "renting_list5": "Property maintenance",
+    "renting_list6": "End of lease",
+    "investing_title": "Property Investment",
+    "investing_desc": "Property investment can yield high returns if done right. Learn about different investment strategies and how to build a profitable portfolio.",
+    "investing_list1": "Types of property investment",
+    "investing_list2": "Market analysis and research",
+    "investing_list3": "Financing investment properties",
+    "investing_list4": "Risk management",
+    "investing_list5": "Tax implications",
+    "investing_list6": "Portfolio diversification"
+  },
+  "categories": {
+    "residential": "Residential",
+    "commercial": "Commercial",
+    "industrial": "Industrial",
+    "agriculture": "Agriculture",
+    "land": "Land",
+    "building": "Building",
+    "condo": "Condo",
+    "business": "Business",
+    "valuation": "Valuation",
+    "measurement": "Measurement",
+    "mortgage": "Mortgage",
+    "favorite": "Favorite",
+    "article": "Article",
+    "agency": "Agency",
+    "certificate": "Certificate",
+    "services": "Services"
+  },
+  "nearby_properties": {
+    "title": "Nearby Properties ({{location}})"
+  },
+  "recently_added": {
+    "title": "Recently added"
+  },
+  "most_like": {
+    "title": "Most liked properties"
+  },
+  "most_view": {
+    "title": "Most viewed properties"
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Cambodia Angkor Real Estate Co. Ltd (CARE) - Trusted, Professional, and Leading Real Estate Agency in Cambodia since 2002.",
+    "tabs": {
+      "about": "About Us",
+      "service": "Service",
+      "history": "History"
+    },
+    "our_story": "Our Story",
+    "our_story_content1": "Cambodia Angkor Real Estate Co. Ltd (CARE) was the first company of its kind to be licensed by the Royal Government of Cambodia. Our operator's license was granted on 8th January 2002 and a copy of the license is available for inspection on this web-site.",
+    "our_story_content2": "The company has spent the last few years developing and improving its services and has grown to become one of the largest and most professional real estate companies within Cambodia. We are constantly striving to improve our customer care and to provide clear and concise advice about the domestic property market.",
+    "our_story_content3": "We hope that the above information gives potential investors an idea of how Cambodia Angkor Real Estate Co. Ltd. conducts its business and that, knowing this, you will feel confident that your investment is in good hands.",
+    "service": {
+      "agency_title": "Real Estate Agency & Consultancy",
+      "agency_content": "We provide assistance to clients seeking to purchase, sell, or rent of any kind of property in Cambodia through the country's most extensive and experienced sales network – one that covers every district of the Kingdom.",
+      "valuation_title": "Property Valuation",
+      "valuation_content": "In a rapidly developing market like Cambodia, credible and strategic valuation services are vital measure taken by lenders to protect their own risk as well as to ensure they are not giving a loan greater than the value of the property or not lending against non-marketable one.",
+      "development_title": "Property Development",
+      "development_content": "We aim to identify the intrinsic value of each property that we manage or design, and then execute a management plan that is best suited to that property.",
+      "investment_title": "Investment funds & Consultancy",
+      "investment_content": "Our consultation services include all regulatory information as well as data on macroeconomic trends, industry and sector analysis and consumer trends.",
+      "citizenship_title": "Acquisition of Cambodia Citizenship",
+      "citizenship_content": "Due to the accelerating demand for visa and citizenship for foreign investors and other foreign nationals from every corner of the world."
+    },
+    "vision_title": "Vision",
+    "vision_content": "To be the most professional real estate agency in Cambodia and the fastest growing and successful agency in all of our branches nationwide.",
+    "mission_title": "Mission",
+    "mission_content": "To provide excellent real-estate services in Cambodia by exceeding the expectations of our clients and by conducting business with honesty and integrity.",
+    "core_values_title": "Core Values",
+    "core_values_content": "C-A-R-E places top priority on the integrity, not only of its products and services, but also its appreciation of local practices and legal requirements. The company conducts transparent business, is accountable for its actions and takes responsibility for its results. C-A-R-E has established a reputation as a highly reliable company by refusing to compromise its integrity in pursuit of profit. Integrity is the cornerstone of the company's most valuable intangible asset: Trust."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We're here to help you with your real estate needs. Contact us for property inquiries, partnership opportunities, or any questions you may have!",
+    "cards": {
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "email1": "director@angkorrealestate.com",
+      "email2": "valuationpp@angkorrealestate.com",
+      "phone1": "+855-14 699 289",
+      "phone2": "+855-77 658 687",
+      "address_value": "St #206, Ou Baek K'am District, Sen Sok Commune, Phnom Penh, Cambodia"
+    },
+    "form": {
+      "title": "Send Us a Message",
+      "name": "Name*",
+      "email": "Email*",
+      "subject": "Subject*",
+      "phone": "Phone",
+      "message": "Message*",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "success": "Your message has been sent successfully!",
+      "error": "There was an error sending your message. Please try again."
+    }
+  },
+  "article": {
+    "title": "Articles",
+    "subtitle": "Explore the latest news, insights, and updates from Cambodia Angkor Real Estate.",
+    "search_placeholder": "Search articles...",
+    "search_button": "Search",
+    "no_results": "No results found.",
+    "date_label": "Date",
+    "pagination_prev": "Previous",
+    "pagination_next": "Next"
+  },
+  "favorite": {
+    "title": "Favorites",
+    "subtitle": "View and manage your favorite properties in one place.",
+    "login_required": "Login Required",
+    "login_message": "Please login to view your properties.",
+    "no_favorites": "No favorite properties found.",
+    "loading": "Loading favorites...",
+    "error": "Failed to fetch favorites.",
+    "grid": "Grid View",
+    "list": "List View",
+    "filters": "Filters",
+    "clear_filters": "Clear Filters"
+  },
+  "mortgage_calculator": {
+    "title": "Mortgage Calculator",
+    "subtitle": "Calculate your monthly mortgage payments, total interest, and get tips for smart mortgage planning.",
+    "loan_amount": "Loan Amount",
+    "interest_rate": "Interest Rate",
+    "loan_term": "Loan Term",
+    "years": "years",
+    "per_month": "/ month",
+    "principal_payment_per_month": "principal payment per month",
+    "interest_payment_per_month": "interest payment per month",
+    "summary": "Summary",
+    "principal_payment": "Principal Payment",
+    "interest_payment": "Interest Payment",
+    "monthly_payment": "Monthly Payment",
+    "total_payments": "Total Payments",
+    "total_interest_payments": "Total Interest Payments",
+    "tips_title": "Mortgage Planning Tips",
+    "tip_compare_rates": "Compare Interest Rates: Shop around to find the best mortgage rates, as even a small difference can save you thousands over the loan term.",
+    "tip_shorter_terms": "Consider Shorter Terms: A shorter loan term (e.g., 15 years) often comes with lower interest rates and less total interest, though monthly payments will be higher.",
+    "tip_budget_costs": "Budget for Additional Costs: Factor in property taxes, insurance, and maintenance costs when planning your mortgage budget.",
+    "tip_extra_payments": "Make Extra Payments: Paying more than the minimum each month can reduce your principal faster and save on interest over time.",
+    "tip_credit_score": "Check Your Credit Score: A higher credit score can help you qualify for better mortgage rates, so review your score before applying."
+  },
+  "agency_page": {
+    "title": "Our Agencies",
+    "subtitle": "Meet our trusted agency partners and find the right professionals to help with your real estate needs.",
+    "not_found": "Agency Not Found",
+    "contact_telegram": "Contact on Telegram"
+  },
+  "certificate_page": {
+    "title": "Our Certificates",
+    "subtitle": "Browse our official company and professional certificates.",
+    "info1": "Our certificates are <bold>official proof</bold> of our company's legitimacy, professional memberships, and the qualifications of our valuation experts.",
+    "info2": "Certificates <bold>build trust</bold> with clients, partners, and banks, ensuring transparency and compliance with Cambodian regulations.",
+    "info3": "Each certificate represents a <bold>milestone</bold> in our journey to provide reliable, expert real estate and valuation services.",
+    "info4": "We are proud to display our credentials, so you can be <bold>confident</bold> in the quality and integrity of our work."
+  },
+  "certificate_titles": {
+    "company_registration": "Company Registration",
+    "membership_certificate": "Membership Certificate",
+    "valuation_certificate_oung": "Valuation Certificate (Oung Vann Duong)",
+    "valuation_certificate_vong": "Valuation Certificate (Vong Thinnon)",
+    "valuation_certificate_kiev": "Valuation Certificate (Kiev Dany)",
+    "valuation_certificate_heun": "Valuation Certificate (Heun Srey Phek)",
+    "valuation_certificate_san1": "Valuation Certificate (Sorn Sovanndara)",
+    "valuation_certificate_san2": "Valuation Certificate (Eang Kimsreang)"
+  },
+  "services_page": {
+    "title": "Our Services",
+    "subtitle": "Discover the full range of real estate services we offer to help you succeed in Cambodia's property market.",
+    "service_list": {
+      "agency": {
+        "title": "Real Estate Agency & Consultancy",
+        "desc": "Expert advice and support for buying, selling, and renting property in Cambodia, tailored to your needs."
+      },
+      "valuation": {
+        "title": "Property Valuation",
+        "desc": "Accurate, credible, and strategic valuation services for banks, investors, and individuals."
+      },
+      "development": {
+        "title": "Property Development",
+        "desc": "Comprehensive project management and development solutions for residential and commercial properties."
+      },
+      "investment": {
+        "title": "Investment Funds Advisory",
+        "desc": "Strategic advice for real estate investment funds, including regulatory and market insights."
+      },
+      "citizenship": {
+        "title": "Acquisition of Cambodian Citizenship",
+        "desc": "Expert guidance for foreign investors and individuals seeking Cambodian citizenship."
+      },
+      "support": {
+        "title": "Client Support & Aftercare",
+        "desc": "Ongoing support and aftercare for all clients, ensuring satisfaction and long-term success."
+      }
+    },
+    "why_choose": "Why Choose Us",
+    "why": [
+      {
+        "title": "Complimentary Verbal Check Estimation",
+        "desc": "Get a complimentary verbal check estimation form for quick insights into your property's value. Our standard valuation form will be promptly delivered at no cost."
+      },
+      {
+        "title": "Professional Indemnity Insurance",
+        "desc": "We offer Professional Indemnity Insurance to safeguard our clients against financial losses resulting from any errors that may impact the value of the appraised property."
+      },
+      {
+        "title": "Expertise & Experienced Team",
+        "desc": "With more than two decades of experience in the real estate sector, CARE has gained extensive understanding of market prices and trends as we have been through economic downturns and volatile real estate markets, equipping us to offer valuable insights and guidance to our clients."
+      },
+      {
+        "title": "Unparalleled Market Coverage",
+        "desc": "With headquarters in Phnom Penh and satellite offices in key provinces and cities such as Siem Reap, Sihanoukville, and Battambang, CARE has a broad geographic reach across Cambodia swiftly."
+      },
+      {
+        "title": "Continuous Improvement & Innovation",
+        "desc": "CARE is dedicated to staying at the forefront of industry trends and advancements, continuously investing in the system such as valuation report generation systems, ERP system as well as trainings and researching to enhance our capabilities and service offerings."
+      },
+      {
+        "title": "Objective & Independent Valuations",
+        "desc": "As an independent valuation firm, CARE maintains strict adherence to professional standards and ethical guidelines in conducting valuations."
+      },
+      {
+        "title": "Timely & Reliable Results",
+        "desc": "CARE is committed to delivering valuation reports promptly and efficiently, enabling clients to make timely and informed decisions."
+      }
+    ]
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "mortgage-calculator": "Property Mortgage",
+    "my-property": "My Property",
+    "add-property": "Add Property",
+    "business-for-sell": "Business For Sell",
+    "agriculture-land": "Agriculture Land",
+    "high-building": "High Building",
+    "property": "Property",
+    "profile": "Profile",
+    "services": "Services",
+    "contact": "Contact",
+    "agency": "Agency",
+    "properties": "Properties",
+    "category": "Category",
+    "page": "Page",
+    "about": "About",
+    "article": "Article",
+    "residential": "Residential",
+    "commercial": "Commercial",
+    "industrial": "Industrial",
+    "land": "Land",
+    "business": "Business",
+    "agriculture": "Agriculture",
+    "highBuilding": "High Building",
+    "condo": "Condo",
+    "favorites": "Favorite",
+    "valuation": "Valuation",
+    "certificate": "Certificate",
+    "edit-property" : "Edit Property"
+  },
+  "properties_page": {
+    "title": "All Properties",
+    "no_properties": "No properties available.",
+    "error_message": "Error: {{error}}",
+    "pagination_prev": "Previous",
+    "pagination_next": "Next",
+    "filters": {
+      "title": "Filters",
+      "clear": "Clear Filters",
+      "apply": "Apply Filters",
+      "keyword_placeholder": "Keyword",
+      "type_label": "Property Type",
+      "all_types": "All Types",
+      "status_label": "Status",
+      "all_statuses": "All Statuses",
+      "pending": "Pending",
+      "active": "Active",
+      "price_range_label": "Price Range",
+      "min_price_placeholder": "Min price",
+      "max_price_placeholder": "Max price",
+      "sale_rent_placeholder": "Sale/Rent",
+      "sell": "Sell",
+      "rent": "Rent",
+      "province_placeholder": "Province",
+      "district_placeholder": "District",
+      "commune_placeholder": "Commune",
+      "village_placeholder": "Village",
+      "all": "All"
+    }
+  },
+  "my_property_page": {
+    "title": "My Properties",
+    "login_required": "Login Required",
+    "login_message": "Please login to view your properties.",
+    "no_properties": "You have no properties listed.",
+    "error_message": "Error: {{error}}",
+    "filters": {
+      "title": "Filter My Properties"
+    }
+  },
+  "add_property_page": {
+    "title": "Add New Property",
+    "access_denied": "Access Denied",
+    "agency_message": "Agency accounts are not permitted to add properties.",
+    "go_back": "Go Back",
+    "login_required": "Login Required",
+    "login_prompt": "Please login to add a new property.",
+    "owner_section": "Owner",
+    "name_label": "Name",
+    "phone_label": "Phone",
+    "address_label": "Address",
+    "note_label": "Note",
+    "details_section": "Details",
+    "category_label": "Category",
+    "title_label": "Title",
+    "property_type_label": "Property Type",
+    "for_sell": "For Sell",
+    "for_rent": "For Rent",
+    "duration_label": "Duration for Price",
+    "price_label": "Price ($)",
+    "description_label": "Description",
+    "facilities_section": "Facilities",
+    "distance_placeholder": "Enter distance",
+    "distance_label": "Distance (km)",
+    "location_section": "Location",
+    "map_placeholder": "Enter a location",
+    "country_label": "Country",
+    "province_label": "Province",
+    "district_label": "District",
+    "commune_label": "Commune",
+    "village_label": "Village",
+    "latitude_label": "Latitude",
+    "longitude_label": "Longitude",
+    "client_address_label": "Client Address",
+    "images_section": "Images",
+    "title_image_label": "Title Image",
+    "threeD_image_label": "3D Image",
+    "gallery_images_label": "Gallery Images",
+    "video_link_label": "Video Link",
+    "dnd_placeholder": "Drag & drop your files or browse",
+    "add_more_images": "+ Add More Images",
+    "submit_button": "Add Property",
+    "submitting_button": "Adding Property...",
+    "select_placeholder": "Select",
+    "select_category_placeholder": "Select Category",
+    "select_duration_placeholder": "Select Duration",
+    "select_country_placeholder": "Select Country",
+    "select_province_placeholder": "Select Province",
+    "select_district_placeholder": "Select District",
+    "select_commune_placeholder": "Select Commune",
+    "select_village_placeholder": "Select Village",
+    "daily": "Daily",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "map_loading_error": "Map failed to load",
+    "no_data_available": "No data available",
+    "error_loading_categories": "Error loading categories",
+    "login_to_load_categories": "Login to load categories",
+    "parameter_bathroom": "Bathroom",
+    "parameter_bedroom": "Bedroom",
+    "parameter_floors": "Number Of Floor",
+    "parameter_title": "Title",
+    "hard_title": "Hard Title",
+    "soft_title": "Soft Title",
+    "normal_title": "Normal",
+    "parameter_land_size": "Land size",
+    "parameter_house_size": "House size",
+    "parameter_title_no": "Title No",
+    "validation": {
+      "category": "Please select a category",
+      "property_type": "Please select a property type",
+      "title": "Please enter a title",
+      "title_image": "Please upload a title image",
+      "description": "Please enter a description",
+      "price": "Please enter a price",
+      "rent_duration": "Please select rent duration",
+      "location": "Please select a location on the map",
+      "client_address": "Please enter client address"
+    },
+    "toast": {
+      "success": "Property added successfully!",
+      "submit_failed": "Failed to submit property. Please check your input and try again.",
+      "non_json_error": "Server returned a non-JSON response",
+      "server_error": "A server error occurred. Please check the console for details and try again.",
+      "generic_error": "Failed to submit property. Please try again."
+    }
+  },
+  "edit_property_page": {
+    "title": "Edit Property",
+    "back": "Back",
+    "owner_section": "Owner",
+    "name_label": "Name",
+    "phone_label": "Phone",
+    "address_label": "Address",
+    "note_label": "Note",
+    "details_section": "Details",
+    "category_label": "Category",
+    "title_label": "Title",
+    "property_type_label": "Property Type",
+    "for_sell": "For Sell",
+    "for_rent": "For Rent",
+    "duration_label": "Duration for Price",
+    "price_label": "Price ($)",
+    "description_label": "Description",
+    "facilities_section": "Facilities",
+    "nearby_places_section": "Near By Places",
+    "distance_placeholder": "Enter distance",
+    "distance_label": "Distance (km)",
+    "location_section": "Location",
+    "map_placeholder": "Enter a location",
+    "country_label": "Country",
+    "province_label": "Province",
+    "district_label": "District",
+    "commune_label": "Commune",
+    "village_label": "Village",
+    "latitude_label": "Latitude",
+    "longitude_label": "Longitude",
+    "client_address_label": "Client Address",
+    "images_section": "Images",
+    "title_image_label": "Title Image",
+    "threeD_image_label": "3D Image",
+    "gallery_images_label": "Gallery Images",
+    "video_link_label": "Video Link",
+    "dnd_placeholder": "Drag & drop your files or Browse",
+    "add_more_images": "+ Add More Images",
+    "submit_button": "Update Property",
+    "submitting_button": "Updating Property...",
+    "select_placeholder": "Select",
+    "select_category_placeholder": "Select Category",
+    "select_duration_placeholder": "Select Duration",
+    "select_country_placeholder": "Select Country",
+    "select_province_placeholder": "Select Province",
+    "select_district_placeholder": "Select District",
+    "select_commune_placeholder": "Select Commune",
+    "select_village_placeholder": "Select Village",
+    "daily": "Daily",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "map_loading_error": "Map failed to load",
+    "no_data_available": "No data available",
+    "error_loading_categories": "Error loading categories",
+    "login_to_load_categories": "Login to load categories",
+    "parameter_bathroom": "Bathroom",
+    "parameter_bedroom": "Bedroom",
+    "parameter_floors": "Number Of Floor",
+    "parameter_title": "Title",
+    "hard_title": "Hard Title",
+    "soft_title": "Soft Title",
+    "normal_title": "Normal",
+    "parameter_land_size": "Land size",
+    "parameter_house_size": "House size",
+    "parameter_title_no": "Title No",
+    "validation": {
+      "category": "Please select a category",
+      "property_type": "Please select a property type",
+      "title": "Please enter a title",
+      "title_image": "Please upload a title image",
+      "description": "Please enter a description",
+      "price": "Please enter a price",
+      "rent_duration": "Please select rent duration",
+      "location": "Please select a location on the map",
+      "client_address": "Please enter client address"
+    },
+    "toast": {
+      "success": "Property updated successfully!",
+      "submit_failed": "Failed to update property. Please check your input and try again.",
+      "non_json_error": "Server returned a non-JSON response",
+      "server_error": "A server error occurred. Please check the console for details and try again.",
+      "generic_error": "Failed to update property. Please try again."
+    },
+    "error": "Error",
+    "loading": "Loading property...",
+    "authorization_error": "You are not authorized to edit this property",
+    "missing_fields": "Please fill all data and Submit"
+  },
+  "countries": {
+    "cambodia": "Cambodia"
+  },
+  "errors": {
+    "failed_to_fetch_properties": "Failed to fetch properties. Please try again.",
+    "failed_to_fetch_user_data": "Failed to fetch user data.",
+    "api_error": "API Error",
+    "http_error": "HTTP error! Status: {{status}}"
+  },
+  "profile_page": {
+    "title": "My Profile",
+    "subtitle": "Manage your account, update your information, and personalize your experience.",
+    "account_management": "Account Management",
+    "upload_photo": "Upload Photo",
+    "change_photo": "Change Photo",
+    "sign_out": "Sign Out",
+    "sign_out_confirm": "Are you sure you want to sign out?",
+    "sign_out_yes": "Yes",
+    "sign_out_no": "No",
+    
+    "signed_out_success": "Signed out successfully!",
+    "profile_updated_success": "Profile updated successfully!",
+    "profile_updated_error": "Profile updated, but failed to refresh info.",
+    "profile_update_failed": "Failed to update profile!",
+    "loading": "Loading profile...",
+    "error": "Failed to load profile",
+    "profile_information": "Profile Information",
+    "username_placeholder": "Username",
+    "contact_info": "Contact Info",
+    "email_placeholder": "Email",
+    "telegram_placeholder": "Telegram Link",
+    "about_user": "About the User",
+    "address_placeholder": "Address",
+    "location_placeholder": "Search for a city",
+    "notification": "Notification",
+    "notification_enabled": "Enabled",
+    "notification_disabled": "Disabled",
+    "update_profile": "Update Profile",
+    "updating": "Updating..."
+  },
+  "category_properties_page": {
+    "all_properties": "All Properties",
+    "no_properties": "No properties available in this category.",
+    "error_message": "Error: {{error}}",
+    "pagination_prev": "Previous",
+    "pagination_next": "Next"
+  },
+  "partner_page": {
+    "title": "Our Partner",
+    "alt": "Bank partner"
+  },
+    "hero": {
+    "title": "Contact Valuation Team",
+    "subtitle": "Message our valuation experts directly on Telegram for fast, professional support."
+  },
+  "info": {
+    "description": "In a rapidly developing market like Cambodia, credible and strategic valuation services are vital measure taken by lenders to protect their own risk as well as to ensure they are not giving a loan greater than the value of the property or not lending against non-marketable one. Our nationwide valuation team examines each property and studies market trends as well as plans for new infrastructure and other developments that could affect (positively or negatively) the value of the property in the future. These insights have led to significant returns on investment for hundreds of clients. Our prompt, exceptionally accurate, honest and deeply knowledgeable valuation reports are supplied to local and international banks, individual clients and to court."
+  },
+  "benefits": {
+    "why_title": "Why Choose Our Valuation?",
+    "why_1": "Accurate, up-to-date market analysis",
+    "why_2": "Trusted by banks and courts",
+    "why_3": "Fast turnaround and responsive support",
+    "why_4": "Transparent, ethical, and confidential",
+    "for_you_title": "Benefits for You",
+    "for_you_1": "Maximize your property value",
+    "for_you_2": "Make informed investment decisions",
+    "for_you_3": "Reduce risk and avoid overpaying",
+    "for_you_4": "Peace of mind with expert guidance"
+  },
+  "process": {
+    "title": "Our Valuation Process",
+    "step_1": "Initial consultation and property details collection",
+    "step_2": "On-site inspection and market research",
+    "step_3": "Comprehensive analysis and report preparation",
+    "step_4": "Delivery of a detailed, actionable valuation report",
+    "step_5": "Follow-up support for any questions or clarifications"
+  },
+  "testimonials": {
+    "title": "What Our Clients Say",
+    "1": {
+      "text": "The valuation report was thorough and delivered quickly. It helped me secure a great deal on my property!",
+      "name": "Mr. Chan Dara"
+    },
+    "2": {
+      "text": "Very professional team. They answered all my questions and the process was smooth from start to finish.",
+      "name": "Ms. Srey Leak"
+    },
+    "3": {
+      "text": "Highly recommend! The valuation was accurate and the report was easy to understand.",
+      "name": "Mr. Vannak"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": {
+      "question": "How long does a valuation take?",
+      "answer": "Most valuations are completed within 2-3 business days after the property inspection."
+    },
+    "q2": {
+      "question": "Is my information confidential?",
+      "answer": "Absolutely. All client information and reports are handled with strict confidentiality and professionalism."
+    },
+    "q3": {
+      "question": "Can I use the valuation for a bank loan?",
+      "answer": "Yes, our reports are accepted by most local and international banks in Cambodia."
+    },
+    "q4": {
+      "question": "How do I get started?",
+      "answer": "Simply contact our team via Telegram or fill out our online form, and we'll guide you through the process."
+    }
+  },
+  "contacts": [
+    {
+      "name": "សន សុវណ្ណតារា",
+      "title": "Valuation Specialist",
+      "button": "Message @Sovanndara07"
+    },
+    {
+      "name": "Alex Vanndoung",
+      "title": "Head of Valuation",
+      "button": "Message @Vanndoung7"
+    }
+  ]
+} 

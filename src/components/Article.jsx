@@ -1,19 +1,31 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaRegCalendarAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import { FaRegCalendarAlt, FaRegNewspaper } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PageComponents from "./PageComponents";
 
 export default function ArticleList() {
+  const { t } = useTranslation();
   const [articles, setArticles] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [submittedSearch, setSubmittedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeCard, setActiveCard] = useState(null);
+  const [scrollY, setScrollY] = useState(0);
   const navigate = useNavigate();
   const itemsPerPage = 12;
   const restoredFromCache = React.useRef(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -132,7 +144,27 @@ export default function ArticleList() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
+      <div className="w-full max-w-7xl mx-auto py-0 md:py-5 md:px-10">
+        {/* Hero Section */}
+
+        <div
+          className={`relative pt-10 pb-16 transform transition-all duration-1000 ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+          }`}
+        >
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-xl mb-8 animate-pulse-slow">
+              <FaRegNewspaper className="text-white text-3xl" />
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent p-3 mb-6 leading-tight">
+              {t("article.title")}
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              {t("article.subtitle")}
+            </p>
+          </div>
+        </div>
+
         <div className="mb-6 mt-4">
           <form
             onSubmit={(e) => {
@@ -144,7 +176,7 @@ export default function ArticleList() {
           >
             <input
               type="text"
-              placeholder="Search articles..."
+              placeholder={t("article.search_placeholder")}
               value={searchTerm}
               onChange={handleSearchChange}
               className="w-full md:w-1/2 px-4 py-2 border rounded-full shadow-sm"
@@ -153,7 +185,7 @@ export default function ArticleList() {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
             >
-              Search
+              {t("article.search_button")}
             </button>
           </form>
         </div>
@@ -164,7 +196,9 @@ export default function ArticleList() {
               <ArticleSkeleton key={index} />
             ))
           ) : articles.length === 0 && submittedSearch ? (
-            <div className="text-center text-gray-600">No results found.</div>
+            <div className="text-center text-gray-600">
+              {t("article.no_results")}
+            </div>
           ) : (
             articles.map((article, index) => (
               <div

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { initializeApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
@@ -6,7 +5,9 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { authApi } from "../api/authApi";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -28,6 +29,7 @@ try {
 const auth = app ? getAuth(app) : null;
 
 export default function Login() {
+  const { t, i18n } = useTranslation();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,18 +71,15 @@ export default function Login() {
         password
       );
       const firebaseId = userCredential.user.uid;
-      localStorage.setItem("firebaseUid", firebaseId); 
+      localStorage.setItem("firebaseUid", firebaseId);
       console.log("Firebase auth success: UID =", firebaseId);
 
-      // Send phone number to backend to trigger OTP
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/save-phone-list`,
-        { phone: fullPhone }
-      );
-      if (res.data && res.data.error === 0) {
+      // Send phone number to backend to trigger OTP using authApi
+      const res = await authApi.savePhone(fullPhone);
+      if (res && res.error === 0) {
         navigate("/otp", { state: { phone: fullPhone, firebaseId } });
       } else {
-        setError(res.data.message || "Something went wrong. Please try again.");
+        setError(res.message || "Something went wrong. Please try again.");
       }
     } catch (err) {
       console.error("Firebase or backend error:", err);
@@ -95,15 +94,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md flex flex-col items-start">
+    <div
+      className={`min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4${
+        i18n.language === "km" ? " khmer-font" : ""
+      }`}
+    >
+      <div className="w-full  max-w-lg bg-white p-6 rounded-lg shadow-md flex flex-col items-start relative">
         <h2 className="text-3xl md:text-4xl font-bold text-blue-700 text-start leading-tight mb-2">
-          Enter Your
-          <br />
-          Mobile Number
+          {t("login.enter_mobile")}
         </h2>
         <p className="text-blue-500 text-center mb-8 mt-2 text-base">
-          We will send you a confirmation code
+          {t("login.send_code")}
         </p>
         <form
           className="w-full flex flex-col items-start"
@@ -132,19 +133,15 @@ export default function Login() {
             className="w-full py-3 rounded-2xl bg-blue-700 text-white text-lg font-semibold shadow-md hover:bg-blue-800 transition mb-6"
             disabled={loading}
           >
-            {loading ? "Sending..." : "Next"}
+            {loading ? t("login.sending") : t("login.next")}
           </button>
         </form>
         <div className="w-full justify-center items-center">
           <p className="text-center text-sm text-blue-600 mt-2">
-            By clicking login you agree to our <br />
-            <a href="/terms" className="underline font-medium">
-              Terms & Conditions
-            </a>{" "}
-            &{" "}
+            {t("login.terms")} <br />
             <a href="/privacy" className="underline font-medium">
-              Privacy Policy
-            </a>
+              {t("login.terms_link")} & {t("login.privacy_link")}
+            </a>{" "}
           </p>
         </div>
       </div>

@@ -1,33 +1,19 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
-import { motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MdApartment } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { fetchAllProperties } from "../../api/propertyApi";
-import PageComponents from "../PageComponents";
-import PropertyCard from "../shared/PropertyCard";
-import PropertyCardSkeleton from "../shared/PropertyCardSkeleton";
-import PropertyFilters from "./PropertyFilters";
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 10, scale: 0.95 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      delay: i * 0.05,
-      type: "spring",
-      ease: "easeOut",
-      damping: 12,
-    },
-  }),
-};
+import PageComponents from "../../components/PageComponents";
+import CategoryPropertyFilter from "../../components/Properies/CategoryPropertyFilter";
+import PropertyCard from "../../components/shared/PropertyCard";
+import PropertyCardSkeleton from "../../components/shared/PropertyCardSkeleton";
 
 export default function CategoryProperties({ category, title, image }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [view, setView] = useState("grid");
-  const [properties, setProperties] = useState([]);
+  const [Properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +24,7 @@ export default function CategoryProperties({ category, title, image }) {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line
-  }, [category, currentPage]);
+  }, [category, currentPage, currentFilters]);
 
   const fetchData = useCallback(
     async (filters = currentFilters, page = currentPage) => {
@@ -61,30 +47,17 @@ export default function CategoryProperties({ category, title, image }) {
           throw new Error("Invalid response format from server");
         }
 
-        const mappedProperties = data
-          .filter(
-            (property) =>
-              property.status === 1 && property.category?.category === category
-          )
-          .map((property) => ({
-            id: property.id,
-            image: property.title_image,
-            status: property.propery_type,
-            type: property.category?.category,
-            category: property.category?.image,
-            price: `$${property.price.toLocaleString()}`,
-            title: property.title,
-            location: property.address,
-            views: property.total_view,
-            time: property.post_created,
-          }));
+        const filteredProperties = data.filter(
+          (property) =>
+            property.status === 1 && property.category?.category === category
+        );
 
-        setProperties(mappedProperties);
+        setProperties(filteredProperties);
         setTotalProperties(total);
         setError(null);
       } catch (err) {
         setError(
-          err.message || "Failed to fetch properties. Please try again."
+          err.message || "Failed to fetch Properties. Please try again."
         );
         setProperties([]);
         setTotalProperties(0);
@@ -95,7 +68,7 @@ export default function CategoryProperties({ category, title, image }) {
     [category, currentFilters, propertiesPerPage]
   ); // Added dependencies
 
-  const handlePropertyClick = (propertyId) => {
+  const handlePropertyClick = (property) => {
     sessionStorage.setItem("propertiesScroll", window.scrollY);
     sessionStorage.setItem(
       "propertiesCache",
@@ -106,7 +79,7 @@ export default function CategoryProperties({ category, title, image }) {
         filters: currentFilters,
       })
     );
-    navigate(`/property/${propertyId}`);
+    navigate(`/property/${property.id}`, { state: { property } });
   };
 
   const totalPages = Math.ceil(totalProperties / propertiesPerPage);
@@ -133,7 +106,7 @@ export default function CategoryProperties({ category, title, image }) {
               : "bg-blue-800 text-white hover:bg-blue-900"
           }`}
         >
-          Previous
+          {t("category_properties_page.pagination_prev")}
         </button>
         {startPage > 1 && (
           <>
@@ -179,7 +152,7 @@ export default function CategoryProperties({ category, title, image }) {
               : "bg-blue-800 text-white hover:bg-blue-900"
           }`}
         >
-          Next
+          {t("category_properties_page.pagination_next")}
         </button>
       </div>
     );
@@ -188,7 +161,7 @@ export default function CategoryProperties({ category, title, image }) {
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
           <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
             <img
               src={image}
@@ -202,9 +175,11 @@ export default function CategoryProperties({ category, title, image }) {
             </div>
           </div>
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-md md:text-xl">All Properties</h2>
+            <h2 className="text-md md:text-xl">
+              {t("category_properties_page.all_properties")}
+            </h2>
             <div className="flex items-center gap-2">
-              <PropertyFilters
+              <CategoryPropertyFilter
                 onFilter={setCurrentFilters}
                 onClear={() => setCurrentFilters({})}
               />
@@ -245,12 +220,14 @@ export default function CategoryProperties({ category, title, image }) {
   if (error) {
     return (
       <PageComponents>
-        <PropertyFilters
+        <CategoryPropertyFilter
           onFilter={setCurrentFilters}
           onClear={() => setCurrentFilters({})}
         />
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
-          <p className="text-red-600">Error: {error}</p>
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 md:px-10">
+          <p className="text-red-600">
+            {t("category_properties_page.error_message", { error })}
+          </p>
         </div>
       </PageComponents>
     );
@@ -258,7 +235,7 @@ export default function CategoryProperties({ category, title, image }) {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
         <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
           <img
             src={image}
@@ -272,9 +249,11 @@ export default function CategoryProperties({ category, title, image }) {
           </div>
         </div>
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-md md:text-2xl">All Properties</h2>
+          <h2 className="text-md md:text-2xl">
+            {t("category_properties_page.all_properties")}
+          </h2>
           <div className="flex items-center gap-2">
-            <PropertyFilters
+            <CategoryPropertyFilter
               onFilter={setCurrentFilters}
               onClear={() => setCurrentFilters({})}
             />
@@ -296,10 +275,12 @@ export default function CategoryProperties({ category, title, image }) {
             </button>
           </div>
         </div>
-        {properties.length === 0 && !loading && !error ? (
+        {Properties.length === 0 && !loading && !error ? (
           <div className="flex flex-col items-center justify-center py-10 text-gray-500">
             <MdApartment className="w-16 h-16 mb-4" />
-            <p className="text-lg">No properties available in this category.</p>
+            <p className="text-lg">
+              {t("category_properties_page.no_properties")}
+            </p>
           </div>
         ) : (
           <div
@@ -309,23 +290,27 @@ export default function CategoryProperties({ category, title, image }) {
                 : "grid-cols-1 lg:grid-cols-2"
             } gap-4`}
           >
-            {properties.map((property, i) => (
-              <motion.div
-                key={property.id}
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-              >
-                <div onClick={() => handlePropertyClick(property.id)}>
-                  <PropertyCard property={property} view={view} />
-                </div>
-              </motion.div>
+            {Properties.map((property) => (
+              <div onClick={() => handlePropertyClick(property)}>
+                <PropertyCard
+                  property={{
+                    ...property,
+                    image: property.title_image,
+                    status: property.propery_type,
+                    price: `$${
+                      property.price?.toLocaleString?.() ?? property.price ?? 0
+                    }`,
+                    location: property.address,
+                    views: property.total_view,
+                    time: property.post_created,
+                  }}
+                  view={view}
+                />
+              </div>
             ))}
           </div>
         )}
-        {totalPages > 1 && properties.length > 0 && renderPagination()}
+        {totalPages > 1 && Properties.length > 0 && renderPagination()}
       </div>
     </PageComponents>
   );

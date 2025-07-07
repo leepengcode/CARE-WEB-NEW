@@ -1,12 +1,12 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MdApartment } from "react-icons/md";
+import PageComponents from "../../components/PageComponents";
+import MyPropertyFilter from "../../components/Properies/MyPropertyFilter";
+import MyPropertyCard from "../../components/shared/MyPropertyCard";
+import PropertyCardSkeleton from "../../components/shared/PropertyCardSkeleton";
 import { useStateContext } from "../../contexts/ContextProvider";
-import LoginPrompt from "../LoginPrompt";
-import PageComponents from "../PageComponents";
-import MyPropertyCard from "../shared/MyPropertyCard";
-import PropertyCardSkeleton from "../shared/PropertyCardSkeleton";
-import MyPropertyFilter from "./MyPropertyFilter";
 
 async function fetchMyProperties({
   userToken,
@@ -45,8 +45,9 @@ async function fetchMyProperties({
 }
 
 export default function MyProperty() {
+  const { t } = useTranslation();
   const { userToken, currentUser } = useStateContext();
-  const [properties, setProperties] = useState([]);
+  const [Properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [view, setView] = useState("grid");
@@ -55,21 +56,52 @@ export default function MyProperty() {
   const propertiesPerPage = 21;
   const [currentFilters, setCurrentFilters] = useState({});
 
+  // Smooth scroll utility function
+  const smoothScrollToTop = () => {
+    const startPosition = window.pageYOffset;
+    const targetPosition = 0;
+    const distance = targetPosition - startPosition;
+    const duration = 800; // 800ms for smooth animation
+    let start = null;
+
+    const animation = (currentTime) => {
+      if (start === null) start = currentTime;
+      const timeElapsed = currentTime - start;
+      const progress = Math.min(timeElapsed / duration, 1);
+
+      // Easing function for smooth animation
+      const easeInOutCubic =
+        progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      window.scrollTo(0, startPosition + distance * easeInOutCubic);
+
+      if (timeElapsed < duration) {
+        requestAnimationFrame(animation);
+      }
+    };
+
+    requestAnimationFrame(animation);
+  };
+
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      smoothScrollToTop(); // Use custom smooth scroll function
     }
   };
 
   const handleFilterApply = (filters) => {
     setCurrentPage(1);
     setCurrentFilters(filters);
+    smoothScrollToTop(); // Add smooth scroll for filter apply
   };
 
   const handleFilterClear = () => {
     setCurrentPage(1);
     setCurrentFilters({});
+    smoothScrollToTop(); // Add smooth scroll for filter clear
   };
 
   useEffect(() => {
@@ -98,7 +130,7 @@ export default function MyProperty() {
         let userid = currentUser.id;
 
         console.log("Latest user data:", userData.data);
-        console.log("Fetching properties for:", {
+        console.log("Fetching Properties for:", {
           role,
           userid,
           name: currentUser.name,
@@ -106,7 +138,7 @@ export default function MyProperty() {
 
         let allProperties = [];
 
-        // For agency role, fetch all properties with higher limit
+        // For agency role, fetch all Properties with higher limit
         if (role === "agency") {
           const [pending, active] = await Promise.all([
             fetchMyProperties({
@@ -145,61 +177,61 @@ export default function MyProperty() {
         }
 
         // Log the responses for debugging
-        console.log("All properties raw data:", allProperties);
-
+        console.log("All Properties raw data:", allProperties);
+        // Debug: log types of property.status and currentFilters.status
+        if (allProperties.length > 0) {
+          console.log(
+            "Sample property.status:",
+            allProperties[0].status,
+            typeof allProperties[0].status
+          );
+          console.log(
+            "Sample property.type:",
+            allProperties[0].type,
+            typeof allProperties[0].type
+          );
+        }
+        console.log(
+          "currentFilters.status:",
+          currentFilters.status,
+          typeof currentFilters.status
+        );
+        console.log(
+          "currentFilters.type:",
+          currentFilters.type,
+          typeof currentFilters.type
+        );
         // Deduplicate by id
         const combined = allProperties.filter(
           (item, idx, arr) => arr.findIndex((i) => i.id === item.id) === idx
         );
 
-        // Map to PropertyCard format
-        const mapped = combined.map((property) => ({
-          id: property.id,
-          image: property.title_image || property.image,
-          status: property.propery_type,
-          state: property.status ? property.status.toString() : "",
-
-          category: property.category?.category,
-          category_image: property.category?.image || property.category,
-          price: property.price
-            ? parseFloat(String(property.price).replace(/[^0-9.-]+/g, "")) || 0
-            : 0,
-          title: property.title,
-          location: property.address,
-          views: property.total_view,
-          time: property.post_created || property.time,
-          is_favourite: property.is_favourite,
-          gallery: property.gallery || [],
-          description: property.description || property.descriptions || "",
-          propery_type: property.propery_type || property.status,
-          post_created: property.post_created || property.time,
-          agent_owner: property.agent_owner || null,
-          mobile: property.mobile || null,
-          telegram_link: property.telegram_link || null,
-        }));
-
-        // Sort properties by ID in descending order
-        const sortedProperties = mapped.sort((a, b) => b.id - a.id);
+        // Sort Properties by ID in descending order
+        const sortedProperties = combined.sort((a, b) => b.id - a.id);
 
         // Apply filters if any exist
         const filteredProperties = sortedProperties.filter((property) => {
           if (Object.keys(currentFilters).length === 0) return true;
 
           // Filter by type/category if specified
-          if (currentFilters.type && property.type !== currentFilters.type) {
+          if (
+            currentFilters.type &&
+            (!property.category ||
+              property.category.category !== currentFilters.type)
+          ) {
             return false;
           }
 
           // Filter by price range if specified
           if (currentFilters.minPrice) {
             const propertyPrice = parseInt(
-              property.price.replace(/[^0-9]/g, "")
+              (property.price || "").toString().replace(/[^0-9]/g, "")
             );
             if (propertyPrice < currentFilters.minPrice) return false;
           }
           if (currentFilters.maxPrice) {
             const propertyPrice = parseInt(
-              property.price.replace(/[^0-9]/g, "")
+              (property.price || "").toString().replace(/[^0-9]/g, "")
             );
             if (propertyPrice > currentFilters.maxPrice) return false;
           }
@@ -208,7 +240,7 @@ export default function MyProperty() {
           if (
             currentFilters.status !== undefined &&
             currentFilters.status !== null &&
-            property.state !== currentFilters.status
+            property.status !== Number(currentFilters.status)
           ) {
             return false;
           }
@@ -218,7 +250,7 @@ export default function MyProperty() {
             const searchTerm = currentFilters.keyword.toLowerCase();
             const searchableText = [
               property.title,
-              property.location,
+              property.address,
               property.type,
               property.status,
             ]
@@ -234,14 +266,22 @@ export default function MyProperty() {
         setProperties(filteredProperties);
         setTotalProperties(filteredProperties.length);
       } catch (err) {
-        console.error("Error fetching properties:", err);
-        setError(err.message || "Failed to fetch properties");
+        console.error("Error fetching Properties:", err);
+        let errorMessage = err.message;
+        if (errorMessage === "API error") {
+          errorMessage = t("errors.api_error");
+        } else if (errorMessage === "Failed to fetch user data") {
+          errorMessage = t("errors.failed_to_fetch_user_data");
+        } else if (!errorMessage) {
+          errorMessage = t("errors.failed_to_fetch_properties");
+        }
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     };
     fetchProps();
-  }, [userToken, currentUser, currentFilters]);
+  }, [userToken, currentUser, currentFilters, t]);
 
   const totalPages = Math.max(
     1,
@@ -264,19 +304,19 @@ export default function MyProperty() {
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md ${
+          className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md transition-colors duration-200 ${
             currentPage === 1
               ? "bg-gray-200 cursor-not-allowed"
               : "bg-blue-800 text-white hover:bg-blue-900"
           }`}
         >
-          Previous
+          {t("properties_page.pagination_prev")}
         </button>
         {startPage > 1 && (
           <>
             <button
               onClick={() => handlePageChange(1)}
-              className="px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md bg-gray-200 hover:bg-gray-300"
+              className="px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md bg-gray-200 hover:bg-gray-300 transition-colors duration-200"
             >
               1
             </button>
@@ -287,7 +327,7 @@ export default function MyProperty() {
           <button
             key={page}
             onClick={() => handlePageChange(page)}
-            className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md ${
+            className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md transition-colors duration-200 ${
               currentPage === page
                 ? "bg-blue-800 text-white"
                 : "bg-gray-200 hover:bg-gray-300"
@@ -301,7 +341,7 @@ export default function MyProperty() {
             {endPage < totalPages - 1 && <span className="px-1">...</span>}
             <button
               onClick={() => handlePageChange(totalPages)}
-              className="px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md bg-gray-200 hover:bg-gray-300"
+              className="px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md bg-gray-200 hover:bg-gray-300 transition-colors duration-200"
             >
               {totalPages}
             </button>
@@ -310,36 +350,47 @@ export default function MyProperty() {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md ${
+          className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md transition-colors duration-200 ${
             currentPage === totalPages
               ? "bg-gray-200 cursor-not-allowed"
               : "bg-blue-800 text-white hover:bg-blue-900"
           }`}
         >
-          Next
+          {t("properties_page.pagination_next")}
         </button>
       </div>
     );
   };
 
   if (!userToken) {
-    return <LoginPrompt message="Please log in to view your properties." />;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            {t("my_property_page.login_required")}
+          </h2>
+          <p className="text-gray-600">{t("my_property_page.login_message")}</p>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 mt-5 gap-3 md:gap-0">
-            <h2 className="text-md md:text-xl">My Properties</h2>
-            <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-md md:text-2xl">
+              {t("properties_page.title")}
+            </h2>
+            <div className="flex items-center gap-2">
               <MyPropertyFilter
                 onFilter={handleFilterApply}
                 onClear={handleFilterClear}
               />
               <button
                 onClick={() => setView("grid")}
-                className={`p-2 rounded-md ${
+                className={`p-2 rounded-md transition-colors duration-200 ${
                   view === "grid" ? "bg-blue-800 text-white" : "bg-gray-200"
                 }`}
               >
@@ -347,7 +398,7 @@ export default function MyProperty() {
               </button>
               <button
                 onClick={() => setView("list")}
-                className={`p-2 rounded-md ${
+                className={`p-2 rounded-md transition-colors duration-200 ${
                   view === "list" ? "bg-blue-800 text-white" : "bg-gray-200"
                 }`}
               >
@@ -379,7 +430,9 @@ export default function MyProperty() {
           onClear={handleFilterClear}
         />
         <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
-          <p className="text-red-600">Error: {error}</p>
+          <p className="text-red-600">
+            {t("my_property_page.error_message", { error: error })}
+          </p>
         </div>
       </PageComponents>
     );
@@ -387,17 +440,17 @@ export default function MyProperty() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-4 md:py-5 lg:px-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 mt-5 gap-3 md:gap-0">
-          <h2 className="text-md md:text-2xl">My Properties</h2>
-          <div className="flex items-center gap-2 w-full md:w-auto">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-md md:text-2xl">{t("properties_page.title")}</h2>
+          <div className="flex items-center gap-2">
             <MyPropertyFilter
               onFilter={handleFilterApply}
               onClear={handleFilterClear}
             />
             <button
               onClick={() => setView("grid")}
-              className={`p-2 rounded-md ${
+              className={`p-2 rounded-md transition-colors duration-200 ${
                 view === "grid" ? "bg-blue-800 text-white" : "bg-gray-200"
               }`}
             >
@@ -405,7 +458,7 @@ export default function MyProperty() {
             </button>
             <button
               onClick={() => setView("list")}
-              className={`p-2 rounded-md ${
+              className={`p-2 rounded-md transition-colors duration-200 ${
                 view === "list" ? "bg-blue-800 text-white" : "bg-gray-200"
               }`}
             >
@@ -414,10 +467,10 @@ export default function MyProperty() {
           </div>
         </div>
 
-        {properties.length === 0 && !loading && !error ? (
+        {Properties.length === 0 && !loading && !error ? (
           <div className="flex flex-col items-center justify-center py-10 text-gray-500">
             <MdApartment className="w-16 h-16 mb-4" />
-            <p className="text-lg">No properties available in your list.</p>
+            <p className="text-lg">{t("my_property_page.no_properties")}</p>
           </div>
         ) : (
           <div
@@ -427,21 +480,20 @@ export default function MyProperty() {
                 : "grid-cols-1 lg:grid-cols-2"
             } gap-4`}
           >
-            {properties
-              .slice(
-                (currentPage - 1) * propertiesPerPage,
-                currentPage * propertiesPerPage
-              )
-              .map((property) => (
-                <MyPropertyCard
-                  key={property.id}
-                  property={property}
-                  view={view}
-                />
-              ))}
+            {Properties.slice(
+              (currentPage - 1) * propertiesPerPage,
+              currentPage * propertiesPerPage
+            ).map((property) => (
+              <div
+                key={property.id}
+                className="transition-transform duration-200 "
+              >
+                <MyPropertyCard property={property} view={view} />
+              </div>
+            ))}
           </div>
         )}
-        {totalPages > 1 && properties.length > 0 && renderPagination()}
+        {totalPages > 1 && Properties.length > 0 && renderPagination()}
       </div>
     </PageComponents>
   );
