@@ -127,7 +127,7 @@ const Footer = () => {
     <div className="w-full bg-gray-300">
       {/* Bank Logos Section */}
       <div className="w-full bg-white py-6">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <h3 className="text-lg font-semibold mb-4 text-gray-800 text-center">
             Our Partners
           </h3>
@@ -198,7 +198,7 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About Section */}
           <div className="md:col-span-2">

@@ -1,5 +1,5 @@
 import { PhoneIcon } from "@heroicons/react/24/outline";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FaCheck,
   FaChevronLeft,
@@ -22,18 +22,17 @@ import {
   WhatsappIcon,
   WhatsappShareButton,
 } from "react-share";
-import { fetchPropertyById, toggleFavorite } from "../api/propertyApi";
 import { useStateContext } from "../contexts/ContextProvider";
+import { useFavoriteProperty } from "../hooks/useFavoriteProperty";
+import { usePropertyDetail } from "../hooks/usePropertyDetail";
+import { useUserRole } from "../hooks/useUserRole";
 import PageComponents from "./PageComponents";
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [property, setProperty] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const { userToken, currentUser } = useStateContext();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isDescriptionLong, setIsDescriptionLong] = useState(false);
@@ -42,45 +41,24 @@ const PropertyDetail = () => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const shareMenuRef = useRef(null);
-  const { userToken, currentUser } = useStateContext();
-  const [favLoading, setFavLoading] = useState(false);
-  const [isFav, setIsFav] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [showLargeImageModal, setShowLargeImageModal] = useState(false);
-  const [userRole, setUserRole] = useState(null);
 
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!userToken || !currentUser?.id) {
-        console.log("No userToken or currentUser.id available");
-        return;
-      }
-
-      try {
-        console.log("Fetching user role for user ID:", currentUser.id);
-        const userResponse = await fetch(
-          `https://externalchecking.com/api/api_rone_new/public/api/get_user_by_id?userid=${currentUser.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-            },
-          }
-        );
-        const userData = await userResponse.json();
-        console.log("User data response:", userData);
-        if (!userData.error) {
-          console.log("Setting user role to:", userData.data.role);
-          setUserRole(userData.data.role);
-        } else {
-          console.error("Error in user data response:", userData.error);
-        }
-      } catch (err) {
-        console.error("Error fetching user role:", err);
-      }
-    };
-
-    fetchUserRole();
-  }, [userToken, currentUser]);
+  // Custom hooks
+  const userRole = useUserRole(userToken, currentUser);
+  const {
+    property,
+    isLoading,
+    error,
+    selectedImage,
+    setSelectedImage,
+    fetchPropertyDetail,
+  } = usePropertyDetail(id, userToken, location.state?.property);
+  const { isFav, favLoading, handleToggleFavorite } = useFavoriteProperty(
+    property?.id,
+    userToken,
+    showToast
+  );
 
   useEffect(() => {
     if (property) {
@@ -95,89 +73,7 @@ const PropertyDetail = () => {
     }
   }, [property, currentUser, userRole]);
 
-  const fetchPropertyDetail = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Check if property object is passed in state (from My Property)
-      const propertyFromState = location.state?.property;
-
-      let propertyData = null;
-
-      if (propertyFromState) {
-        console.log("=== Property Data from State ===");
-        console.log("Raw PropertyFromState object:", propertyFromState);
-
-        // Normalize category to object if needed
-        let normalizedCategory = propertyFromState.category;
-        if (typeof normalizedCategory === "string" || !normalizedCategory) {
-          normalizedCategory = {
-            category: propertyFromState.category || "",
-            image: propertyFromState.category_image || "",
-          };
-        }
-
-        // Map the data correctly, trying multiple potential description field names
-        propertyData = {
-          ...propertyFromState,
-          title_image: propertyFromState.image || propertyFromState.title_image,
-          description:
-            propertyFromState.description ||
-            propertyFromState.descriptions ||
-            "",
-          propery_type:
-            propertyFromState.propery_type || propertyFromState.status,
-          post_created:
-            propertyFromState.post_created ||
-            propertyFromState.time ||
-            new Date().toISOString(),
-          type: propertyFromState.type || "",
-          status: propertyFromState.state || propertyFromState.status,
-          price: propertyFromState.price
-            ? parseFloat(
-                String(propertyFromState.price).replace(/[^0-9.-]+/g, "")
-              ) || 0
-            : 0,
-          gallery: propertyFromState.gallery || [],
-          category: normalizedCategory,
-        };
-
-        console.log("Mapped Property Data (from State):", propertyData);
-        setProperty(propertyData);
-        setSelectedImage(propertyData.title_image);
-        return;
-      }
-
-      // Try fetching with token first, fallback to public if token error
-      try {
-        propertyData = await fetchPropertyById(id, userToken);
-      } catch (err) {
-        if (
-          err.message &&
-          err.message.toLowerCase().includes("authorization token not found")
-        ) {
-          propertyData = await fetchPropertyById(id, null);
-        } else {
-          throw err;
-        }
-      }
-
-      if (!propertyData) {
-        throw new Error("Property not found");
-      }
-      setProperty(propertyData);
-      setSelectedImage(propertyData.title_image);
-    } catch (error) {
-      console.error("Error fetching property:", error);
-      setError(error.message || "Failed to fetch property");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id, userToken, location.state?.property]);
-
   useEffect(() => {
-    // Only fetch if property is not passed in state
     if (!location.state?.property) {
       fetchPropertyDetail();
       setImgLoaded(false);
@@ -190,9 +86,8 @@ const PropertyDetail = () => {
           image: location.state.property.category_image || "",
         };
       }
-      setProperty({ ...location.state.property, category: normalizedCategory });
       setSelectedImage(location.state.property.title_image);
-      setIsLoading(false);
+      // setIsLoading(false); // This line was removed
     }
     // eslint-disable-next-line
   }, [id, userToken]);
@@ -224,10 +119,16 @@ const PropertyDetail = () => {
 
   useEffect(() => {
     if (property?.id) {
-      const favIds = getFavoriteIds();
-      setIsFav(favIds.includes(property.id));
+      // setIsFav(favIds.includes(property.id)); // This line was removed
     }
   }, [property?.id]);
+
+  // Automatically go back if there is an error loading the property
+  useEffect(() => {
+    if (error) {
+      navigate(-1);
+    }
+  }, [error, navigate]);
 
   const scrollThumbnailIntoView = (index) => {
     if (!thumbnailContainerRef.current) return;
@@ -312,29 +213,6 @@ const PropertyDetail = () => {
     }
   }, []);
 
-  // Alternative approach - simpler and more reliable
-  const handleBackClickSimple = () => {
-    const from = location.state?.from;
-
-    if (from) {
-      // Simply go back without scroll restoration complications
-      navigate(-1);
-    } else {
-      // Navigate to Property page if no previous state
-      navigate("/Property");
-    }
-  };
-
-  const handleShareClick = () => {
-    setShowShareMenu(!showShareMenu);
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   // Helper for toast
   function showToast(message, type = "info") {
     const toast = document.createElement("div");
@@ -357,47 +235,6 @@ const PropertyDetail = () => {
       setTimeout(() => document.body.removeChild(toast), 400);
     }, 2000);
   }
-
-  // LocalStorage helpers for favorite property IDs
-  function getFavoriteIds() {
-    try {
-      return JSON.parse(localStorage.getItem("favoritePropertyIds") || "[]");
-    } catch {
-      return [];
-    }
-  }
-  function setFavoriteIds(ids) {
-    localStorage.setItem("favoritePropertyIds", JSON.stringify(ids));
-  }
-
-  const handleToggleFavorite = async () => {
-    if (!userToken) {
-      showToast("Please log in to use favorites.", "error");
-      return;
-    }
-    if (!property?.id || favLoading) return;
-    setFavLoading(true);
-    const type = isFav ? 0 : 1;
-    try {
-      const res = await toggleFavorite(property.id, type, userToken);
-      if (!res.error) {
-        let favIds = getFavoriteIds();
-        if (type === 1) {
-          favIds = [...new Set([...favIds, property.id])];
-          showToast("Added to favorites!", "success");
-        } else {
-          favIds = favIds.filter((id) => id !== property.id);
-          showToast("Removed from favorites!", "success");
-        }
-        setFavoriteIds(favIds);
-        setIsFav(type === 1);
-      }
-    } catch {
-      showToast("Failed to update favorite status.", "error");
-    } finally {
-      setFavLoading(false);
-    }
-  };
 
   // --- Custom Mortgage Calculator UI ---
   function MortgageCalculatorUI({ price }) {
@@ -684,6 +521,11 @@ const PropertyDetail = () => {
     }
   }, []);
 
+  // Only show skeleton if loading and there is no error
+  if (error) {
+    // Don't render anything, useEffect will navigate back
+    return null;
+  }
   if (isLoading) {
     return (
       <PageComponents>
@@ -834,25 +676,6 @@ const PropertyDetail = () => {
     );
   }
 
-  if (error) {
-    return (
-      <PageComponents>
-        <div className="w-full max-w-7xl mx-auto py-2 md:py-5 md:px-10">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
-            Error Loading Property
-          </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Back
-          </button>
-        </div>
-      </PageComponents>
-    );
-  }
-
   if (!property) {
     return (
       <PageComponents>
@@ -874,7 +697,7 @@ const PropertyDetail = () => {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-2 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <div className="flex justify-between items-center mb-4">
           {/* Back Button */}
           <button
@@ -922,7 +745,7 @@ const PropertyDetail = () => {
               </button>
               <div className="relative" ref={shareMenuRef}>
                 <button
-                  onClick={handleShareClick}
+                  onClick={() => setShowShareMenu(true)}
                   className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-all duration-200"
                 >
                   <FaShareAlt className="w-5 h-5 text-gray-600" />
@@ -977,7 +800,14 @@ const PropertyDetail = () => {
 
                       {/* Copy Link Button */}
                       <button
-                        onClick={handleCopyLink}
+                        onClick={() => {
+                          const url = window.location.href;
+                          navigator.clipboard.writeText(url).then(() => {
+                            setCopied(true);
+                            showToast("Link copied to clipboard!", "success");
+                            setTimeout(() => setCopied(false), 2000);
+                          });
+                        }}
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                       >
                         {copied ? (
@@ -1029,7 +859,7 @@ const PropertyDetail = () => {
             <img
               src={selectedImage || property?.title_image}
               alt={property?.title}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-contian rounded-lg"
               onLoad={() => setImgLoaded(true)}
               style={{ display: imgLoaded ? "block" : "none" }}
             />

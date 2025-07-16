@@ -12,7 +12,7 @@ export default function Breadcrumb() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto   lg:px-10 pt-4">
+      <div className="w-full max-w-7xl mx-auto my-4 rounded-md py-1 md:py-2 bg-gray-200 px-5 lg:px-18">
         <nav aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2">
             <li>

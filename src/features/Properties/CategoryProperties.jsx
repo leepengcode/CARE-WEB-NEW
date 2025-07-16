@@ -1,88 +1,28 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MdApartment } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { fetchAllProperties } from "../../api/propertyApi";
 import PageComponents from "../../components/PageComponents";
 import CategoryPropertyFilter from "../../components/Properies/CategoryPropertyFilter";
 import PropertyCard from "../../components/shared/PropertyCard";
 import PropertyCardSkeleton from "../../components/shared/PropertyCardSkeleton";
+import { useCategoryProperties } from "../../hooks/useCategoryProperties";
 
 export default function CategoryProperties({ category, title, image }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [view, setView] = useState("grid");
-  const [Properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalProperties, setTotalProperties] = useState(0);
-  const propertiesPerPage = 24;
-  const [currentFilters, setCurrentFilters] = useState({});
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line
-  }, [category, currentPage, currentFilters]);
-
-  const fetchData = useCallback(
-    async (filters = currentFilters, page = currentPage) => {
-      setLoading(true);
-      try {
-        // Remove null/undefined values from filters and remove category from filters
-        const cleanFilters = Object.fromEntries(
-          Object.entries(filters).filter(
-            ([key, value]) => value != null && key !== "category"
-          )
-        );
-
-        const { data = [], total } = await fetchAllProperties(
-          page,
-          propertiesPerPage,
-          { ...cleanFilters, category }
-        );
-
-        if (!Array.isArray(data)) {
-          throw new Error("Invalid response format from server");
-        }
-
-        const filteredProperties = data.filter(
-          (property) =>
-            property.status === 1 && property.category?.category === category
-        );
-
-        setProperties(filteredProperties);
-        setTotalProperties(total);
-        setError(null);
-      } catch (err) {
-        setError(
-          err.message || "Failed to fetch Properties. Please try again."
-        );
-        setProperties([]);
-        setTotalProperties(0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [category, currentFilters, propertiesPerPage]
-  ); // Added dependencies
-
-  const handlePropertyClick = (property) => {
-    sessionStorage.setItem("propertiesScroll", window.scrollY);
-    sessionStorage.setItem(
-      "propertiesCache",
-      JSON.stringify({
-        view,
-        currentPage,
-        totalProperties,
-        filters: currentFilters,
-      })
-    );
-    navigate(`/property/${property.id}`, { state: { property } });
-  };
-
-  const totalPages = Math.ceil(totalProperties / propertiesPerPage);
+  const {
+    view,
+    setView,
+    Properties,
+    loading,
+    error,
+    currentPage,
+    setCurrentPage,
+    setCurrentFilters,
+    totalPages,
+    handlePropertyClick,
+  } = useCategoryProperties(category);
 
   const renderPagination = () => {
     const pageNumbers = [];
@@ -158,10 +98,14 @@ export default function CategoryProperties({ category, title, image }) {
     );
   };
 
+  if (error) {
+    // Don't render anything, useEffect will navigate back
+    return null;
+  }
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
           <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
             <img
               src={image}
@@ -208,7 +152,7 @@ export default function CategoryProperties({ category, title, image }) {
                 : "grid-cols-1 lg:grid-cols-2"
             } gap-4`}
           >
-            {Array.from({ length: propertiesPerPage }).map((_, i) => (
+            {Array.from({ length: 24 }).map((_, i) => (
               <PropertyCardSkeleton key={i} view={view} />
             ))}
           </div>
@@ -217,25 +161,9 @@ export default function CategoryProperties({ category, title, image }) {
     );
   }
 
-  if (error) {
-    return (
-      <PageComponents>
-        <CategoryPropertyFilter
-          onFilter={setCurrentFilters}
-          onClear={() => setCurrentFilters({})}
-        />
-        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 md:px-10">
-          <p className="text-red-600">
-            {t("category_properties_page.error_message", { error })}
-          </p>
-        </div>
-      </PageComponents>
-    );
-  }
-
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <div className="relative w-full h-[15vh] md:h-[40vh] mb-6">
           <img
             src={image}
@@ -249,7 +177,7 @@ export default function CategoryProperties({ category, title, image }) {
           </div>
         </div>
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-md md:text-2xl">
+          <h2 className="text-md md:text-xl">
             {t("category_properties_page.all_properties")}
           </h2>
           <div className="flex items-center gap-2">
@@ -291,21 +219,12 @@ export default function CategoryProperties({ category, title, image }) {
             } gap-4`}
           >
             {Properties.map((property) => (
-              <div onClick={() => handlePropertyClick(property)}>
-                <PropertyCard
-                  property={{
-                    ...property,
-                    image: property.title_image,
-                    status: property.propery_type,
-                    price: `$${
-                      property.price?.toLocaleString?.() ?? property.price ?? 0
-                    }`,
-                    location: property.address,
-                    views: property.total_view,
-                    time: property.post_created,
-                  }}
-                  view={view}
-                />
+              <div
+                key={property.id}
+                onClick={() => handlePropertyClick(property, navigate)}
+                className="cursor-pointer transition-transform duration-200 "
+              >
+                <PropertyCard property={property} view={view} />
               </div>
             ))}
           </div>

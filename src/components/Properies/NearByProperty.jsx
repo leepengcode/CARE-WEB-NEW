@@ -199,8 +199,8 @@ export default function NearByProperty() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-10">
-        <h2 className="text-xl md:text-xl mb-3 transition-all duration-500 ease-in-out transform">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
+        <h2 className="text-md md:text-xl mb-3 transition-all duration-500 ease-in-out transform">
           {t("nearby_properties.title", { location: selectedLocation })}
         </h2>
         <div className="flex overflow-x-auto gap-1 md:gap-4 rounded-lg hide-scrollbar scroll-smooth">

@@ -975,7 +975,7 @@ export default function AddProperty() {
   if (currentUser?.role === "agency") {
     return (
       <PageComponents>
-        <div className="w-full max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
           <div className="bg-white p-6 rounded-lg shadow text-center">
             <h1 className="text-2xl font-semibold mb-4">
               {t("add_property_page.access_denied")}
@@ -997,7 +997,7 @@ export default function AddProperty() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-8 px-2 md:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <h1 className="text-2xl font-semibold mb-6">
           {t("add_property_page.title")}
         </h1>

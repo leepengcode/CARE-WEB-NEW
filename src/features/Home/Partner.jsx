@@ -5,7 +5,7 @@ export default function Partner() {
   const { t } = useTranslation();
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 px-2 md:px-6 md:mb-5">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <div className="text-center text-2xl md:text-3xl font-bold text-blue-900">
           <h1>{t("partner_page.title")}</h1>
         </div>

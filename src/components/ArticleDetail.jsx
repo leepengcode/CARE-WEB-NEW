@@ -76,7 +76,7 @@ export default function ArticleDetail() {
   if (isLoading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
           <div className="animate-pulse">
             <div className="h-64 bg-gray-200 rounded mb-6"></div>
             <div className="space-y-3">
@@ -93,7 +93,7 @@ export default function ArticleDetail() {
   if (!article) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
             Article Not Found
           </h2>
@@ -110,7 +110,7 @@ export default function ArticleDetail() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-6xl mx-auto py-2 md:py-5 md:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <div className="flex justify-between items-center mb-4">
           {/* Back Button */}
           <button

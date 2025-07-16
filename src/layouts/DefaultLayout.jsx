@@ -44,15 +44,62 @@ export default function DefaultLayout() {
   const [anniversaryCountdown, setAnniversaryCountdown] = useState(10);
   const [hoveredMenu, setHoveredMenu] = useState(null);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef(null);
 
+  // Enhanced scroll handler with throttling and better logic
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsAtTop(window.scrollY < 10);
-      setIsVisible(window.scrollY < lastScrollY || window.scrollY < 10);
-      setLastScrollY(window.scrollY);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollThreshold = 10;
+
+          // Check if we're at the top
+          setIsAtTop(currentScrollY < scrollThreshold);
+
+          // Only hide/show navbar after scrolling past threshold
+          if (currentScrollY > scrollThreshold) {
+            // Show navbar when scrolling up, hide when scrolling down
+            if (currentScrollY < lastScrollY) {
+              setIsVisible(true);
+            } else if (currentScrollY > lastScrollY + 5) {
+              // Add small buffer to prevent flickering
+              setIsVisible(false);
+            }
+          } else {
+            // Always show navbar when near top
+            setIsVisible(true);
+          }
+
+          setLastScrollY(currentScrollY);
+          setIsScrolling(true);
+
+          // Clear existing timeout
+          if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+          }
+
+          // Set scrolling to false after scroll ends
+          scrollTimeoutRef.current = setTimeout(() => {
+            setIsScrolling(false);
+          }, 150);
+
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, [lastScrollY]);
 
   useEffect(() => {
@@ -261,16 +308,20 @@ export default function DefaultLayout() {
       )}
       <Disclosure
         as="nav"
-        className={`top-0 left-0 right-0 z-50 transition-all duration-300 h-16
+        className={`top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out h-16 will-change-transform
           ${
             isAtTop
               ? "absolute bg-white/30 backdrop-blur-md shadow-sm"
               : "fixed bg-white shadow-md"
           }
-          ${isVisible ? "translate-y-0" : "-translate-y-full"}
+          ${
+            isVisible
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-full opacity-0"
+          }
         `}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-0">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <div className="shrink-0">
@@ -327,7 +378,7 @@ export default function DefaultLayout() {
                               to={subItem.to}
                               className={({ isActive }) =>
                                 classNames(
-                                  "block px-5 py-2 text-sm md:text-md xl:text-base uppercase transition-all duration-200  transform hover:translate-x-1",
+                                  "block px-5 py-2 text-sm md:text-md xl:text-base  transition-all duration-200  transform hover:translate-x-1",
                                   isActive
                                     ? "bg-blue-600 text-white font-semibold"
                                     : "text-black hover:bg-blue-50 hover:text-blue-700"
@@ -654,6 +705,11 @@ export default function DefaultLayout() {
         /* Mobile menu smooth transitions */
         .mobile-menu-transition {
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Smooth navbar transitions */
+        .will-change-transform {
+          will-change: transform;
         }
       `}</style>
     </div>

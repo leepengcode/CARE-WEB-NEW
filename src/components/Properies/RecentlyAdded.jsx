@@ -88,7 +88,7 @@ export default function RecentlyAdded() {
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-10 lg:px-18">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-md md:text-xl animate-pulse bg-gradient-to-r from-gray-300 via-gray-400 to-gray-300 bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer">
               {t("recently_added.title")}
@@ -144,7 +144,7 @@ export default function RecentlyAdded() {
   if (error) {
     return (
       <PageComponents>
-        <div className="w-full max-w-6xl mx-auto py-4 md:py-5 md:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-10 lg:px-18">
           <div className="animate-fade-in-up bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <div className="text-red-600 text-lg font-medium mb-2">
               Oops! Something went wrong
@@ -164,15 +164,16 @@ export default function RecentlyAdded() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-10 lg:px-18">
         <div className="flex justify-between items-center mb-3">
           <h2
-            className={`text-md md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent transition-all duration-500 ease-in-out transform ${
+            className={`text-md md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent transition-all duration-500 ease-in-out transform ${
               fadeIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
             {t("recently_added.title")}
           </h2>
+
           <div
             className={`flex gap-2 transition-all duration-500 ease-in-out transform ${
               fadeIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"

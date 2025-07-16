@@ -112,7 +112,10 @@ export default function Categories() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-0 lg:px-6">
+      <div
+        className="w-full max-w-8xl mx-auto py-4 md:py-0 px-4 sm:px-6 lg:px-8  2xl:px-10 3xl:px-60
+      "
+      >
         {/* Small screens: horizontal scrollable carousel */}
         <div className="block md:hidden relative">
           <div
@@ -172,11 +175,11 @@ export default function Categories() {
           </div>
         </div>
         {/* md+ screens: full grid */}
-        <div className="hidden md:grid md:grid-cols-8 gap-x-4 justify-items-center min-h-[230px]">
+        <div className="hidden md:grid md:grid-cols-8 gap-x-20  justify-items-center min-h-[230px] ">
           {categories.map((cat) => (
             <div
               key={cat.name}
-              className="flex flex-col items-center cursor-pointer focus:outline-none"
+              className="flex flex-col items-center cursor-pointer focus:outline-none "
               onClick={() => {
                 window.scrollTo(0, 0);
                 navigate(cat.to);
@@ -190,7 +193,7 @@ export default function Categories() {
                 }
               }}
             >
-              <div className="bg-gradient-to-br from-gray-300 to-white rounded-2xl w-12 h-12 md:w-14 md:h-14 flex items-center justify-center mb-2 shadow-md transition-transform duration-100 ease-in-out hover:scale-110 hover:shadow-xl focus:scale-110 focus:shadow-xl">
+              <div className="bg-gradient-to-br border border-blue-500 from-gray-300 to-white rounded-2xl w-12 h-12 md:w-14 md:h-14 flex items-center justify-center mb-2 shadow-md transition-transform duration-100 ease-in-out hover:scale-110 hover:shadow-xl focus:scale-110 focus:shadow-xl">
                 <span className="text-2xl md:text-3xl text-blue-700">
                   {cat.icon}
                 </span>

@@ -266,10 +266,14 @@ export default function Properties() {
     );
   };
 
+  if (error) {
+    // Don't render anything, useEffect will navigate back
+    return null;
+  }
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-md md:text-2xl">
               {t("properties_page.title")}
@@ -304,7 +308,7 @@ export default function Properties() {
                 : "grid-cols-1 lg:grid-cols-2"
             } gap-4`}
           >
-            {Array.from({ length: propertiesPerPage }).map((_, i) => (
+            {Array.from({ length: 54 }).map((_, i) => (
               <PropertyCardSkeleton key={i} view={view} />
             ))}
           </div>
@@ -331,7 +335,7 @@ export default function Properties() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-md md:text-2xl">{t("properties_page.title")}</h2>
           <div className="flex items-center gap-2">

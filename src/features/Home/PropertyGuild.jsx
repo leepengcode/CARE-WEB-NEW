@@ -17,10 +17,10 @@ export default function PropertyGuild() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-2 md:py-10 px-2 md:px-0 ">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-6xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto py-2  md:py-10 px-0 md:px-0 ">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-7xl mx-auto">
           {/* Property Guides Card */}
-          <div className="bg-white rounded-lg shadow-md p-3 md:p-5 hover:shadow-lg transition-all duration-300">
+          <div className="bg-white rounded-lg shadow-md border border-blue-500 p-3 md:p-5 hover:shadow-lg transition-all duration-300 ">
             <div className="flex flex-col items-center text-center">
               {/* Content for Property Guides Card */}
               <div className="bg-blue-100 p-2 md:p-3 rounded-full mb-2 md:mb-4">
@@ -42,7 +42,7 @@ export default function PropertyGuild() {
           </div>
 
           {/* Mortgage Calculator Card */}
-          <div className="bg-white rounded-lg shadow-md p-3 md:p-5 hover:shadow-lg transition-all duration-300">
+          <div className="bg-white rounded-lg shadow-md border border-blue-500 p-3 md:p-5 hover:shadow-lg transition-all duration-300">
             <div className="flex flex-col items-center text-center">
               {/* Content for Mortgage Calculator Card */}
               <div className="bg-green-100 p-2 md:p-3 rounded-full mb-2 md:mb-4">

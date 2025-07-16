@@ -16,6 +16,29 @@ import { useStateContext } from "../../contexts/ContextProvider";
 // Define libraries as a static constant outside the component
 const googleMapLibraries = ["places"];
 
+// Add toast function at the top of the file, after imports
+function showToast(message, type = "info") {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.className = `fixed right-8 top-8 z-50 px-6 py-3 rounded shadow text-white text-center transition-all duration-300 opacity-0 translate-x-10 ${
+    type === "success"
+      ? "bg-green-600"
+      : type === "error"
+      ? "bg-red-600"
+      : "bg-blue-600"
+  }`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.remove("opacity-0", "translate-x-10");
+    toast.classList.add("opacity-100", "translate-x-0");
+  }, 10);
+  setTimeout(() => {
+    toast.classList.remove("opacity-100", "translate-x-0");
+    toast.classList.add("opacity-0", "translate-x-10");
+    setTimeout(() => document.body.removeChild(toast), 400);
+  }, 2000);
+}
+
 const EditProperty = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -502,6 +525,170 @@ const EditProperty = () => {
     console.log("propertyData?.category?.id:", propertyData?.category?.id);
   }, [selectedCategory, categoryOptions, propertyData]);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+  //   setFormError("");
+
+  //   // Validation for required fields
+  //   console.log("Required fields before submit:", {
+  //     id,
+  //     action_type: 0,
+  //     category_id: selectedCategory,
+  //     title: e.target.title.value,
+  //     description: e.target.description.value,
+  //     propertyType,
+  //     price: e.target.price.value,
+  //     latitude,
+  //     longitude,
+  //     selectedCountry,
+  //     selectedProvince,
+  //     selectedDistrict,
+  //     selectedCommune,
+  //     selectedVillage,
+  //     client_address: e.target.client_address.value,
+  //     owner_name: e.target.owner_name.value,
+  //     owner_phone: e.target.owner_phone.value,
+  //     owner_address: e.target.owner_address.value,
+  //   });
+  //   const missingFields = [];
+  //   if (!selectedCategory) missingFields.push("Category");
+  //   if (!e.target.title.value) missingFields.push("Title");
+  //   if (!e.target.description.value) missingFields.push("Description");
+  //   if (!propertyType) missingFields.push("Property Type");
+  //   if (!e.target.price.value) missingFields.push("Price");
+  //   if (!latitude) missingFields.push("Latitude");
+  //   if (!longitude) missingFields.push("Longitude");
+  //   if (!selectedCountry) missingFields.push("Country");
+  //   if (!selectedProvince) missingFields.push("Province");
+  //   if (!selectedDistrict) missingFields.push("District");
+  //   if (!selectedCommune) missingFields.push("Commune");
+  //   if (!selectedVillage) missingFields.push("Village");
+  //   if (!e.target.client_address.value) missingFields.push("Client Address");
+  //   if (!e.target.owner_name.value) missingFields.push("Owner Name");
+  //   if (!e.target.owner_phone.value) missingFields.push("Owner Phone");
+  //   if (!e.target.owner_address.value) missingFields.push("Owner Address");
+
+  //   if (missingFields.length > 0) {
+  //     setFormError("Please fill all data and Submit");
+  //     console.error("Missing required fields:", missingFields);
+  //     setIsSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+
+  //     // Required fields
+  //     formData.append("id", id);
+  //     formData.append("category_id", selectedCategory);
+  //     formData.append("userid", currentUser.id);
+
+  //     // Property details
+  //     formData.append("title", e.target.title.value);
+  //     formData.append("description", e.target.description.value || "");
+  //     formData.append("property_type", propertyType === "1" ? "0" : "1");
+  //     formData.append("price", e.target.price.value || "0");
+  //     formData.append("rentduration", rentDurationType || "");
+
+  //     // Location details
+  //     formData.append("country", selectedCountry);
+  //     formData.append("province", selectedProvince || "");
+  //     formData.append("district", selectedDistrict || "");
+  //     formData.append("commune", selectedCommune || "");
+  //     formData.append("village", selectedVillage || "");
+  //     formData.append("latitude", latitude || "");
+  //     formData.append("longitude", longitude || "");
+  //     formData.append("client_address", e.target.client_address.value || "");
+  //     formData.append("address", e.target.address.value || "");
+
+  //     // Owner details
+  //     formData.append("owner_name", e.target.owner_name.value || "");
+  //     formData.append("owner_phone", e.target.owner_phone.value || "");
+  //     formData.append("owner_address", e.target.owner_address.value || "");
+  //     formData.append("owner_note", e.target.owner_note.value || "");
+
+  //     // Images
+  //     if (titleImagePreview && titleImagePreview.file) {
+  //       formData.append("title_image", titleImagePreview.file);
+  //     }
+  //     if (threeDImagePreview && threeDImagePreview.file) {
+  //       formData.append("three_d_image", threeDImagePreview.file);
+  //     }
+  //     if (galleryImagesPreview.length > 0) {
+  //       galleryImagesPreview.forEach((image, index) => {
+  //         if (image.file) {
+  //           formData.append(`gallery[${index}]`, image.file);
+  //         }
+  //       });
+  //     }
+
+  //     // Facilities
+  //     Object.entries(facilities).forEach(([facilityId, data]) => {
+  //       if (data) {
+  //         formData.append(`facilities[${facilityId}]`, data.distance);
+  //       }
+  //     });
+
+  //     // Parameters
+  //     Object.entries(parameterValues).forEach(([paramId, value]) => {
+  //       if (value) {
+  //         formData.append(`parameters[${paramId}]`, value);
+  //       }
+  //     });
+
+  //     // Log all FormData entries before sending
+  //     console.log("FormData before update:");
+  //     for (let pair of formData.entries()) {
+  //       console.log(pair[0] + ":", pair[1]);
+  //     }
+
+  //     const response = await fetch(
+  //       "https://externalchecking.com/api/api_rone_new/public/api/update_post_property",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${userToken}`,
+  //         },
+  //         body: formData,
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       const errorText = await response.text();
+  //       console.error("Server responded with an error:", errorText);
+  //       throw new Error(
+  //         `Server error: ${response.status} ${response.statusText}`
+  //       );
+  //     }
+
+  //     const responseText = await response.text();
+  //     let result;
+  //     try {
+  //       result = JSON.parse(responseText);
+  //     } catch {
+  //       console.error("Failed to parse JSON:", responseText);
+  //       throw new Error("Server returned an invalid JSON response.");
+  //     }
+
+  //     if (result.error) {
+  //       throw new Error(result.message || "Failed to update property");
+  //     }
+
+  //     // Show success message and redirect
+  //     alert("Property updated successfully!");
+  //     navigate(`/property/${id}`);
+  //   } catch (err) {
+  //     console.error("Update property error:", err);
+  //     setError(err.message);
+  //     setFormError(err.message);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+  // Handle search box place changes
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -510,7 +697,7 @@ const EditProperty = () => {
     // Validation for required fields
     console.log("Required fields before submit:", {
       id,
-      action_type: 0,
+      action_type: 0, // Add action_type to the log as it's expected by backend
       category_id: selectedCategory,
       title: e.target.title.value,
       description: e.target.description.value,
@@ -528,7 +715,9 @@ const EditProperty = () => {
       owner_phone: e.target.owner_phone.value,
       owner_address: e.target.owner_address.value,
     });
+
     const missingFields = [];
+    if (!id) missingFields.push("ID");
     if (!selectedCategory) missingFields.push("Category");
     if (!e.target.title.value) missingFields.push("Title");
     if (!e.target.description.value) missingFields.push("Description");
@@ -557,14 +746,15 @@ const EditProperty = () => {
       const formData = new FormData();
 
       // Required fields
-      formData.append("property_id", id);
+      formData.append("id", id); // Corrected from property_id
+      formData.append("action_type", "0"); // Explicitly add action_type
       formData.append("category_id", selectedCategory);
       formData.append("userid", currentUser.id);
 
       // Property details
       formData.append("title", e.target.title.value);
       formData.append("description", e.target.description.value || "");
-      formData.append("property_type", propertyType === "1" ? "0" : "1");
+      formData.append("propery_type", propertyType === "1" ? "0" : "1"); // Note: Fix typo in backend if 'propery_type' is expected
       formData.append("price", e.target.price.value || "0");
       formData.append("rentduration", rentDurationType || "");
 
@@ -590,34 +780,49 @@ const EditProperty = () => {
         formData.append("title_image", titleImagePreview.file);
       }
       if (threeDImagePreview && threeDImagePreview.file) {
-        formData.append("three_d_image", threeDImagePreview.file);
+        formData.append("threeD_image", threeDImagePreview.file);
       }
       if (galleryImagesPreview.length > 0) {
         galleryImagesPreview.forEach((image, index) => {
           if (image.file) {
-            formData.append(`gallery[${index}]`, image.file);
+            formData.append(`gallery_images[${index}]`, image.file);
           }
         });
       }
 
       // Facilities
-      Object.entries(facilities).forEach(([facilityId, data]) => {
-        if (data) {
-          formData.append(`facilities[${facilityId}]`, data.distance);
-        }
+      const facilitiesArray = Object.entries(facilities)
+        .filter(([_, data]) => data)
+        .map(([facilityId, data], index) => ({
+          facility_id: facilityId,
+          distance: data.distance,
+        }));
+      facilitiesArray.forEach((facility, index) => {
+        formData.append(
+          `facilities[${index}][facility_id]`,
+          facility.facility_id
+        );
+        formData.append(
+          `facilities[${index}][distance]`,
+          facility.distance || ""
+        );
       });
 
       // Parameters
-      Object.entries(parameterValues).forEach(([paramId, value]) => {
-        if (value) {
-          formData.append(`parameters[${paramId}]`, value);
+      parameters.forEach((param, index) => {
+        if (parameterValues[param.id]) {
+          formData.append(`parameters[${index}][parameter_id]`, param.id);
+          formData.append(
+            `parameters[${index}][value]`,
+            parameterValues[param.id]
+          );
         }
       });
 
       // Log all FormData entries before sending
       console.log("FormData before update:");
       for (let pair of formData.entries()) {
-        console.log(pair[0] + ":", pair[1]);
+        console.log(`${pair[0]}: ${pair[1]}`);
       }
 
       const response = await fetch(
@@ -631,32 +836,42 @@ const EditProperty = () => {
         }
       );
 
+      const responseText = await response.text();
+      console.log("Server response:", responseText);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server responded with an error:", errorText);
+        console.error("Server error:", {
+          status: response.status,
+          statusText: response.statusText,
+          responseText,
+        });
         throw new Error(
           `Server error: ${response.status} ${response.statusText}`
         );
       }
 
-      const responseText = await response.text();
       let result;
       try {
         result = JSON.parse(responseText);
+        console.log("Parsed response:", result);
       } catch {
         console.error("Failed to parse JSON:", responseText);
         throw new Error("Server returned an invalid JSON response.");
       }
 
       if (result.error) {
+        console.error("API error response:", result);
         throw new Error(result.message || "Failed to update property");
       }
 
       // Show success message and redirect
-      alert("Property updated successfully!");
-      navigate(`/property/${id}`);
+      showToast("Property updated successfully!", "success");
+      navigate(`/my-property`);
     } catch (err) {
-      console.error("Update property error:", err);
+      console.error("Update property error:", {
+        message: err.message,
+        stack: err.stack,
+      });
       setError(err.message);
       setFormError(err.message);
     } finally {
@@ -664,7 +879,6 @@ const EditProperty = () => {
     }
   };
 
-  // Handle search box place changes
   const onPlacesChanged = () => {
     const places = searchBox.getPlaces();
     if (places.length === 0) return;

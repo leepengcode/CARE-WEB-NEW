@@ -41,7 +41,7 @@ export const authApi = {
   // Verify OTP
   verifyOtp: async (phone, otp) => {
     const response = await axios.post(
-      `${API_BASE_URL}/api/verify_otp`,
+      `${API_BASE_URL}/api/check-otp`,
       { phone, otp }
     );
     return response.data;

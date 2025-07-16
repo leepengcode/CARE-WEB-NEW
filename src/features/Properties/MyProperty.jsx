@@ -1,5 +1,5 @@
 import { ListBulletIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MdApartment } from "react-icons/md";
 import PageComponents from "../../components/PageComponents";
@@ -8,18 +8,35 @@ import MyPropertyCard from "../../components/shared/MyPropertyCard";
 import PropertyCardSkeleton from "../../components/shared/PropertyCardSkeleton";
 import { useStateContext } from "../../contexts/ContextProvider";
 
-async function fetchMyProperties({
+// Debounce hook
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+// Memoized API fetch function
+const fetchMyProperties = async ({
   userToken,
   role,
   userid,
   status,
   offset = 0,
   limit = 100,
-}) {
+}) => {
   const url =
     "https://externalchecking.com/api/api_rone_new/public/api/get_property";
 
-  // Prepare request body
   const requestBody = {
     status,
     offset,
@@ -27,9 +44,6 @@ async function fetchMyProperties({
     role: role === null ? "researcher" : role,
     userid,
   };
-
-  console.log("API Request URL:", url);
-  console.log("Request Body:", requestBody);
 
   const res = await fetch(url, {
     method: "POST",
@@ -39,29 +53,65 @@ async function fetchMyProperties({
     },
     body: JSON.stringify(requestBody),
   });
+
   const json = await res.json();
   if (json.error) throw new Error(json.message || "API error");
   return json.data || [];
-}
+};
+
+// Memoized user data fetch
+const fetchUserData = async (userToken, userId) => {
+  const userResponse = await fetch(
+    `https://externalchecking.com/api/api_rone_new/public/api/get_user_by_id?userid=${userId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  const userData = await userResponse.json();
+
+  if (userData.error) {
+    throw new Error(userData.message || "Failed to fetch user data");
+  }
+
+  return userData.data;
+};
 
 export default function MyProperty() {
   const { t } = useTranslation();
   const { userToken, currentUser } = useStateContext();
-  const [Properties, setProperties] = useState([]);
+
+  // State management
+  const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [view, setView] = useState("grid");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalProperties, setTotalProperties] = useState(0);
-  const propertiesPerPage = 21;
   const [currentFilters, setCurrentFilters] = useState({});
+  const [userRole, setUserRole] = useState(null);
 
-  // Smooth scroll utility function
-  const smoothScrollToTop = () => {
+  // Refs for cleanup
+  const animationRef = useRef(null);
+  const abortControllerRef = useRef(null);
+
+  // Constants
+  const propertiesPerPage = 21;
+
+  // Debounced filters to prevent excessive API calls
+  const debouncedFilters = useDebounce(currentFilters, 300);
+
+  // Memoized smooth scroll function
+  const smoothScrollToTop = useCallback(() => {
+    // Cancel any existing animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
     const startPosition = window.pageYOffset;
     const targetPosition = 0;
     const distance = targetPosition - startPosition;
-    const duration = 800; // 800ms for smooth animation
+    const duration = 800;
     let start = null;
 
     const animation = (currentTime) => {
@@ -69,7 +119,6 @@ export default function MyProperty() {
       const timeElapsed = currentTime - start;
       const progress = Math.min(timeElapsed / duration, 1);
 
-      // Easing function for smooth animation
       const easeInOutCubic =
         progress < 0.5
           ? 4 * progress * progress * progress
@@ -78,195 +127,191 @@ export default function MyProperty() {
       window.scrollTo(0, startPosition + distance * easeInOutCubic);
 
       if (timeElapsed < duration) {
-        requestAnimationFrame(animation);
+        animationRef.current = requestAnimationFrame(animation);
       }
     };
 
-    requestAnimationFrame(animation);
-  };
+    animationRef.current = requestAnimationFrame(animation);
+  }, []);
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-      smoothScrollToTop(); // Use custom smooth scroll function
-    }
-  };
+  // Memoized filter function
+  const applyFilters = useCallback((properties, filters) => {
+    if (Object.keys(filters).length === 0) return properties;
 
-  const handleFilterApply = (filters) => {
-    setCurrentPage(1);
-    setCurrentFilters(filters);
-    smoothScrollToTop(); // Add smooth scroll for filter apply
-  };
+    return properties.filter((property) => {
+      // Filter by type/category
+      if (
+        filters.type &&
+        (!property.category || property.category.category !== filters.type)
+      ) {
+        return false;
+      }
 
-  const handleFilterClear = () => {
+      // Filter by price range
+      if (filters.minPrice || filters.maxPrice) {
+        const propertyPrice = parseInt(
+          (property.price || "").toString().replace(/[^0-9]/g, "")
+        );
+        if (filters.minPrice && propertyPrice < filters.minPrice) return false;
+        if (filters.maxPrice && propertyPrice > filters.maxPrice) return false;
+      }
+
+      // Filter by status
+      if (
+        filters.status !== undefined &&
+        filters.status !== null &&
+        property.status !== Number(filters.status)
+      ) {
+        return false;
+      }
+
+      // Filter by keyword
+      if (filters.keyword) {
+        const searchTerm = filters.keyword.toLowerCase();
+        const searchableText = [
+          property.title,
+          property.address,
+          property.type,
+          property.status,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!searchableText.includes(searchTerm)) return false;
+      }
+
+      return true;
+    });
+  }, []);
+
+  // Memoized filtered and sorted properties
+  const filteredProperties = useMemo(() => {
+    const filtered = applyFilters(allProperties, debouncedFilters);
+    return filtered.sort((a, b) => b.id - a.id);
+  }, [allProperties, debouncedFilters, applyFilters]);
+
+  // Memoized paginated properties
+  const paginatedProperties = useMemo(() => {
+    const startIndex = (currentPage - 1) * propertiesPerPage;
+    const endIndex = startIndex + propertiesPerPage;
+    return filteredProperties.slice(startIndex, endIndex);
+  }, [filteredProperties, currentPage, propertiesPerPage]);
+
+  // Memoized pagination data
+  const paginationData = useMemo(() => {
+    const totalProperties = filteredProperties.length;
+    const totalPages = Math.max(
+      1,
+      Math.ceil(totalProperties / propertiesPerPage)
+    );
+
+    return {
+      totalProperties,
+      totalPages,
+      hasNextPage: currentPage < totalPages,
+      hasPrevPage: currentPage > 1,
+    };
+  }, [filteredProperties.length, currentPage, propertiesPerPage]);
+
+  // Optimized page change handler
+  const handlePageChange = useCallback(
+    (page) => {
+      if (
+        page >= 1 &&
+        page <= paginationData.totalPages &&
+        page !== currentPage
+      ) {
+        setCurrentPage(page);
+        smoothScrollToTop();
+      }
+    },
+    [currentPage, paginationData.totalPages, smoothScrollToTop]
+  );
+
+  // Optimized filter handlers
+  const handleFilterApply = useCallback(
+    (filters) => {
+      setCurrentPage(1);
+      setCurrentFilters(filters);
+      smoothScrollToTop();
+    },
+    [smoothScrollToTop]
+  );
+
+  const handleFilterClear = useCallback(() => {
     setCurrentPage(1);
     setCurrentFilters({});
-    smoothScrollToTop(); // Add smooth scroll for filter clear
-  };
+    smoothScrollToTop();
+  }, [smoothScrollToTop]);
 
+  // Optimized view toggle
+  const handleViewToggle = useCallback(
+    (newView) => {
+      if (newView !== view) {
+        setView(newView);
+      }
+    },
+    [view]
+  );
+
+  // Main data fetching effect
   useEffect(() => {
     if (!userToken || !currentUser?.id) return;
-    setLoading(true);
-    setError(null);
-    const fetchProps = async () => {
+
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    const fetchData = async () => {
       try {
-        // Fetch latest user data to get current role
-        const userResponse = await fetch(
-          `https://externalchecking.com/api/api_rone_new/public/api/get_user_by_id?userid=${currentUser.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-            },
-          }
-        );
-        const userData = await userResponse.json();
+        setLoading(true);
+        setError(null);
 
-        if (userData.error) {
-          throw new Error(userData.message || "Failed to fetch user data");
+        // Only fetch user data if we don't have the role cached
+        let role = userRole;
+        if (!role) {
+          const userData = await fetchUserData(userToken, currentUser.id);
+          role = userData.role;
+          setUserRole(role);
         }
 
-        // Use the role from the latest user data
-        let role = userData.data.role;
-        let userid = currentUser.id;
+        // Fetch properties with optimized parallel requests
+        const fetchPromises = [
+          fetchMyProperties({
+            userToken,
+            role,
+            userid: currentUser.id,
+            status: 0,
+            limit: role === "agency" ? 100 : 100,
+          }),
+          fetchMyProperties({
+            userToken,
+            role,
+            userid: currentUser.id,
+            status: 1,
+            limit: role === "agency" ? 100 : 100,
+          }),
+        ];
 
-        console.log("Latest user data:", userData.data);
-        console.log("Fetching Properties for:", {
-          role,
-          userid,
-          name: currentUser.name,
-        });
+        const [pending, active] = await Promise.all(fetchPromises);
 
-        let allProperties = [];
+        if (signal.aborted) return;
 
-        // For agency role, fetch all Properties with higher limit
-        if (role === "agency") {
-          const [pending, active] = await Promise.all([
-            fetchMyProperties({
-              userToken,
-              role,
-              userid,
-              status: 0,
-              limit: 100, // Increased limit for agency
-            }),
-            fetchMyProperties({
-              userToken,
-              role,
-              userid,
-              status: 1,
-              limit: 100, // Increased limit for agency
-            }),
-          ]);
-          allProperties = [...pending, ...active];
-        } else {
-          // For other roles (including null role), fetch with default limit
-          const [pending, active] = await Promise.all([
-            fetchMyProperties({
-              userToken,
-              role,
-              userid,
-              status: 0,
-            }),
-            fetchMyProperties({
-              userToken,
-              role,
-              userid,
-              status: 1,
-            }),
-          ]);
-          allProperties = [...pending, ...active];
-        }
-
-        // Log the responses for debugging
-        console.log("All Properties raw data:", allProperties);
-        // Debug: log types of property.status and currentFilters.status
-        if (allProperties.length > 0) {
-          console.log(
-            "Sample property.status:",
-            allProperties[0].status,
-            typeof allProperties[0].status
-          );
-          console.log(
-            "Sample property.type:",
-            allProperties[0].type,
-            typeof allProperties[0].type
-          );
-        }
-        console.log(
-          "currentFilters.status:",
-          currentFilters.status,
-          typeof currentFilters.status
-        );
-        console.log(
-          "currentFilters.type:",
-          currentFilters.type,
-          typeof currentFilters.type
-        );
-        // Deduplicate by id
-        const combined = allProperties.filter(
+        // Combine and deduplicate
+        const combined = [...pending, ...active];
+        const deduplicated = combined.filter(
           (item, idx, arr) => arr.findIndex((i) => i.id === item.id) === idx
         );
 
-        // Sort Properties by ID in descending order
-        const sortedProperties = combined.sort((a, b) => b.id - a.id);
-
-        // Apply filters if any exist
-        const filteredProperties = sortedProperties.filter((property) => {
-          if (Object.keys(currentFilters).length === 0) return true;
-
-          // Filter by type/category if specified
-          if (
-            currentFilters.type &&
-            (!property.category ||
-              property.category.category !== currentFilters.type)
-          ) {
-            return false;
-          }
-
-          // Filter by price range if specified
-          if (currentFilters.minPrice) {
-            const propertyPrice = parseInt(
-              (property.price || "").toString().replace(/[^0-9]/g, "")
-            );
-            if (propertyPrice < currentFilters.minPrice) return false;
-          }
-          if (currentFilters.maxPrice) {
-            const propertyPrice = parseInt(
-              (property.price || "").toString().replace(/[^0-9]/g, "")
-            );
-            if (propertyPrice > currentFilters.maxPrice) return false;
-          }
-
-          // Filter by status if specified
-          if (
-            currentFilters.status !== undefined &&
-            currentFilters.status !== null &&
-            property.status !== Number(currentFilters.status)
-          ) {
-            return false;
-          }
-
-          // Filter by keyword if specified
-          if (currentFilters.keyword) {
-            const searchTerm = currentFilters.keyword.toLowerCase();
-            const searchableText = [
-              property.title,
-              property.address,
-              property.type,
-              property.status,
-            ]
-              .filter(Boolean)
-              .join(" ")
-              .toLowerCase();
-            if (!searchableText.includes(searchTerm)) return false;
-          }
-
-          return true;
-        });
-
-        setProperties(filteredProperties);
-        setTotalProperties(filteredProperties.length);
+        setAllProperties(deduplicated);
       } catch (err) {
-        console.error("Error fetching Properties:", err);
+        if (signal.aborted) return;
+
+        console.error("Error fetching properties:", err);
         let errorMessage = err.message;
         if (errorMessage === "API error") {
           errorMessage = t("errors.api_error");
@@ -277,41 +322,66 @@ export default function MyProperty() {
         }
         setError(errorMessage);
       } finally {
-        setLoading(false);
+        if (!signal.aborted) {
+          setLoading(false);
+        }
       }
     };
-    fetchProps();
-  }, [userToken, currentUser, currentFilters, t]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalProperties / propertiesPerPage)
-  );
+    fetchData();
 
-  const renderPagination = () => {
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [userToken, currentUser?.id, userRole, t]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Memoized pagination component
+  const PaginationComponent = useMemo(() => {
+    if (paginationData.totalPages <= 1) return null;
+
+    const { totalPages } = paginationData;
     const pageNumbers = [];
     const maxPagesToShow = window.innerWidth < 768 ? 3 : 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
+
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
+
     return (
       <div className="flex justify-center items-center gap-1 sm:gap-2 mt-6">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
+          disabled={!paginationData.hasPrevPage}
           className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md transition-colors duration-200 ${
-            currentPage === 1
+            !paginationData.hasPrevPage
               ? "bg-gray-200 cursor-not-allowed"
               : "bg-blue-800 text-white hover:bg-blue-900"
           }`}
         >
           {t("properties_page.pagination_prev")}
         </button>
+
         {startPage > 1 && (
           <>
             <button
@@ -323,6 +393,7 @@ export default function MyProperty() {
             {startPage > 2 && <span className="px-1">...</span>}
           </>
         )}
+
         {pageNumbers.map((page) => (
           <button
             key={page}
@@ -336,6 +407,7 @@ export default function MyProperty() {
             {page}
           </button>
         ))}
+
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && <span className="px-1">...</span>}
@@ -347,11 +419,12 @@ export default function MyProperty() {
             </button>
           </>
         )}
+
         <button
           onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          disabled={!paginationData.hasNextPage}
           className={`px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base rounded-md transition-colors duration-200 ${
-            currentPage === totalPages
+            !paginationData.hasNextPage
               ? "bg-gray-200 cursor-not-allowed"
               : "bg-blue-800 text-white hover:bg-blue-900"
           }`}
@@ -360,8 +433,9 @@ export default function MyProperty() {
         </button>
       </div>
     );
-  };
+  }, [currentPage, paginationData, handlePageChange, t]);
 
+  // Early returns for different states
   if (!userToken) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -378,7 +452,7 @@ export default function MyProperty() {
   if (loading) {
     return (
       <PageComponents>
-        <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+        <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-md md:text-2xl">
               {t("properties_page.title")}
@@ -389,7 +463,7 @@ export default function MyProperty() {
                 onClear={handleFilterClear}
               />
               <button
-                onClick={() => setView("grid")}
+                onClick={() => handleViewToggle("grid")}
                 className={`p-2 rounded-md transition-colors duration-200 ${
                   view === "grid" ? "bg-blue-800 text-white" : "bg-gray-200"
                 }`}
@@ -397,7 +471,7 @@ export default function MyProperty() {
                 <Squares2X2Icon className="w-4 h-4 md:w-6 md:h-6" />
               </button>
               <button
-                onClick={() => setView("list")}
+                onClick={() => handleViewToggle("list")}
                 className={`p-2 rounded-md transition-colors duration-200 ${
                   view === "list" ? "bg-blue-800 text-white" : "bg-gray-200"
                 }`}
@@ -440,7 +514,7 @@ export default function MyProperty() {
 
   return (
     <PageComponents>
-      <div className="w-full max-w-7xl mx-auto py-4 md:py-5 lg:px-10">
+      <div className="w-full max-w-7xl mx-auto py-4 md:py-1 lg:px-18">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-md md:text-2xl">{t("properties_page.title")}</h2>
           <div className="flex items-center gap-2">
@@ -449,7 +523,7 @@ export default function MyProperty() {
               onClear={handleFilterClear}
             />
             <button
-              onClick={() => setView("grid")}
+              onClick={() => handleViewToggle("grid")}
               className={`p-2 rounded-md transition-colors duration-200 ${
                 view === "grid" ? "bg-blue-800 text-white" : "bg-gray-200"
               }`}
@@ -457,7 +531,7 @@ export default function MyProperty() {
               <Squares2X2Icon className="w-4 h-4 md:w-6 md:h-6" />
             </button>
             <button
-              onClick={() => setView("list")}
+              onClick={() => handleViewToggle("list")}
               className={`p-2 rounded-md transition-colors duration-200 ${
                 view === "list" ? "bg-blue-800 text-white" : "bg-gray-200"
               }`}
@@ -467,33 +541,32 @@ export default function MyProperty() {
           </div>
         </div>
 
-        {Properties.length === 0 && !loading && !error ? (
+        {filteredProperties.length === 0 && !loading && !error ? (
           <div className="flex flex-col items-center justify-center py-10 text-gray-500">
             <MdApartment className="w-16 h-16 mb-4" />
             <p className="text-lg">{t("my_property_page.no_properties")}</p>
           </div>
         ) : (
-          <div
-            className={`grid ${
-              view === "grid"
-                ? "grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1 lg:grid-cols-2"
-            } gap-4`}
-          >
-            {Properties.slice(
-              (currentPage - 1) * propertiesPerPage,
-              currentPage * propertiesPerPage
-            ).map((property) => (
-              <div
-                key={property.id}
-                className="transition-transform duration-200 "
-              >
-                <MyPropertyCard property={property} view={view} />
-              </div>
-            ))}
-          </div>
+          <>
+            <div
+              className={`grid ${
+                view === "grid"
+                  ? "grid-cols-2 lg:grid-cols-3"
+                  : "grid-cols-1 lg:grid-cols-2"
+              } gap-4`}
+            >
+              {paginatedProperties.map((property) => (
+                <div
+                  key={property.id}
+                  className="transition-transform duration-200"
+                >
+                  <MyPropertyCard property={property} view={view} />
+                </div>
+              ))}
+            </div>
+            {PaginationComponent}
+          </>
         )}
-        {totalPages > 1 && Properties.length > 0 && renderPagination()}
       </div>
     </PageComponents>
   );

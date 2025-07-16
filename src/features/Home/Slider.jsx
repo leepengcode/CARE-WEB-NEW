@@ -1,28 +1,32 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
 import { fetchSlider } from "../../api/sliderApi";
 
-// ✅ Skeleton Slider Component
+// ✅ Fixed Skeleton Slider Component
 const SkeletonSlider = () => {
   return (
-    <div className="relative w-full overflow-hidden rounded-lg shadow-lg aspect-[16/9] md:aspect-[22/9]">
-      {/* Still placeholder image */}
-      <div className="absolute inset-0 z-0"></div>
+    <div className="mt-4 w-full max-w-7xl rounded-md  border border-blue-500 shadow-md mx-auto aspect-[21/9] md:aspect-[23/9] relative">
+      {/* Base background */}
+      <div className="absolute inset-0 bg-gray-200 rounded-lg border border-gray-300 z-0"></div>
 
       {/* Shimmer effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-blue-200 to-blue-100 animate-pulse z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-pulse z-10 rounded-lg opacity-50" />
 
       {/* Loading spinner */}
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 z-20">
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 z-20 rounded-lg">
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
 
       {/* Fake navigation arrows */}
-      <div className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-gray-200 bg-opacity-40 text-gray-400 p-2 sm:p-3 rounded-full shadow-md z-30">
+      {/* <div className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-gray-200 bg-opacity-40 text-gray-400 p-2 sm:p-3 rounded-full shadow-md z-30">
         <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
       </div>
       <div className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-gray-200 bg-opacity-40 text-gray-400 p-2 sm:p-3 rounded-full shadow-md z-30">
         <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+      </div> */}
+
+      {/* Fake contact button */}
+      <div className="absolute top-2 right-2 md:top-4 md:right-2 rounded-lg bg-gray-200 px-2 py-1 text-sm md:text-base md:px-4 md:py-2 shadow-lg z-30">
+        <div className="w-20 h-4 bg-gray-300 rounded animate-pulse"></div>
       </div>
     </div>
   );
@@ -131,17 +135,13 @@ const Slider = ({ isMenuAtTop = true }) => {
   */
 
   return (
-    <div
-      className={`w-full max-w-8xl mx-auto px-1 py-0 md:py-0 lg:px-0 ${
-        !isMenuAtTop ? "mt-16" : ""
-      }`}
-    >
-      <div className="w-full flex items-center justify-center">
+    <div className={`w-full max-w-8xl mx-auto px-1 py-0 md:py-0 lg:px-0 `}>
+      <div className="w-full flex items-center justify-center px-2 md:px-0">
         <div className="w-full relative overflow-hidden">
           {loading ? (
             <SkeletonSlider />
           ) : error ? (
-            <div className="flex items-center justify-center w-full aspect-[22/9]​  text-red-500 text-center px-4">
+            <div className="flex items-center justify-center w-full aspect-[22/9] text-red-500 text-center px-4">
               {error}
             </div>
           ) : sliderData.length === 0 ? (
@@ -149,7 +149,7 @@ const Slider = ({ isMenuAtTop = true }) => {
               No slider data available.
             </div>
           ) : (
-            <div className="relative w-full h-full aspect-[21/9] md:aspect-[22/9]">
+            <div className="mt-4 w-full max-w-7xl mx-auto aspect-[21/9] md:aspect-[23/9] relative">
               {/*
               <div
                 className="flex transition-transform duration-1000"
@@ -200,14 +200,14 @@ const Slider = ({ isMenuAtTop = true }) => {
                   }}
                 >
                   {imageLoading && idx === currentIndex && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20">
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-20 rounded-lg">
                       <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent animate-spin"></div>
                     </div>
                   )}
                   <img
                     src={slide.image}
                     alt={slide.property_title}
-                    className="w-full h-full object-contain border"
+                    className="w-full h-full object-cover rounded-lg border border-blue-500 shadow-md"
                     onLoad={handleImageLoad}
                     onError={handleImageError}
                     style={{
@@ -217,7 +217,7 @@ const Slider = ({ isMenuAtTop = true }) => {
                   {slide.link && idx === currentIndex && (
                     <button
                       onClick={(e) => handleLinkClick(e, slide.link)}
-                      className="absolute top-2 right-2 md:top-4 md:right-4 rounded-lg bg-white px-2 py-1 text-sm md:text-base md:px-4 md:py-2  shadow-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                      className="absolute top-2 right-2 md:top-4 md:right-5 rounded-lg bg-white px-2 py-1 text-sm md:text-base md:px-4 md:py-2  shadow-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                     >
                       Contact Us
                     </button>
