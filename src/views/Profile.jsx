@@ -15,6 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import PageComponents from "../components/PageComponents.jsx";
 import { useStateContext } from "../contexts/ContextProvider.jsx";
+import { loadGoogleMaps } from "../utils/googleMapsLoader.js";
 
 function showToast(message, type = "info") {
   // Simple toast implementation
@@ -42,6 +43,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [googleMapsReady, setGoogleMapsReady] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -56,6 +58,19 @@ export default function Profile() {
   const [autocomplete, setAutocomplete] = useState(null);
   const navigate = useNavigate();
   const fileInputRef = useRef();
+
+  // Load Google Maps API
+  useEffect(() => {
+    loadGoogleMaps()
+      .then(() => {
+        setGoogleMapsReady(true);
+      })
+      .catch((err) => {
+        console.error("Failed to load Google Maps:", err);
+        // Continue without Google Maps if it fails to load
+        setGoogleMapsReady(true);
+      });
+  }, []);
 
   useEffect(() => {
     if (!userToken) {
@@ -445,12 +460,22 @@ export default function Profile() {
                 {/* Location */}
                 <div className="relative flex items-center">
                   <FaMapMarkerAlt className="absolute left-3 text-blue-400 text-lg" />
-                  <Autocomplete
-                    onLoad={onLoad}
-                    onPlaceChanged={onPlaceChanged}
-                    restrictions={{ country: "kh" }}
-                    types={["(cities)"]}
-                  >
+                  {googleMapsReady ? (
+                    <Autocomplete
+                      onLoad={onLoad}
+                      onPlaceChanged={onPlaceChanged}
+                      restrictions={{ country: "kh" }}
+                      types={["(cities)"]}
+                    >
+                      <input
+                        name="location"
+                        className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
+                        value={form.location}
+                        onChange={handleChange}
+                        placeholder={t("profile_page.location_placeholder")}
+                      />
+                    </Autocomplete>
+                  ) : (
                     <input
                       name="location"
                       className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-md bg-blue-50 text-sm focus:ring-blue-500 focus:border-blue-500"
@@ -458,7 +483,7 @@ export default function Profile() {
                       onChange={handleChange}
                       placeholder={t("profile_page.location_placeholder")}
                     />
-                  </Autocomplete>
+                  )}
                 </div>
 
                 {/* Notification Toggle */}
